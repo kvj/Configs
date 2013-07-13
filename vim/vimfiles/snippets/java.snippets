@@ -1,0 +1,147 @@
+snippet main
+	public static void main (String[] args) {
+		${1:/* code */}
+	}
+snippet pu
+	public ${1}
+snippet St
+	String${1}
+snippet pe
+	protected ${1}
+snippet pr
+	private ${1}
+snippet st
+	static ${1}
+snippet fi 
+	final ${1}
+snippet ab
+	abstract ${1}
+snippet re
+	return ${1}
+snippet br
+	break;
+snippet de
+	default:
+		${1}
+snippet th
+	throws ${1}
+snippet twn
+	throw new ${1:Exception}(${2});
+snippet sy
+	synchronized ${1}
+snippet imp
+	import ${1};
+snippet pa
+	package ${1:`JavaTestFileName(1)`};
+snippet j.u
+	java.util.*
+snippet j.i
+	java.io.*${1}
+snippet j.b
+	java.beans.*${1}
+snippet j.n
+	java.net.*${1}
+snippet j.m
+	java.math.*${1}
+snippet tr
+	true
+snippet fa
+	false
+snippet if
+	if (${1:true}) {//${2}
+	}
+snippet ife
+	if (${1:true}) {//${2}
+		${4}
+	} else {//${3}
+	}
+snippet sw
+	switch (${1:expression}) {
+		case ${3:case}://${4}
+			break;
+		default:
+	}
+# case
+snippet case
+	case ${1:case}://${2}
+		break;
+# for (...) {...}
+snippet for
+	for (int ${1:i} = ${2:0}; $1 < ${3}; $1++) {//${4}
+	}
+# for in (...) {...}
+snippet fore
+	for (${1:Object} ${2:v}: ${3}) {//${4}
+	}
+# while (...) {...}
+snippet wh
+	while (${1:true}) {//${2}
+	}
+snippet trc
+	try {${4}
+	} catch (Throwable ${1:t}) {//${2}
+		${3:$1.printStackTrace();}
+	}
+# else
+snippet el
+	else {//${1}
+	}
+snippet tc
+	public class ${1:`Filename()`} extends ${2:TestCase}
+snippet t
+	public void test${1:Name}() throws Exception ${2}
+snippet cl
+	/**
+	* ${2}
+	* @author Konstantin Vorobyev
+	*/
+	public class ${1:`Filename("", "untitled")`} {
+
+		/**
+		* ${4:Default constructor}
+		* TODO: Constructor $1: complete javadoc
+		*/
+		public $1(${3}) {${5}
+		}
+	}
+snippet gg
+	/**
+	* Returns value of ${1:value} property
+	* @return the value of $1 property
+	*/
+	${2:public} ${3:String} get${4}$1() {
+		return this.$1;
+	}
+snippet ss
+	/**
+	* Sets value of ${1:} property
+	* @param $1 new value of $1 property
+	*/
+	${2:public} void set${4}$1(${3:String} $1) {
+		this.$1 = $1;
+	}
+snippet in
+	/**
+	* ${2}
+	* @author Konstantin Vorobyev
+	*/
+	public interface ${1:`Filename("", "untitled")`} {
+		${3}
+	}
+snippet m
+	/**
+	* ${5}
+	* TODO: $3: complete javadoc
+	* @return 
+	*/
+	${1:public} ${2:void} ${3:method}(${4})${6:;}
+snippet v
+	${1:String} ${2:var}${3: = null}${4};${5}
+snippet psf
+	public static final ${1:String} ${2:var} = ${3};
+snippet psfs
+	public static final String ${1:var} = "${2}";
+snippet as
+	assert ${1:test} : "${2:Failure message}";${3}
+snippet sout
+	System.out.println("${1}");
