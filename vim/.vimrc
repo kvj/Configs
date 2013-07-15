@@ -1,3 +1,8 @@
+if exists('vim_config')
+	exec 'set runtimepath+='.globpath(g:vim_config,'vimfiles').','.globpath(g:vim_config,'vimfiles/after')
+	let g:snippets_dir=globpath(g:vim_config, 'vimfiles/snippets')
+endif
+
 set termencoding=utf-8
 set fileencodings=utf-8
 set encoding=utf-8
@@ -29,7 +34,7 @@ set timeout timeoutlen=500 ttimeoutlen=100
 
 "set statusline=%1*%m%*%2*%r%*%F%=\ Col:%3*%03c%*\ Ln:%3*%03l%*/%3*%03L%*\ File:%3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
 
-set list listchars=tab:»·,trail:·,extends:…,nbsp:‗
+set list listchars=tab:>.,trail:~,extends:*
 
 let g:showmarks_enable = 1
 hi! link ShowMarksHLl LineNr
@@ -132,9 +137,6 @@ let g:proj_window_increment = 35
 let g:bufExplorerShowRelativePath = 1
 let g:proj_flags = "imsStTvg"
 let g:proj_after_open = 'setlocal foldlevel=1'
-"let g:snip_start_tag = "`$"
-"let g:snip_end_tag = "$`"
-
 
 let g:miniBufExplMapWindowNavArrows = 1
 let g:miniBufExplMapCTabSwitchBufs = 1
@@ -258,24 +260,24 @@ inoremap <silent><LEADER>/ <C-O>:silent noh<CR>
 vnoremap <silent><LEADER>/ <ESC>:silent noh<CR>
 
 "Top win
-nnoremap <C-Up> :wincmd k<CR>
-inoremap <C-Up> <ESC>:wincmd k<CR>
-vnoremap <C-Up> <ESC>:wincmd k<CR>
+nnoremap <C-I> :wincmd k<CR>
+inoremap <C-I> <ESC>:wincmd k<CR>
+vnoremap <C-I> <ESC>:wincmd k<CR>
 
 "Bottom win
-nnoremap <C-Down> :wincmd j<CR>
-inoremap <C-Down> <ESC>:wincmd j<CR>
-vnoremap <C-Down> <ESC>:wincmd j<CR>
+nnoremap <C-K> :wincmd j<CR>
+inoremap <C-K> <ESC>:wincmd j<CR>
+vnoremap <C-K> <ESC>:wincmd j<CR>
 
 "Next win
-nnoremap <C-Right> :wincmd l<CR>
-inoremap <C-Right> <ESC>:wincmd l<CR>
-vnoremap <C-Right> <ESC>:wincmd l<CR>
+nnoremap <C-L> :wincmd l<CR>
+inoremap <C-L> <ESC>:wincmd l<CR>
+vnoremap <C-L> <ESC>:wincmd l<CR>
 
 "Prev win
-nnoremap <C-Left> :wincmd h<CR>
-inoremap <C-Left> <ESC>:wincmd h<CR>
-vnoremap <C-Left> <ESC>:wincmd h<CR>
+nnoremap <C-J> :wincmd h<CR>
+inoremap <C-J> <ESC>:wincmd h<CR>
+vnoremap <C-J> <ESC>:wincmd h<CR>
 
 "Win size
 nnoremap <C--> :vertical resize -1<CR>
@@ -284,9 +286,9 @@ nnoremap <C-_> :resize -1<CR>
 nnoremap <C-+> :resize +1<CR>
 
 "Next tab
-nnoremap <C-TAB> :bNext<CR>
-inoremap <C-TAB> <C-O>:bNext<CR>
-vnoremap <C-TAB> <ESC>:bNext<CR>
+"nnoremap <C-TAB> :bNext<CR>
+"inoremap <C-TAB> <C-O>:bNext<CR>
+"vnoremap <C-TAB> <ESC>:bNext<CR>
 
 "Alternative make
 "nnoremap <silent><LEADER>. :make! alt<CR>:cl<CR>

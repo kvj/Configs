@@ -3,29 +3,29 @@ snippet pr
 	${1:class_name}.prototype.${2:method_name} = ${3};
 # Function
 snippet fun
-	function(${1}) {//${2}
+	function(${1}) { // ${2}
 	}
 # if
 snippet if
-	if (${1:true}) {//${2}
+	if (${1:true}) { // ${2}
 	};
 # if ... else
 snippet ife
-	if (${1:true}) {//${2}
+	if (${1:true}) { // ${2}
 		${4}
-	} else {//${3}
+	} else { // ${3}
 	};
 snippet trc
 	try {${4}
-	} catch (${1:e}) {//${2}
+	} catch (${1:e}) { // ${2}
 		${3://TODO: Handle exception}
-	}
+	};
 # else
 snippet el
-	else {//${1}
+	else { // ${1}
 	};
 snippet ?
-	${1} ? ${2} : ${3}
+	${1}? ${2}: ${3}
 snippet :
 	${1}: ${2},
 snippet {
@@ -39,40 +39,40 @@ snippet tr
 snippet fa
 	false
 snippet re
-	return ${1};
+	return ${1}; // ${2}
 # switch
 snippet sw
 	switch(${1:expression}) {
-		case ${3:case}://${4}
+		case ${3:case}: // ${4}
 			break;
 		default:
 	}
 # case
 snippet case
-	case ${1:case}://${2}
+	case ${1:case}: // ${2}
 		break;
 # for (...) {...}
 snippet for
-	for (var ${1:i} = ${2:0}; $1 < ${3}; $1++) {//${4}
+	for (var ${1:i} = ${2:0}; $1 < ${3}; $1++) { // ${4}
 	};
 # for in (...) {...}
 snippet fore
-	for (var ${1:i} in ${2}) {//${3}
+	for (var ${1:i} in ${2}) { // ${3}
 	};
 # while (...) {...}
 snippet wh
-	while (${1:true}) {//${2}
+	while (${1:true}) { // ${2}
 	};
 # do...while
 snippet do
-	do {//${2}
+	do { // ${2}
 	} while (${1:true});
 # jQuery
 snippet $
 	$(${1})${2}
 # log
 snippet log
-	log('${1}');
+	log('${1}'${2});
 # alert
 snippet al
 	alert('${1}');
