@@ -34,6 +34,7 @@ set timeout timeoutlen=500 ttimeoutlen=100
 
 "set statusline=%1*%m%*%2*%r%*%F%=\ Col:%3*%03c%*\ Ln:%3*%03l%*/%3*%03L%*\ File:%3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
 
+set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
 set list listchars=tab:>.,trail:~,extends:*
 
 let g:showmarks_enable = 1
