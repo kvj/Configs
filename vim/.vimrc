@@ -6,6 +6,10 @@ endif
 set termencoding=utf-8
 set fileencodings=utf-8
 set encoding=utf-8
+language messages C
+language ctype C
+language time C
+set langmenu=en_US.UTF-8
 set autoread
 set mouse=
 set wildmenu
