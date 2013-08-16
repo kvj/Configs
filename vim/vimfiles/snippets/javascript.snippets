@@ -1,6 +1,6 @@
 # Prototype
 snippet pr
-	${1:class_name}.prototype.${2:method_name} = ${3};
+	${1:Class}.prototype.${2:method} = ${3};
 # Function
 snippet fun
 	function(${1}) { // ${2}
@@ -16,7 +16,7 @@ snippet ife
 	} else { // ${3}
 	};
 snippet trc
-	try {${4}
+	try { // ${4}
 	} catch (${1:e}) { // ${2}
 		${3://TODO: Handle exception}
 	};
@@ -28,6 +28,8 @@ snippet ?
 	${1}? ${2}: ${3}
 snippet :
 	${1}: ${2},
+snippet .
+	${1}: ${2}
 snippet {
 	{
 		${1}
@@ -39,7 +41,7 @@ snippet tr
 snippet fa
 	false
 snippet re
-	return ${1}; // ${2}
+	return${1}; // ${2}
 # switch
 snippet sw
 	switch(${1:expression}) {
@@ -77,4 +79,4 @@ snippet log
 snippet al
 	alert('${1}');
 snippet bi
-	_.bind(${1}, this)
+	.bind(${1:this})
