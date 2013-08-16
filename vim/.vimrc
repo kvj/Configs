@@ -220,9 +220,9 @@ vnoremap <silent><LEADER>2 <ESC>:w<CR>
 "nnoremap <silent><LEADER>o :TlistOpen<CR>
 "inoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
 "vnoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
-nnoremap <silent><LEADER>o :TlistToo<CR>
-inoremap <silent><LEADER>o <ESC>:TlistToo<CR>
-vnoremap <silent><LEADER>o <ESC>:TlistToo<CR>
+nnoremap <silent><LEADER>o :TlistToggle<CR>
+inoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
+vnoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
 
 "Project
 nnoremap <silent><LEADER>p :Project<CR>
