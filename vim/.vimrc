@@ -149,6 +149,7 @@ let g:miniBufExplTabWrap = 1
 let g:miniBufExplModSelTarget = 1
 let g:miniBufExplUseSingleClick = 1
 let g:miniBufExplMaxSize = 1
+let g:NERDTreeShowBookmarks = 1
 "let g:miniBufExplorerMoreThanOne = 0
 "let g:calendar_focus_today = 1
 "let g:calendar_navi = ''

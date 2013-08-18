@@ -35,6 +35,8 @@ hi! link ShowMarksHLu LineNr
 hi! link ShowMarksHLo LineNr
 hi! link ShowMarksHLm LineNr
 
+set foldcolumn=2
+set foldlevel=99
 set wrap
 set tabstop=4
 set shiftwidth=4
@@ -68,6 +70,8 @@ let g:miniBufExplModSelTarget = 1
 let g:miniBufExplUseSingleClick = 1
 let g:miniBufExplMaxSize = 1
 let g:NERDTreeShowBookmarks = 1
+let g:NERDTreeQuitOnOpen = 1
+
 colorscheme solarized
 let g:solarized_contrast = "high"
 let mapleader='f'
