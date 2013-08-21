@@ -80,12 +80,12 @@ map Q gq
 
 "New paste
 "nnoremap <C-P> :set paste<CR>.:set nopaste<CR>
-inoremap  <ESC>pa
-nnoremap  jmpPV`pk
+inoremap <silent><LEADER>c <ESC>pa
+nnoremap <silent><LEADER>c jmpPV`pk
 
 "Save selection
-vnoremap < <gv
-vnoremap > >gv
+vnoremap n <gv
+vnoremap m >gv
 
 "Copy
 vnoremap y ymygv<ESC>
@@ -102,17 +102,17 @@ nnoremap <silent><LEADER>w :BufExplorer<CR>
 "Close win
 nnoremap <silent><LEADER>q :close<CR>
 
-"Close win#2
-nnoremap <silent><LEADER>Q :q!<CR>
+"Reload buffer
+nnoremap <silent><LEADER>e :e<CR>
 
 "Next tab
-nnoremap <silent><LEADER>r :e #<CR>
+nnoremap <silent><LEADER>f :e #<CR>
 
 "Toggle tree
 nnoremap <silent><LEADER>t :NERDTreeToggle<CR>
 
 "Reset switch
-nnoremap <silent><LEADER>s :silent noh<CR>
+nnoremap <silent><LEADER>r :silent noh<CR>
 
 "Top win
 nnoremap <C-I> :wincmd k<CR>
