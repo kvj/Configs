@@ -22,7 +22,9 @@ function! Add_New_Line(top, content, indent)
 	startinsert!
 endfunction
 
-nnoremap <buffer> tt :call Add_New_Line(0, '-', 1)<CR>
-nnoremap <buffer> tn :call Add_New_Line(0, '-', 0)<CR>
-nnoremap <buffer> tl :call Add_New_Line(1, 'time', 1)<CR>
+let maplocalleader = "t"
+
+nnoremap <buffer> <localleader>t :call Add_New_Line(0, '-', 1)<CR>
+nnoremap <buffer> <localleader>n :call Add_New_Line(0, '-', 0)<CR>
+nnoremap <buffer> <localleader>l :call Add_New_Line(1, 'time', 1)<CR>
 "nnoremap <buffer> t ggO

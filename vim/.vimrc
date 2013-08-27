@@ -11,7 +11,7 @@ language ctype C
 language time C
 set langmenu=en_US.UTF-8
 set autoread
-set mouse=
+set mouse=a
 set wildmenu
 set magic
 set more
@@ -279,6 +279,9 @@ vnoremap <C-K> <ESC>:wincmd j<CR>
 nnoremap <C-L> :wincmd l<CR>
 inoremap <C-L> <ESC>:wincmd l<CR>
 vnoremap <C-L> <ESC>:wincmd l<CR>
+
+"Reload buffer
+nnoremap <silent><LEADER>e :e<CR>
 
 "Prev win
 nnoremap <C-J> :wincmd h<CR>
