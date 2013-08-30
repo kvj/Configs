@@ -150,6 +150,7 @@ let g:miniBufExplModSelTarget = 1
 let g:miniBufExplUseSingleClick = 1
 let g:miniBufExplMaxSize = 1
 let g:NERDTreeShowBookmarks = 1
+let g:NERDTreeQuitOnOpen = 1
 "let g:miniBufExplorerMoreThanOne = 0
 "let g:calendar_focus_today = 1
 "let g:calendar_navi = ''
@@ -161,6 +162,9 @@ let g:NERDTreeShowBookmarks = 1
 let g:VerticalToolWindowSide = 'right'
 let g:EclimJavaHierarchyDefaultAction = 'edit'
 
+
+set ssop-=options
+set ssop-=folds
 
 colorscheme solarized
 
@@ -333,5 +337,9 @@ vnoremap <silent><LEADER>n <ESC>:cw<CR>
 nnoremap <silent><LEADER>a ggVG
 inoremap <silent><LEADER>a <ESC>ggVG
 vnoremap <silent><LEADER>a <ESC>ggVG
+
+nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
+nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
+nnoremap <silent><LEADER>m :source ~/.s.vim<CR>
 
 "source ~/.vimrc.local
