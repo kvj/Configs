@@ -293,10 +293,10 @@ inoremap <C-J> <ESC>:wincmd h<CR>
 vnoremap <C-J> <ESC>:wincmd h<CR>
 
 "Win size
-nnoremap <C--> :vertical resize -1<CR>
-nnoremap <C-=> :vertical resize +1<CR>
-nnoremap <C-_> :resize -1<CR>
-nnoremap <C-+> :resize +1<CR>
+nnoremap <C-1> :vertical resize -1<CR>
+nnoremap <C-4> :vertical resize +1<CR>
+nnoremap <C-2> :resize -1<CR>
+nnoremap <C-3> :resize +1<CR>
 
 "Next tab
 "nnoremap <C-TAB> :bNext<CR>
