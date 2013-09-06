@@ -476,6 +476,7 @@ nnoremap <buffer> <localleader>n :call Add_New_Line(0, '-', 0)<CR>
 nnoremap <buffer> <localleader>l :call Add_New_Line(1, 'time', 1)<CR>
 nnoremap <buffer> <localleader>f :call Fold_Marked()<CR>
 nnoremap <buffer> <localleader>y :call Insert_Template(1)<CR>
+nnoremap <buffer> <localleader>a :call Insert_Template(0)<CR>
 
 call Fold_Marked()
 call Enable_Markers()
