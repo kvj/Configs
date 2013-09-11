@@ -72,6 +72,8 @@ let g:miniBufExplMaxSize = 1
 let g:NERDTreeShowBookmarks = 1
 let g:NERDTreeQuitOnOpen = 1
 
+let g:tttHotKeys = {'00_Organizer/01.ttt': 'x', '00_Organizer/07.ttt': 'w', '01_Timeline/00.ttt': 'z'}
+
 colorscheme solarized
 let g:solarized_contrast = "high"
 let mapleader='f'

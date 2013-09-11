@@ -17,6 +17,7 @@ let b:lastHourUpdate = 0
 let s:signHour = 21000
 let s:cursorUpdateInterval = 5
 let s:dmFormat = '%m/%d'
+let s:dmyFileFormat = '%y%m%d'
 let s:hmFormat = '%H:%M'
 let s:rxTime = '\(\(\d\{2\}\):\(\d\{2\}\)\s\)'
 let s:rxDate = '\(\(\d\{2\}\)\/\(\d\{2\}\)\s\)'
@@ -417,24 +418,77 @@ endfunction
 function! s:CursorHour()
 	let dt = localtime()
 	if dt-b:lastHourUpdate>s:cursorUpdateInterval*60
-		let b:lastHourUpdate = dt
 		exec 'sign unplace '.s:signHour.' file='.expand('%:p')
+		let b:lastHourUpdate = dt
 		let line = search('^'.strftime('%H', dt).':00', 'wn')
 		if line>0
 			exec 'sign place '.s:signHour.' line='.line.' name=tttHour file='.expand('%:p')
-			echom 'Cursor moved: '.strftime(s:hmFormat, dt)
+			"echom 'Cursor moved: '.strftime(s:hmFormat, dt)
 		endif
 	endif
 endfunction
 
-function! Enable_Markers()
+function! s:Enable_Markers()
 	sign define tttHour text=>> texthl=Search
 	if b:cr == 'hour'
 		"Enable hour sign
 		autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
-		echom 'Enabled hour cursor'
+		"echom 'Enabled hour cursor'
 		call s:CursorHour()
 	endif
+endfunction
+
+function! JumpToWindow(path)
+	function! ProcessTab(tab, path)
+		let tabnum = tabpagewinnr(a:tab, '$')
+		let idx = 1
+		let bufs = tabpagebuflist(a:tab)
+		for bufno in bufs
+			"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
+			if fnamemodify(bufname(bufno), ':p') ==? a:path
+				"Found buffer
+				exe 'tabnext '.a:tab
+				let winno = bufwinnr(bufname(bufno))
+				"echom 'Will focus on: '.winno
+				exe winno.'wincmd w'
+				return 1
+			endif
+		endfor
+		return 0
+	endfunction
+	let tab = tabpagenr()
+	let tabs = tabpagenr('$')
+	"echom 'Locating: '.a:path.' '.tab.' of '.tabs
+	if ProcessTab(tab, a:path) == 1
+		"Switched in currect tab
+		return 1
+	endif
+	let idx = 1
+	while idx <= tabs
+		if ProcessTab(idx, a:path) == 1
+			"Found in other tab
+			return 1
+		endif
+		let idx += 1
+	endwhile
+	"Edit in current
+	exe 'e '.a:path
+	return 0
+endfunction
+
+function! s:Enable_Hotkeys()
+	if !exists('g:tttHotKeys')
+		return
+	endif
+	if !exists('g:tttRoot')
+		echom 'Root not defined. Please set g:tttRoot'
+		return
+	endif
+	for [filePath, key] in items(g:tttHotKeys)
+		let path = glob(g:tttRoot.'/'.filePath)
+		exe 'nmap <buffer> <silent><localleader>'.key.' :call JumpToWindow("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
+		"echom 'Bound key '.key.' to file: '.path
+	endfor
 endfunction
 
 function! Fold_Marked()
@@ -469,6 +523,15 @@ function! Fold_Marked()
 	endif
 endfunction
 
+function! Make_Archive(addDate)
+	let file = expand('%:h').'/.archive/'.expand('%:t')
+	if a:addDate
+		let file .= '.'.strftime(s:dmyFileFormat)
+	endif
+	exe '!cp '.expand('%:p').' '.file
+	echom 'Copied to '.file
+endfunction
+
 let maplocalleader = "t"
 
 nnoremap <buffer> <localleader>t :call Add_New_Line(0, '-', 1)<CR>
@@ -476,6 +539,9 @@ nnoremap <buffer> <localleader>n :call Add_New_Line(0, '-', 0)<CR>
 nnoremap <buffer> <localleader>l :call Add_New_Line(1, 'time', 1)<CR>
 nnoremap <buffer> <localleader>f :call Fold_Marked()<CR>
 nnoremap <buffer> <localleader>y :call Insert_Template(1)<CR>
+nnoremap <buffer> <localleader>a :call Insert_Template(0)<CR>
+nnoremap <buffer> <localleader>c :call Make_Archive(1)<CR>
 
 call Fold_Marked()
-call Enable_Markers()
+call s:Enable_Markers()
+call s:Enable_Hotkeys()

@@ -444,8 +444,8 @@ function! JumpToWindow(path)
 		let idx = 1
 		let bufs = tabpagebuflist(a:tab)
 		for bufno in bufs
-			"echom 'Tab '.a:tab.', buf: '.bufno.', name:'.bufname(bufno)
-			if bufname(bufno) ==? a:path
+			"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
+			if fnamemodify(bufname(bufno), ':p') ==? a:path
 				"Found buffer
 				exe 'tabnext '.a:tab
 				let winno = bufwinnr(bufname(bufno))
