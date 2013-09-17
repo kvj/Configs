@@ -188,7 +188,7 @@ autocmd BufReadPost *
   \   exe "normal g`\"" |
   \ endif
 
-let mapleader=','
+let mapleader='f'
 
 map Q gq
 
@@ -196,7 +196,7 @@ map Q gq
 nnoremap <silent><LEADER>v :e $MYVIMRC<CR>
 
 "Reload .vimrc
-nnoremap <silent><LEADER>s :source $MYVIMRC<CR>
+"nnoremap <silent><LEADER>s :source $MYVIMRC<CR>
 
 "New paste
 "nnoremap <C-P> :set paste<CR>.:set nopaste<CR>
@@ -218,47 +218,47 @@ inoremap <C-L> <C-X><C-L>
 
 "nnoremap <silent><LEADER>3 :%s/>\s*</>\r</g<CR>ggVG=
 "Save
-nnoremap <silent><LEADER>2 :w<CR>
-inoremap <silent><LEADER>2 <ESC>:w<CR>
-vnoremap <silent><LEADER>2 <ESC>:w<CR>
+nnoremap <silent><LEADER>s :wa<CR>
+"inoremap <silent><LEADER>2 <ESC>:w<CR>
+"vnoremap <silent><LEADER>2 <ESC>:w<CR>
 
 "TagList
 "nnoremap <silent><LEADER>o :TlistOpen<CR>
 "inoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
 "vnoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
 nnoremap <silent><LEADER>o :TlistToggle<CR>
-inoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
-vnoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
+"inoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
+"vnoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
 
 "Project
 nnoremap <silent><LEADER>p :Project<CR>
-inoremap <silent><LEADER>p <ESC>:Project<CR>
-vnoremap <silent><LEADER>p <ESC>:Project<CR>
+"inoremap <silent><LEADER>p <ESC>:Project<CR>
+"vnoremap <silent><LEADER>p <ESC>:Project<CR>
 
 "Show open windows
 nnoremap <silent><LEADER>w :BufExplorer<CR>
-inoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
-vnoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
+"inoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
+"vnoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
 
 "Close win
 nnoremap <silent><LEADER>q :close<CR>
-inoremap <silent><LEADER>q <C-O>:close<CR>
-vnoremap <silent><LEADER>q <C-O>:close<CR>
+"inoremap <silent><LEADER>q <C-O>:close<CR>
+"vnoremap <silent><LEADER>q <C-O>:close<CR>
 
 "Close win#2
 nnoremap <silent><LEADER>Q :q!<CR>
-inoremap <silent><LEADER>Q <C-O>:q!<CR>
-vnoremap <silent><LEADER>Q <C-O>:q!<CR>
+"inoremap <silent><LEADER>Q <C-O>:q!<CR>
+"vnoremap <silent><LEADER>Q <C-O>:q!<CR>
 
 "Next tab
-nnoremap <silent><LEADER>, :e #<CR>
-inoremap <silent><LEADER>, <ESC>:e #<CR>
-vnoremap <silent><LEADER>, <ESC>:e #<CR>
+nnoremap <silent><LEADER>f :e #<CR>
+"inoremap <silent><LEADER>, <ESC>:e #<CR>
+"vnoremap <silent><LEADER>, <ESC>:e #<CR>
 
 "Toggle tree
 nnoremap <silent><LEADER>t :NERDTreeToggle<CR>
-inoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
-vnoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
+"inoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
+"vnoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
 
 "Repeat search
 "nnoremap <C-A> :/<CR>
@@ -267,8 +267,8 @@ vnoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
 
 "Reset switch
 nnoremap <silent><LEADER>/ :silent noh<CR>
-inoremap <silent><LEADER>/ <C-O>:silent noh<CR>
-vnoremap <silent><LEADER>/ <ESC>:silent noh<CR>
+"inoremap <silent><LEADER>/ <C-O>:silent noh<CR>
+"vnoremap <silent><LEADER>/ <ESC>:silent noh<CR>
 
 "Top win
 nnoremap <C-I> :wincmd k<CR>
@@ -316,28 +316,28 @@ nnoremap <C-3> :resize +1<CR>
 
 "Next error
 nnoremap <silent><LEADER>; :cn<CR>
-inoremap <silent><LEADER>; <C-O>:cn<CR>
-vnoremap <silent><LEADER>; <ESC>:cn<CR>
+"inoremap <silent><LEADER>; <C-O>:cn<CR>
+"vnoremap <silent><LEADER>; <ESC>:cn<CR>
 
 "Prev error
 nnoremap <silent><LEADER>' :cp<CR>
-inoremap <silent><LEADER>' <C-O>:cp<CR>
-vnoremap <silent><LEADER>' <ESC>:cp<CR>
+"inoremap <silent><LEADER>' <C-O>:cp<CR>
+"vnoremap <silent><LEADER>' <ESC>:cp<CR>
 
 "Errors list
 nnoremap <silent><LEADER>l :cl<CR>
-inoremap <silent><LEADER>l <ESC>:cl<CR>
-vnoremap <silent><LEADER>l <ESC>:cl<CR>
+"inoremap <silent><LEADER>l <ESC>:cl<CR>
+"vnoremap <silent><LEADER>l <ESC>:cl<CR>
 
 "Make result
 nnoremap <silent><LEADER>n :cw<CR>
-inoremap <silent><LEADER>n <ESC>:cw<CR>
-vnoremap <silent><LEADER>n <ESC>:cw<CR>
+"inoremap <silent><LEADER>n <ESC>:cw<CR>
+"vnoremap <silent><LEADER>n <ESC>:cw<CR>
 
 "Select All
 nnoremap <silent><LEADER>a ggVG
-inoremap <silent><LEADER>a <ESC>ggVG
-vnoremap <silent><LEADER>a <ESC>ggVG
+"inoremap <silent><LEADER>a <ESC>ggVG
+"vnoremap <silent><LEADER>a <ESC>ggVG
 
 nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
 nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>

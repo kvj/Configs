@@ -26,6 +26,14 @@ function! Add_New_Line(top, content, indent)
 	if a:top == 1
 		normal! gg
 	endif
+	if a:content == 'time'
+		let nowDate = strftime(s:dmFormat)
+		let header = getline(1)
+		if header != nowDate
+			call append(0, nowDate)
+			call cursor(1, 0)
+		endif
+	endif
 	let ex = "A\n"
 	if a:indent == 1
 		let ex = ex . "\t"
