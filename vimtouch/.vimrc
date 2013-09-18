@@ -26,7 +26,7 @@ set modelines=5
 set smartindent
 set laststatus=2
 set guicursor=a:blinkon300-blinkoff200
-set timeout timeoutlen=500 ttimeoutlen=100
+set timeout timeoutlen=2000 ttimeoutlen=100
 set list listchars=tab:>.,trail:~,extends:*
 
 let g:showmarks_enable = 1

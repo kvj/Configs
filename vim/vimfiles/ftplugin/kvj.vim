@@ -499,6 +499,24 @@ function! s:Enable_Hotkeys()
 	endfor
 endfunction
 
+function! Select_Tree()
+	let idx = line('.')
+	let i = idx+1
+	let lineindent = s:Indent(getline(idx))
+	while i<=line('$')
+		let line = getline(i)
+		if s:Indent(line)<=lineindent && !empty(line)
+			break
+		endif
+		let i += 1
+	endwhile
+	let lastline = i-1
+	normal! V
+	if lastline>idx
+		exe 'normal! '.(lastline-idx).'j'
+	endif
+endfunction
+
 function! Fold_Marked()
 	normal mx
 	let linenr = 0
@@ -542,13 +560,14 @@ endfunction
 
 let maplocalleader = "t"
 
-nnoremap <buffer> <localleader>t :call Add_New_Line(0, '-', 1)<CR>
-nnoremap <buffer> <localleader>n :call Add_New_Line(0, '-', 0)<CR>
-nnoremap <buffer> <localleader>l :call Add_New_Line(1, 'time', 1)<CR>
-nnoremap <buffer> <localleader>f :call Fold_Marked()<CR>
-nnoremap <buffer> <localleader>y :call Insert_Template(1)<CR>
-nnoremap <buffer> <localleader>a :call Insert_Template(0)<CR>
-nnoremap <buffer> <localleader>c :call Make_Archive(1)<CR>
+nnoremap <buffer> <silent><localleader>t :call Add_New_Line(0, '-', 1)<CR>
+nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
+nnoremap <buffer> <silent><localleader>l :call Add_New_Line(1, 'time', 1)<CR>
+nnoremap <buffer> <silent><localleader>f :call Fold_Marked()<CR>
+nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
+nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
+nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
+nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
 
 call Fold_Marked()
 call s:Enable_Markers()
