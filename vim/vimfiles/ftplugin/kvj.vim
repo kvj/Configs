@@ -499,10 +499,9 @@ function! s:Enable_Hotkeys()
 	endfor
 endfunction
 
-function! Select_Tree()
-	let idx = line('.')
-	let i = idx+1
-	let lineindent = s:Indent(getline(idx))
+function! s:BufferSearchForLastChild(idx)
+	let i = a:idx+1
+	let lineindent = s:Indent(getline(a:idx))
 	while i<=line('$')
 		let line = getline(i)
 		if s:Indent(line)<=lineindent && !empty(line)
@@ -510,7 +509,12 @@ function! Select_Tree()
 		endif
 		let i += 1
 	endwhile
-	let lastline = i-1
+	return i-1
+endfunction
+
+function! Select_Tree()
+	let idx = line('.')
+	let lastline = s:BufferSearchForLastChild(idx)
 	normal! V
 	if lastline>idx
 		exe 'normal! '.(lastline-idx).'j'
@@ -558,6 +562,80 @@ function! Make_Archive(addDate)
 	echom 'Copied to '.file
 endfunction
 
+let s:refillRexp = '^\(\t*\)\(.\s\)\?'.s:rxTime.'\?\(.\{-}\)\(\s#[a-z0-9]\+\)\?\( /\)\?$'
+" 0 = full, 1 = indent, 2 = start sign, 3 = time, 6 = text, 7 = tag, 8 = fold sign
+
+"Returns str of tabs num long
+function! s:MakeIndent(num)
+	let str = ''
+	let i = 0
+	while i<a:num
+		let str .= "\t"
+		let i += 1
+	endwhile
+	return str
+endfunction
+
+function! Set_Tag(remove, tag)
+	let idx = line('.')
+	let line = getline(idx)
+	let m = matchlist(line, s:refillRexp)
+	let str = m[1].m[2].m[3].m[6]
+	if !a:remove
+		let str .= m[7]
+	endif
+	if !empty(a:tag)
+		let str .= ' #'.a:tag
+	endif
+	let str .= m[8]
+	call setline('.', str)
+endfunction
+
+function! Copy_Tree(indent)
+	let idx = line('.')
+	let line = getline(idx)
+	let m = matchlist(line, s:refillRexp)
+	let indent = s:Indent(line)
+	let endblock = s:BufferSearchForLastChild(idx)
+	let block = s:MakeIndent(a:indent)
+	if m[2]
+		"Have start sign
+		let block .= m[2]
+	else
+		"No sign
+		let block .= "- "
+	endif
+	let block .= m[6].m[8]."\n"
+	let i = idx+1
+	while i<=endblock
+		let l = getline(i)
+		let id = s:Indent(l)
+		if id>0
+			"Have indent - means have text
+			let newindent = id - indent + a:indent
+			let mm = matchlist(l, '^\t*\(.*\)$')
+			let block .= s:MakeIndent(newindent).mm[1]."\n"
+		else
+			"No indent = no text
+			let block .= "\n"
+		endif
+		let i += 1
+	endw
+	let @0 = block
+	echo "Copied to 0"
+endfunction
+
+function! b:Fold_Text()
+	let nl = v:foldend - v:foldstart + 1
+	let indent = s:Indent(getline(v:foldstart-1))
+	let res = s:MakeIndent(indent+2)
+	let res .= '++ '.nl.' --'
+	return res
+endfunction
+
+setlocal foldtext=b:Fold_Text()
+setlocal fillchars=fold:\ 
+
 let maplocalleader = "t"
 
 nnoremap <buffer> <silent><localleader>t :call Add_New_Line(0, '-', 1)<CR>
@@ -568,6 +646,9 @@ nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
 nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
 nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
 nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
+nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
+nnoremap <buffer> <silent><localleader>o :call Set_Tag(1, 'ok')<CR>
+nnoremap <buffer> <silent><localleader>i :call Set_Tag(1, 'list')<CR>
 
 call Fold_Marked()
 call s:Enable_Markers()
