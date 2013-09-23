@@ -27,6 +27,8 @@ function! s:OpenFiles(config)
 	endfor
 endfunction
 
+let g:kvjExtBlockConfig = {'puml': {'input': 'lines', 'output': 'file', 'cmd': 'java -jar plantuml.jar -charset utf-8 -pipe > %f'}}
+
 "let g:kvjSession = 's'
 "let g:kvjStartup = [{'name': 'ttt:00_Organizer/01.ttt'}, {'name': 'ttt:00_Organizer/07.ttt', 'pre': 'sp'}, {'name': 'ttt:01_Timeline/00.ttt', 'pre': 'tabnew'}]
 

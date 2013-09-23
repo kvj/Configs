@@ -137,3 +137,8 @@ nnoremap <C-+> :resize +1<CR>
 "Select All
 nnoremap <silent><LEADER>a ggVG
 
+nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
+nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
+nnoremap <silent><LEADER>m :source ~/.s.vim<CR>
+let g:kvjSession = 's'
+

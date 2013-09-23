@@ -446,34 +446,35 @@ function! s:Enable_Markers()
 	endif
 endfunction
 
+function! s:ProcessTab(tab, path)
+	let tabnum = tabpagewinnr(a:tab, '$')
+	let idx = 1
+	let bufs = tabpagebuflist(a:tab)
+	for bufno in bufs
+		"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
+		if fnamemodify(bufname(bufno), ':p') ==? a:path
+			"Found buffer
+			exe 'tabnext '.a:tab
+			let winno = bufwinnr(bufname(bufno))
+			"echom 'Will focus on: '.winno
+			exe winno.'wincmd w'
+			return 1
+		endif
+	endfor
+	return 0
+endfunction
+
 function! JumpToWindow(path)
-	function! ProcessTab(tab, path)
-		let tabnum = tabpagewinnr(a:tab, '$')
-		let idx = 1
-		let bufs = tabpagebuflist(a:tab)
-		for bufno in bufs
-			"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
-			if fnamemodify(bufname(bufno), ':p') ==? a:path
-				"Found buffer
-				exe 'tabnext '.a:tab
-				let winno = bufwinnr(bufname(bufno))
-				"echom 'Will focus on: '.winno
-				exe winno.'wincmd w'
-				return 1
-			endif
-		endfor
-		return 0
-	endfunction
 	let tab = tabpagenr()
 	let tabs = tabpagenr('$')
 	"echom 'Locating: '.a:path.' '.tab.' of '.tabs
-	if ProcessTab(tab, a:path) == 1
+	if s:ProcessTab(tab, a:path) == 1
 		"Switched in currect tab
 		return 1
 	endif
 	let idx = 1
 	while idx <= tabs
-		if ProcessTab(idx, a:path) == 1
+		if s:ProcessTab(idx, a:path) == 1
 			"Found in other tab
 			return 1
 		endif
@@ -621,8 +622,8 @@ function! Copy_Tree(indent)
 		endif
 		let i += 1
 	endw
-	let @0 = block
-	echo "Copied to 0"
+	let @" = block
+	echo "Copied to register"
 endfunction
 
 function! b:Fold_Text()

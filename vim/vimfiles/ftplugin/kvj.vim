@@ -135,6 +135,7 @@ endfunction
 "Debug output for lists
 function! s:PrintList(list)
 	let idx = 0
+	echom 'PrintList: '.len(a:list)
 	for item in a:list
 		echom 'List['.idx.'] = '.item
 		let idx += 1
@@ -446,34 +447,35 @@ function! s:Enable_Markers()
 	endif
 endfunction
 
+function! s:ProcessTab(tab, path)
+	let tabnum = tabpagewinnr(a:tab, '$')
+	let idx = 1
+	let bufs = tabpagebuflist(a:tab)
+	for bufno in bufs
+		"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
+		if fnamemodify(bufname(bufno), ':p') ==? a:path
+			"Found buffer
+			exe 'tabnext '.a:tab
+			let winno = bufwinnr(bufname(bufno))
+			"echom 'Will focus on: '.winno
+			exe winno.'wincmd w'
+			return 1
+		endif
+	endfor
+	return 0
+endfunction
+
 function! JumpToWindow(path)
-	function! ProcessTab(tab, path)
-		let tabnum = tabpagewinnr(a:tab, '$')
-		let idx = 1
-		let bufs = tabpagebuflist(a:tab)
-		for bufno in bufs
-			"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
-			if fnamemodify(bufname(bufno), ':p') ==? a:path
-				"Found buffer
-				exe 'tabnext '.a:tab
-				let winno = bufwinnr(bufname(bufno))
-				"echom 'Will focus on: '.winno
-				exe winno.'wincmd w'
-				return 1
-			endif
-		endfor
-		return 0
-	endfunction
 	let tab = tabpagenr()
 	let tabs = tabpagenr('$')
 	"echom 'Locating: '.a:path.' '.tab.' of '.tabs
-	if ProcessTab(tab, a:path) == 1
+	if s:ProcessTab(tab, a:path) == 1
 		"Switched in currect tab
 		return 1
 	endif
 	let idx = 1
 	while idx <= tabs
-		if ProcessTab(idx, a:path) == 1
+		if s:ProcessTab(idx, a:path) == 1
 			"Found in other tab
 			return 1
 		endif
@@ -494,7 +496,7 @@ function! s:Enable_Hotkeys()
 	endif
 	for [filePath, key] in items(g:tttHotKeys)
 		let path = glob(g:tttRoot.'/'.filePath)
-		exe 'nmap <buffer> <silent><localleader>'.key.' :call JumpToWindow("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
+		exe 'nn <buffer> <silent><localleader>'.key.' :call JumpToWindow("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
 		"echom 'Bound key '.key.' to file: '.path
 	endfor
 endfunction
@@ -512,6 +514,77 @@ function! s:BufferSearchForLastChild(idx)
 	return i-1
 endfunction
 
+"Searches closest line with #begin from index
+function! s:FindBegin(index)
+	let idx = a:index
+	while match(getline(idx), '\s*#begin ') == -1
+		let idx -= 1
+		if idx == -1
+			return -1
+		endif
+	endwhile
+	return idx
+endfunction
+
+"Selects block (without header)
+function! BeginSelectAll()
+	let beginIdx = s:FindBegin(line('.'))
+	if beginIdx == -1
+		echo 'Head of block not found'
+		return
+	endif
+	let idx = beginIdx+1
+	call cursor(idx, 0)
+	let lastline = s:BufferSearchForLastChild(beginIdx)
+	normal! V
+	if lastline>idx
+		exe 'normal! '.(lastline-idx).'j'
+	endif
+endfunction
+
+"Parses header
+function! s:BeginParseHeader(index)
+	let m = matchlist(getline(a:index), '^\s*#begin\s\([a-z0-9]\+\)\s\(.\{-}\)\(\s/\)\?$')
+	"call s:PrintList(m)
+	return [m[1], s:ParseAttrs(m[2], 0)]
+endfunction
+
+"Compiles block starting from #begin
+function! BeginCompile()
+	let beginIdx = s:FindBegin(line('.'))
+	if beginIdx == -1
+		echo 'Head of block not found'
+		return
+	endif
+	let [type, params] = s:BeginParseHeader(beginIdx)
+	echo 'Type: '.type.', file: '.params.file
+	if get(g:kvjExtBlockConfig, type, {}) == {}
+		"Not found
+		echo 'Config ['.type.'] not found'
+		return
+	endif
+	let lastline = s:BufferSearchForLastChild(beginIdx)
+	let conf = g:kvjExtBlockConfig[type]
+	let inp = ''
+	let indent = s:Indent(getline(beginIdx+1))
+	if conf.input == 'lines'
+		let idx = beginIdx+1
+		while idx<=lastline
+			let inp .= strpart(getline(idx), indent)."\n"
+			let idx += 1
+		endwhile
+	endif
+	let cmd = conf.cmd
+	let fileName = ''
+	if conf.output == 'file'
+		let fileName = expand('%:h').'/'.params.file
+		let cmd = substitute(cmd, '%f', fileName, '')
+	endif
+	echo 'Exec: '.cmd.' '.fileName.'Input: '.inp
+	let outp = system(cmd, inp)
+	echo 'Output: '.outp
+endfunction
+
 function! Select_Tree()
 	let idx = line('.')
 	let lastline = s:BufferSearchForLastChild(idx)
@@ -519,6 +592,21 @@ function! Select_Tree()
 	if lastline>idx
 		exe 'normal! '.(lastline-idx).'j'
 	endif
+endfunction
+
+"Parses var=val;var=val to dictionary
+function! s:ParseAttrs(text, index)
+	let result = {}
+	let pattern = '\([a-z]\+\)=\([a-zA-Z0-9_\\''\./\\,\{\}\[\]]\+\)\($\|;\)'
+	let index = a:index
+	let line = a:text
+	let matched_list = matchlist(line, pattern, index)
+	while len(matched_list)>0
+		let result[matched_list[1]] = matched_list[2]
+		let index = match(line, pattern, index)+len(matched_list[0])
+		let matched_list = matchlist(line, pattern, index)
+	endwhile
+	return result
 endfunction
 
 function! Fold_Marked()
@@ -536,15 +624,10 @@ function! Fold_Marked()
 		"Set buffer parameters
 		let matched = matchstr(line, '^// ttt:\(.\+\)$')
 		if !empty(matched)
-			let index = len('// ttt:')
-			let pattern = '\([a-z]\+\)=\([a-zA-Z0-9_\\'']\+\)\($\|;\)'
-			let matched_list = matchlist(line, pattern, index)
-			while len(matched_list)>0
-				"echom 'Found settings: '.len(matched_list).' '.len(matched_list[0])
-				exe 'let b:'.matched_list[1].'='.matched_list[2]
-				let index = match(line, pattern, index)+len(matched_list[0])
-				let matched_list = matchlist(line, pattern, index)
-			endwhile
+			let vars = s:ParseAttrs(line, len('// ttt:'))
+			for [var, value] in items(vars)
+				exe 'let b:'.var.'='.value
+			endfor
 		endif
 		let linenr += 1
 	endwhile
@@ -621,8 +704,8 @@ function! Copy_Tree(indent)
 		endif
 		let i += 1
 	endw
-	let @0 = block
-	echo "Copied to 0"
+	let @" = block
+	echo "Copied to register"
 endfunction
 
 function! b:Fold_Text()
@@ -649,6 +732,8 @@ nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
 nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
 nnoremap <buffer> <silent><localleader>o :call Set_Tag(1, 'ok')<CR>
 nnoremap <buffer> <silent><localleader>i :call Set_Tag(1, 'list')<CR>
+nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
+nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 
 call Fold_Marked()
 call s:Enable_Markers()
