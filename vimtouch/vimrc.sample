@@ -1,0 +1,3 @@
+let g:vim_config="~/Configs/vim"
+exec 'source '.globpath(g:vim_config, '.vimrc')
+set nolist
