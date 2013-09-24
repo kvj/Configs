@@ -22,6 +22,8 @@ let s:hmFormat = '%H:%M'
 let s:rxTime = '\(\(\d\{2\}\):\(\d\{2\}\)\s\)'
 let s:rxDate = '\(\(\d\{2\}\)\/\(\d\{2\}\)\s\)'
 
+let s:handlers = ['gnome-open', 'kde-open', 'exo-open', 'xdg-open']
+
 function! Add_New_Line(top, content, indent)
 	if a:top == 1
 		normal! gg
@@ -549,6 +551,45 @@ function! s:BeginParseHeader(index)
 	return [m[1], s:ParseAttrs(m[2], 0)]
 endfunction
 
+function! s:OpenFile(location, ...)
+	if has("win32")
+		let command = '!start /min CMD /C START "" %s'
+		silent execute printf(command, shellescape(a:location))
+	else
+		let s:uname = system("uname")
+		if s:uname == "Darwin"
+			"Max OSX
+			let cmd = 'open ' . shellescape(a:location) . ' 2>&1'
+			call system(cmd)
+		else
+			"Linux
+			for handler in s:handlers + a:000
+				if executable(handler)
+					let cmd = shellescape(handler) . ' ' . shellescape(a:location) . ' 2>&1'
+					call system(cmd)
+					return
+				endif
+			endfor
+		endif
+	endif
+endfunction
+
+"Opens file from block
+function! BeginOpen()
+	let beginIdx = s:FindBegin(line('.'))
+	if beginIdx == -1
+		echo 'Head of block not found'
+		return
+	endif
+	let [type, params] = s:BeginParseHeader(beginIdx)
+	if !empty(get(params, 'file', ''))
+		let fileName = fnamemodify(expand('%:p:h').'/'.params.file, ':p')
+		call s:OpenFile(fileName)
+	else
+		echo 'File not found'
+	endif
+endfunction
+
 "Compiles block starting from #begin
 function! BeginCompile()
 	let beginIdx = s:FindBegin(line('.'))
@@ -557,7 +598,7 @@ function! BeginCompile()
 		return
 	endif
 	let [type, params] = s:BeginParseHeader(beginIdx)
-	echo 'Type: '.type.', file: '.params.file
+	"echo 'Type: '.type.', file: '.params.file
 	if get(g:kvjExtBlockConfig, type, {}) == {}
 		"Not found
 		echo 'Config ['.type.'] not found'
@@ -565,24 +606,34 @@ function! BeginCompile()
 	endif
 	let lastline = s:BufferSearchForLastChild(beginIdx)
 	let conf = g:kvjExtBlockConfig[type]
-	let inp = ''
 	let indent = s:Indent(getline(beginIdx+1))
+	let inputFile = tempname()
+	let cmd = conf.cmd
+	let inputFile = ''
 	if conf.input == 'lines'
+		let inputFile = tempname()
 		let idx = beginIdx+1
+		let inp = []
 		while idx<=lastline
-			let inp .= strpart(getline(idx), indent)."\n"
+			call add(inp, strpart(getline(idx), indent))
 			let idx += 1
 		endwhile
+		call writefile(inp, inputFile)
+		let cmd .= ' <'.fnameescape(inputFile)
 	endif
-	let cmd = conf.cmd
 	let fileName = ''
 	if conf.output == 'file'
-		let fileName = expand('%:h').'/'.params.file
-		let cmd = substitute(cmd, '%f', fileName, '')
+		let fileName = fnamemodify(expand('%:p:h').'/'.params.file, ':p')
+		let cmd .= ' >'.fnameescape(fileName)
 	endif
-	echo 'Exec: '.cmd.' '.fileName.'Input: '.inp
-	let outp = system(cmd, inp)
-	echo 'Output: '.outp
+	"echo 'Exec: '.cmd.' Input: '.len(inp)
+	exec 'silent !'.cmd
+	if !empty(inputFile)
+		call delete(inputFile)
+	endif
+	if !empty(fileName)
+		call s:OpenFile(fileName)
+	endif
 endfunction
 
 function! Select_Tree()
@@ -734,6 +785,7 @@ nnoremap <buffer> <silent><localleader>o :call Set_Tag(1, 'ok')<CR>
 nnoremap <buffer> <silent><localleader>i :call Set_Tag(1, 'list')<CR>
 nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
+nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 
 call Fold_Marked()
 call s:Enable_Markers()

@@ -1,4 +1,5 @@
 let s:okTags = ['ok', 'list']
+let s:extBlockBegin = '#begin'
 
 "syn match tTitle '^\s*\*\{1,4\}'
 syn match tTime '\s:\d\{2}'hs=s+1
@@ -17,9 +18,23 @@ syn match tTitle '^\s*[A-Z0-9].*: /'he=e-3
 syn cluster BlockHL contains=tTagInfo,tPickTag,tContact
 let markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
-syn match tBegin '\s*#begin 'he=e-1 contained
-syn cluster ExtBlock contains=tBegin
-exe 'syn region tExtBlock start=''^\z(\s*\)#begin '''.markIndentBlock.' contains=@ExtBlock'
+"syn cluster ExtBlockSyntax contains=tBegin
+
+exe 'syn region tExtBlock start=''^\z(\s*\)'.s:extBlockBegin.' '''.markIndentBlock.' keepend contains=@ExtBlockSyntax'
+
+function! s:enableExtBlockSyntax(code, name)
+	let ft=toupper(a:code)
+	let group='ExtSyntax'.ft
+	execute 'syntax include @'.group.' syntax/'.a:name.'.vim'
+	execute 'syntax region tExtGroup'.ft.' matchgroup=tExtGroupMark start=''^\s*'.s:extBlockBegin.'\(\s\|\n\)'.a:code.'\s.*\n''rs=e skip=''\n'' end=''$'' contained contains=@'.group
+	execute 'syn cluster ExtBlockSyntax add=tExtGroup'.ft
+endfunction
+
+call s:enableExtBlockSyntax('puml', 'plantuml')
+call s:enableExtBlockSyntax('js', 'javascript')
+
+exec 'syn match tBegin ''\s*'.s:extBlockBegin.'\s''he=e-1 contained containedin=tExtGroupMark'
+"syn cluster ExtBlockSyntax add=tBegin
 hi link tTitle Title
 hi link tDate Special
 hi link tTime Identifier
@@ -33,3 +48,5 @@ hi link tTagInfo LineNr
 hi link tOkLine Comment
 hi link tBegin Question
 hi link tOkTag Statement
+hi link tBlockStartEnd String
+"hi link tExtGroupMark Comment
