@@ -120,7 +120,6 @@ function! s:SubstituteTemplates(lines, dt)
 			continue
 		endif
 		let matches = matchlist(line, rexp)
-		"echom 'Found template: '.idx.' total: '.matches[1].', type: '.matches[2].' append: '.matches[3]
 		let subs = '!!tmpl!!'
 		if matches[1] == 'd'
 			let _dt = a:dt
@@ -130,6 +129,7 @@ function! s:SubstituteTemplates(lines, dt)
 			endif
 			let subs = strftime(matches[2], _dt)
 		endif
+		"echo 'Found template: '.idx.' total: '.matches[1].', type: '.matches[2].' append: '.matches[3].' with '.subs
 		let a:lines[lineidx] = substitute(line, rexp, subs, "")
 	endfor
 endfunction
@@ -307,7 +307,8 @@ function! s:Mode07(lines, dt)
 	let [idx, line, endidx] = parts[0]
 	while idx<endidx
 		let idx += 1
-		let parts = matchlist(lines04[idx], '^\t-\s'.s:rxDate.'\?\(.\+\)')
+		let parts = matchlist(lines04[idx], '^\t-\s'.s:rxDate.'\?\('.s:rxTime.'\)\?\(.\+\)')
+		"call s:PrintList(parts)
 		if empty(parts) "Sub-child/text - skip
 			continue
 		endif
@@ -316,12 +317,13 @@ function! s:Mode07(lines, dt)
 		if !empty(parts[1]) "Have date
 			let timeline = s:SearchForLines(a:lines, '^'.parts[2].'\/'.parts[3].'\s', 1)
 			if len(timeline)>0 "Found
-				let addidx = timeline[0][2]+1 "After all children
+				"echo 'Search for: '.parts[6].':'.parts[7]
+				let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], parts[6], parts[7], parts[8])
 			else
 				let task .= parts[1].' ' "Keep date anyway with task
 			endif
 		endif
-		let task .= parts[4]
+		let task .= parts[5].parts[8]
 		call insert(a:lines, task, addidx)
 		let lastchild = s:SearchForLastChild(lines04, idx)
 		call extend(a:lines, lines04[idx+1:lastchild], addidx+1)
@@ -337,7 +339,8 @@ function! s:Mode07(lines, dt)
 				"echom 'Cron check: '.part[1].' OK '.task
 				let timeline = s:SearchForLines(a:lines, '^'.strftime('%m\/%d', date).'\s', 1)
 				if len(timeline)>0 "Found
-					let addidx = timeline[0][2]+1 "After all children
+					let m = matchlist(part[1], '^\t-\s'.s:rxTime.'\?')
+					let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], m[2], m[3], task)
 					call insert(a:lines, task, addidx)
 					let lastchild = s:SearchForLastChild(lines05, part[0])
 					"echom 'Add task: '.idx.' lastchild: '.lastchild.' from '.lines07[idx].' to '.lines07[lastchild]
@@ -349,6 +352,50 @@ function! s:Mode07(lines, dt)
 		endfor
 		let day += 1
 	endwhile
+endfunction
+
+" 1 = hour, 3 = min
+let s:rexpHourMin = '^\t-\s\(\d\{2\}\)\?\(:\(\d\{2\}\)\)\?'
+
+"Tries to find a place among children start..end according to hour (can be
+"empty) and minutes
+function! s:FindPlaceForChild(lines, start, end, hour, min, debug)
+	"echo 'FindPlaceForChild: '.a:hour.':'.a:min.' to '.a:lines[a:start-1].' = '.a:debug. ' children = '.(a:end-a:start)
+	let lastEmpty = -1
+	for i in range(a:start, a:end)
+		let m = matchlist(a:lines[i], s:rexpHourMin)
+		"call s:PrintList(m)
+		if empty(m)
+			"No time found - it's OK. Invalid or child line
+			continue
+		endif
+		"echo 'Line: '.a:lines[i]' '.m[1].' == '.a:hour.', '.m[3].' == '.a:min
+		if empty(m[3])
+			" No date/time in line
+			let lastEmpty = i+1
+			continue
+		endif
+		"call s:PrintList(m)
+		if m[1] == a:hour
+			"Hours are same
+			if str2nr(m[3])>str2nr(a:min)
+				" First time minute is after requested
+				return i "Means 'add before this'
+			endif
+		else
+			if str2nr(m[1])>str2nr(a:hour)
+				" First time hour is after requested
+				return i "Means 'add before this'
+			endif
+		endif
+	endfor
+	if lastEmpty == -1 || !empty(a:min)
+		" Another option - we have a time but didn't find good place for it -
+		" go to bottom
+		let lastEmpty = a:end+1 "Very last
+	endif
+	" No match - add before lastEmpty
+	return lastEmpty
 endfunction
 
 "Loads assigned tasks for that day from 07.ttt and puts those under selected
@@ -375,7 +422,7 @@ function! s:Mode01(lines, dt)
 		if !empty(parts[1]) "Have time
 			let timeline = s:SearchForLines(a:lines, '^'.parts[2].':00', 1)
 			if len(timeline)>0 "Found
-				let addidx = timeline[0][2]+1 "After all children
+				let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], '', parts[3], parts[4])
 				if parts[3] != '00' "Have minutes
 					let task .= ':'.parts[3].' '
 				endif
