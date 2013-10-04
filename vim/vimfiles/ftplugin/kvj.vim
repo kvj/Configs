@@ -195,61 +195,62 @@ function! s:SearchForLines(lines, rexp, children)
 	return result
 endfunction
 
+function! s:CheckCronItem(str, min, max, value)
+	"echom 'CheckCronItem '.a:str.' '.a:min.'-'.a:max.' = '.a:value
+	if '*' == a:str
+		return 1
+	endif
+	if a:str[0] == '/'
+		let inc = str2nr(a:str[1:])
+		if !inc
+			echom 'Invalid increment'
+			return 0
+		endif
+		let idx = a:min
+		"echom 'Inc: '.idx.' '.inc.' '.a:value
+		while idx<=a:value && idx<=a:max
+			if idx == a:value
+				"Match
+				return 1
+			endif
+			let idx += inc
+		endwhile
+		return 0 "No luck
+	endif
+	let values = split(a:str, ',')
+	for val in values
+		let nval = -1
+		if val == 'SUN' 
+			let nval = 0 
+		elseif val == 'MON' 
+			let nval = 1 
+		elseif val == 'TUE' 
+			let nval = 2 
+		elseif val == 'WED' 
+			let nval = 3 
+		elseif val == 'THU' 
+			let nval = 4 
+		elseif val == 'FRI' 
+			let nval = 5 
+		elseif val == 'SAT' 
+			let nval = 6
+		else 
+			let nval = str2nr(val) 
+		endif
+		"echom 'Iterate: '.val.'/'.nval.' = '.a:value
+		if nval>a:value "Too big
+			return 0
+		endif
+		if nval == a:value
+			return 1 "Match
+		endif
+	endfor
+	return 0
+endfunction
+
 "Looks for CRON element and checks whether provided date falls into it.
 "Returns task text
 function! s:CheckCronStatement(line, date)
-	function! CheckCronItem(str, min, max, value)
-		"echom 'CheckCronItem '.a:str.' '.a:min.'-'.a:max.' = '.a:value
-		if '*' == a:str
-			return 1
-		endif
-		if a:str[0] == '/'
-			let inc = str2nr(a:str[1:])
-			if !inc
-				echom 'Invalid increment'
-				return 0
-			endif
-			let idx = a:min
-			"echom 'Inc: '.idx.' '.inc.' '.a:value
-			while idx<=a:value && idx<=a:max
-				if idx == a:value
-					"Match
-					return 1
-				endif
-				let idx += inc
-			endwhile
-			return 0 "No luck
-		endif
-		let values = split(a:str, ',')
-		for val in values
-			let nval = -1
-			if val == 'SUN' 
-				let nval = 0 
-			elseif val == 'MON' 
-				let nval = 1 
-			elseif val == 'TUE' 
-				let nval = 2 
-			elseif val == 'WED' 
-				let nval = 3 
-			elseif val == 'THU' 
-				let nval = 4 
-			elseif val == 'FRI' 
-				let nval = 5 
-			elseif val == 'SAT' 
-				let nval = 6
-			else 
-				let nval = str2nr(val) 
-			endif
-			"echom 'Iterate: '.val.'/'.nval.' = '.a:value
-			if nval>a:value "Too big
-				return 0
-			endif
-			if nval == a:value
-				return 1 "Match
-			endif
-		endfor
-		return 0
-	endfunction
 	let rexp = '^\(.*\)\s\[\([A-Z0-9 ,\*\/]\+\)\]\(\s\/\)\?$'
 	let parts = matchlist(a:line, rexp) "Parts: 1 - task, 2 - cron
 	if empty(parts) || empty(parts[2])
@@ -281,13 +282,13 @@ function! s:CheckCronStatement(line, date)
 		echom 'Invalid date in cron'
 		return ''
 	endif
-	if !CheckCronItem(cron[0], 1, 31, s:DateItem(dt, 'd'))
+	if !s:CheckCronItem(cron[0], 1, 31, s:DateItem(dt, 'd'))
 		return ''
 	endif
-	if !CheckCronItem(cron[1], 1, 12, s:DateItem(dt, 'm'))
+	if !s:CheckCronItem(cron[1], 1, 12, s:DateItem(dt, 'm'))
 		return ''
 	endif
-	if !CheckCronItem(cron[2], 0, 6, s:DateItem(dt, 'wd'))
+	if !s:CheckCronItem(cron[2], 0, 6, s:DateItem(dt, 'wd'))
 		return ''
 	endif
 	return task
@@ -837,3 +838,4 @@ nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 call Fold_Marked()
 call s:Enable_Markers()
 call s:Enable_Hotkeys()
+
