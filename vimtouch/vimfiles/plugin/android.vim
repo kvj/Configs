@@ -151,7 +151,7 @@ fu! s:T_Parse(str, start)
 	throw 'Unexpected EOL'
 endf
 
-let Android_Parse = function('s:T_Parse')
+let g:Android_Parse = function('s:T_Parse')
 "let [idx, result] = Android_Parse(s:TestTransferable, 0)
 "echom 'Result: '.idx.' '.s:T_ToString(result)
 
@@ -216,3 +216,36 @@ fun! s:T_Serialize(obj)
 	return str
 endf
 
+fun! s:A_Execute(type, obj)
+    let resp = android(a:type, s:T_Serialize(a:obj))
+    let out = s:T_Parse(resp, 0)
+    return out
+endf
+
+fun! g:Android_Execute(type, obj)
+    return s:A_Execute(a:type, a:obj)
+endf
+
+let s:subscriptions = {}
+
+fun! g:Android_Subscribe(obj, handler)
+	if !get(a:obj, 'subscription', 0)
+		return 0
+	endif
+	s:subscriptions[a:obj.subscription] = handler
+	return 1
+endf
+
+fun! s:A_OnEvent()
+    echom 'User event: '.v:android_type.' object: '.v:android_object
+	if get(s:subscriptions, v:android_type, 0) == 0
+		echom 'Invalid subscription: '.v:android_type
+		return 0
+	endif
+	let obj = s:T_Parse(v:android_object, 0)
+	call(s:subscriptions[v:android_type], [obj, v:android_type])
+	return 1
+endf
+
+au User * call s:A_OnEvent()
+let g:android = 1
