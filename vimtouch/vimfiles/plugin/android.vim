@@ -218,7 +218,10 @@ endf
 
 fun! s:A_Execute(type, obj)
     let resp = android(a:type, s:T_Serialize(a:obj))
-    let out = s:T_Parse(resp, 0)
+    let [idx, out] = s:T_Parse(resp, 0)
+	if get(out, 'error', '') != ''
+		throw out.error
+	endif
     return out
 endf
 
@@ -229,22 +232,22 @@ endf
 let s:subscriptions = {}
 
 fun! g:Android_Subscribe(obj, handler)
-	if !get(a:obj, 'subscription', 0)
+	if get(a:obj, 'subscription', 0) == 0
 		return 0
 	endif
-	s:subscriptions[a:obj.subscription] = handler
+	let s:subscriptions[a:obj.subscription] = a:handler
 	return 1
 endf
 
 fun! s:A_OnEvent()
-    echom 'User event: '.v:android_type.' object: '.v:android_object
-	if get(s:subscriptions, v:android_type, 0) == 0
-		echom 'Invalid subscription: '.v:android_type
-		return 0
+    "echom 'User event: '.v:android_type.' object: '.v:android_object
+	if has_key(s:subscriptions, v:android_type)
+		let [idx, obj] = s:T_Parse(v:android_object, 0)
+		call call(s:subscriptions[v:android_type], [obj, v:android_type])
+		return 1
 	endif
-	let obj = s:T_Parse(v:android_object, 0)
-	call(s:subscriptions[v:android_type], [obj, v:android_type])
-	return 1
+	echom 'Invalid subscription: '.v:android_type
+	return 0
 endf
 
 au User * call s:A_OnEvent()

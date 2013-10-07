@@ -487,12 +487,22 @@ function! s:CursorHour()
 	endif
 endfunction
 
+fun! CursorHourInterval(obj, subscription)
+	echom 'Cursor moved at: '.strftime(s:hmFormat)
+	call s:CursorHour()
+endf
+
 function! s:Enable_Markers()
 	sign define tttHour text=>> texthl=Search
 	if b:cr == 'hour'
 		"Enable hour sign
-		autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
-		"echom 'Enabled hour cursor'
+		if exists('g:android')
+			let dt = localtime()
+			let dt = s:AddToDate(dt, 'i', 60-s:DateItem(dt, 'i'))
+			call g:Android_Subscribe(g:Android_Execute('timer', {'interval': 60*60, 'time': dt}), function('CursorHourInterval'))
+		else
+			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
+		endif
 		call s:CursorHour()
 	endif
 endfunction
@@ -838,4 +848,3 @@ nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 call Fold_Marked()
 call s:Enable_Markers()
 call s:Enable_Hotkeys()
-

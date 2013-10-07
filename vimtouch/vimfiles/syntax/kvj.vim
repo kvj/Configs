@@ -9,7 +9,7 @@ syn match tComment '^\s*\/\{2}\s.*$'
 syn match tMark '^\s*\(\!\|@\|#\|?\|-\|+\|>\|<\|\$\|\~\)'
 syn match tDate '\(\s\|^\)\d\{2}\/\d\{2}\(\/\d\{2}\)\?'
 syn match tTag '#[a-z0-9]\+'
-syn match tContact '@[a-zA-Z0-9-_]\+'
+syn match tContact '[^a-zA-Z]@[a-zA-Z0-9-_]\+'hs=s+1
 exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
 syn match tPickTag '#\(achieve\|pick\)\(\s\|$\)'
 syn match tTagInfo '\s-[a-z0-9]\+'hs=s+1
