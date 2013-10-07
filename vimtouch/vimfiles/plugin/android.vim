@@ -236,7 +236,7 @@ fun! g:Android_Subscribe(obj, handler)
 		return 0
 	endif
 	let s:subscriptions[a:obj.subscription] = a:handler
-	return 1
+	return a:obj.subscription
 endf
 
 fun! s:A_OnEvent()
