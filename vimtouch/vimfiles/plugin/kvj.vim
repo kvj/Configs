@@ -1,5 +1,8 @@
 function! s:LoadSession(name)
-	exec 'source ~/.'.a:name.'.vim'
+	let fname = '~/.'.a:name.'.vim'
+	if filereadable(fnamemodify(fname, ':p'))
+		exec 'source '.fname
+	endif
 endfunction
 
 function! s:OpenFiles(config)

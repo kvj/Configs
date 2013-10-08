@@ -11,6 +11,9 @@ let b:date = 0
 let b:cron = ''
 let b:cr = ''
 let b:amode = ''
+let b:qbar = ''
+
+let b:qbar_01 = ['fs', 'tt', 'tn', 'to', 'tz', 'tw']
 
 let b:lastHourUpdate = 0
 
@@ -483,6 +486,8 @@ function! s:CursorHour()
 		if line>0
 			exec 'sign place '.s:signHour.' line='.line.' name=tttHour file='.expand('%:p')
 			"echom 'Cursor moved: '.strftime(s:hmFormat, dt)
+			call cursor(line, 0)
+			normal! zz
 		endif
 	endif
 endfunction
@@ -499,7 +504,9 @@ function! s:Enable_Markers()
 		if exists('g:android')
 			let dt = localtime()
 			let dt = s:AddToDate(dt, 'i', 60-s:DateItem(dt, 'i'))
-			call g:Android_Subscribe(g:Android_Execute('timer', {'interval': 60*60, 'time': dt}), function('CursorHourInterval'))
+			let sub = g:Android_Subscribe(g:Android_Execute('timer', {'interval': 60*60, 'time': dt}), function('CursorHourInterval'))
+			"Remove subscription on exit
+			exe "autocmd BufUnload <buffer> call g:Android_Execute('timer', {'subscription': ".sub."})"
 		else
 			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
 		endif
@@ -718,7 +725,7 @@ function! s:ParseAttrs(text, index)
 	return result
 endfunction
 
-function! Fold_Marked()
+function! s:Load()
 	normal mx
 	let linenr = 0
 	let foldsmade = 0
@@ -742,6 +749,16 @@ function! Fold_Marked()
 	endwhile
 	if foldsmade>0
 		normal `x
+	endif
+	if exists('g:android')
+		"Quickbar support
+		if b:qbar != '' && exists('b:qbar_'.b:qbar)
+			"echom 'Have qbar: '.b:qbar
+			let cmd = "call g:Android_Execute('quickbar', {'items': b:qbar_".b:qbar."})"
+			exe cmd
+			autocmd BufLeave <buffer> call g:Android_Execute('quickbar', {'default': 1})
+			exe "autocmd BufEnter <buffer> ".cmd
+		endif
 	endif
 endfunction
 
@@ -833,7 +850,7 @@ let maplocalleader = "t"
 nnoremap <buffer> <silent><localleader>t :call Add_New_Line(0, '-', 1)<CR>
 nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
 nnoremap <buffer> <silent><localleader>l :call Add_New_Line(1, 'time', 1)<CR>
-nnoremap <buffer> <silent><localleader>f :call Fold_Marked()<CR>
+"nnoremap <buffer> <silent><localleader>f :call Fold_Marked()<CR>
 nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
 nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
 nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
@@ -845,6 +862,6 @@ nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 
-call Fold_Marked()
+call s:Load()
 call s:Enable_Markers()
 call s:Enable_Hotkeys()

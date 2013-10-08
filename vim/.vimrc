@@ -193,15 +193,15 @@ let mapleader='f'
 map Q gq
 
 "Edit .vimrc
-nnoremap <silent><LEADER>v :e $MYVIMRC<CR>
+"nnoremap <silent><LEADER>v :e $MYVIMRC<CR>
 
 "Reload .vimrc
 "nnoremap <silent><LEADER>s :source $MYVIMRC<CR>
 
 "New paste
 "nnoremap <C-P> :set paste<CR>.:set nopaste<CR>
-inoremap  <ESC>pa
-nnoremap  jmpPV`pk
+"inoremap <silent><LEADER>v <ESC>pa
+nnoremap <silent><LEADER>v jmpPV`pk
 
 "Save selection
 vnoremap < <gv
@@ -214,7 +214,7 @@ vnoremap y ymygv<ESC>
 nnoremap bb `mzz
 
 "Complete line
-inoremap <C-L> <C-X><C-L>
+"inoremap <C-L> <C-X><C-L>
 
 "nnoremap <silent><LEADER>3 :%s/>\s*</>\r</g<CR>ggVG=
 "Save
@@ -231,7 +231,7 @@ nnoremap <silent><LEADER>o :TlistToggle<CR>
 "vnoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
 
 "Project
-nnoremap <silent><LEADER>p :Project<CR>
+"nnoremap <silent><LEADER>p :Project<CR>
 "inoremap <silent><LEADER>p <ESC>:Project<CR>
 "vnoremap <silent><LEADER>p <ESC>:Project<CR>
 
@@ -246,7 +246,7 @@ nnoremap <silent><LEADER>q :close<CR>
 "vnoremap <silent><LEADER>q <C-O>:close<CR>
 
 "Close win#2
-nnoremap <silent><LEADER>Q :q!<CR>
+nnoremap <silent><LEADER>Q :qa<CR>
 "inoremap <silent><LEADER>Q <C-O>:q!<CR>
 "vnoremap <silent><LEADER>Q <C-O>:q!<CR>
 
@@ -294,10 +294,10 @@ inoremap <C-J> <ESC>:wincmd h<CR>
 vnoremap <C-J> <ESC>:wincmd h<CR>
 
 "Win size
-nnoremap <C-1> :vertical resize -1<CR>
-nnoremap <C-4> :vertical resize +1<CR>
-nnoremap <C-2> :resize -1<CR>
-nnoremap <C-3> :resize +1<CR>
+"nnoremap <C-1> :vertical resize -1<CR>
+"nnoremap <C-4> :vertical resize +1<CR>
+"nnoremap <C-2> :resize -1<CR>
+"nnoremap <C-3> :resize +1<CR>
 
 "Next tab
 "nnoremap <C-TAB> :bNext<CR>

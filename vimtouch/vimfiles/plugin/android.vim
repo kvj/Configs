@@ -1,6 +1,7 @@
 let s:T_TypeString = 's'
 let s:T_TypeNumber = 'i'
 let s:T_TypeDouble = 'd'
+let s:T_TypeBoolean = 'b'
 let s:T_TypeList = 'l'
 let s:T_TypeMap = 'm'
 let s:T_TypeTransferable = 'o'
@@ -72,6 +73,11 @@ endf
 fun! s:T_Parse_i(str, index)
 	let [idx, str] = s:T_NextPiece(a:str, a:index)
 	return [idx, str2nr(str), s:T_TypeNumber]
+endf
+
+fun! s:T_Parse_b(str, index)
+	let [idx, str] = s:T_NextPiece(a:str, a:index)
+	return [idx, str2nr(str) == 0 ? 0 : 1, s:T_TypeBoolean]
 endf
 
 fun! s:T_Parse_d(str, index)

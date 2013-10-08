@@ -82,8 +82,8 @@ map Q gq
 
 "New paste
 "nnoremap <C-P> :set paste<CR>.:set nopaste<CR>
-inoremap <silent><LEADER>c <ESC>pa
-nnoremap <silent><LEADER>c jmpPV`pk
+"inoremap <silent><LEADER>c <ESC>pa
+nnoremap <silent><LEADER>v jmpPV`pk
 
 "Save selection
 vnoremap n <gv
