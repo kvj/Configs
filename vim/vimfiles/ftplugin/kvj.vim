@@ -49,6 +49,10 @@ function! Add_New_Line(top, content, indent)
 		let ex = ex . a:content . ' '
 	endif
     exec 'normal! ' . ex
+	if exists('g:android')
+		" Raise keyboard
+		call g:Android_Execute('input', {'request': 'keyboard_show'})
+	endif
 	startinsert!
 endfunction
 
