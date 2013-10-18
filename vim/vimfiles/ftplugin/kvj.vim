@@ -18,6 +18,7 @@ let b:qbar_01 = ['fs', 'tt', 'tn', 'to', 'tz', 'tw']
 let b:lastHourUpdate = 0
 
 let s:signHour = 21000
+let s:signTask = 22000
 let s:cursorUpdateInterval = 5
 let s:dmFormat = '%m/%d'
 let s:dmyFileFormat = '%y%m%d'
@@ -496,6 +497,55 @@ function! s:CursorHour()
 	endif
 endfunction
 
+let s:tagRexp = '\s#\([a-z0-9]\+\)'
+let s:infoRexp = '\s-\([a-z0-9]\+\)'
+
+" Returns all items in line
+fun! s:GetAll(line, rexp)
+	let idx = 0
+	let result = []
+	while 1
+		let list = matchlist(a:line, a:rexp, idx)
+		if empty(list)
+			return result
+		endif
+		call add(result, list[1])
+		let idx += match(a:line, a:rexp, idx)+len(list[0])
+	endwhile
+endf
+
+let s:taskSigns = 0
+
+" Updates task markers
+fun! s:CursorTask()
+	let rootlines = s:BufferSearchForLines('^[^\t].*[^\( /\)]$', 1)
+	let signNo = 0
+	for pos in rootlines
+		" echom 'Found root:' pos[0] pos[2]
+		let tasklines = s:BufferSearchForLines('.*'.s:tagRexp.'$', 0, pos[0]+1, pos[2])
+		for task in tasklines
+			let tags = s:GetAll(task[1], s:tagRexp)
+			" echom 'Task:' task[0] task[1] len(tags) tags[-1]
+			if tags[-1] != 'task'
+				" Not a task
+				continue
+			endif
+			" Put mark
+			exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
+			exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name=tttTask buffer='.bufnr('%')
+			let signNo += 1
+		endfor
+	endfor
+	if signNo<s:taskSigns
+		for i in range(signNo, s:taskSigns-1)
+			echom 'Remove sign' i
+			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
+		endfor
+	endif
+	let s:taskSigns = signNo
+	"echo 'Found tasks:' s:taskSigns
+endf
+
 fun! CursorHourInterval(obj, subscription)
 	echom 'Cursor moved at: '.strftime(s:hmFormat)
 	call s:CursorHour()
@@ -503,6 +553,7 @@ endf
 
 function! s:Enable_Markers()
 	sign define tttHour text=>> texthl=Search
+	sign define tttTask text=[] texthl=Todo
 	if b:cr == 'hour'
 		"Enable hour sign
 		if exists('g:android')
@@ -515,6 +566,10 @@ function! s:Enable_Markers()
 			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
 		endif
 		call s:CursorHour()
+	endif
+	if b:cr == 'task'
+		call s:CursorTask()
+		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorTask()
 	endif
 endfunction
 
@@ -570,6 +625,30 @@ function! s:Enable_Hotkeys()
 		exe 'nn <buffer> <silent><localleader>'.key.' :call JumpToWindow("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
 		"echom 'Bound key '.key.' to file: '.path
 	endfor
+endfunction
+
+function! s:BufferSearchForLines(rexp, children, ...)
+	let idx = 1
+	let end = line('$')
+	if len(a:000) == 2
+		let idx = a:1
+		let end = a:2
+	endif
+	let result = []
+	while idx<=end
+		let line = getline(idx)
+		if match(line, a:rexp) != -1
+			"Found
+			let item = [idx, line]
+			call add(result, item)
+			let lineindent = s:Indent(line)
+			if a:children
+				call add(item, s:BufferSearchForLastChild(idx))
+			endif
+		endif
+		let idx += 1
+	endwhile
+	return result
 endfunction
 
 function! s:BufferSearchForLastChild(idx)
