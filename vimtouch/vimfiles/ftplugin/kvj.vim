@@ -11,9 +11,11 @@ let b:date = 0
 let b:cron = ''
 let b:cr = ''
 let b:amode = ''
-let b:qbar = ''
+let b:qbar = 'def'
 
-let b:qbar_01 = ['fs', 'tt', 'tn', 'to', 'tz', 'tw']
+let b:qbar_def = ['<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tw tw', '<Esc>to to', '<Esc>ti ti', '<Esc>tt<kOn> tt']
+let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
+let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
 
 let b:lastHourUpdate = 0
 
@@ -565,6 +567,7 @@ function! s:Enable_Markers()
 		else
 			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
 		endif
+		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorHour()
 		call s:CursorHour()
 	endif
 	if b:cr == 'task'
