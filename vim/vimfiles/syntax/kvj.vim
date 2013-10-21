@@ -41,8 +41,8 @@ hi link tTime Identifier
 "hi link tDuration Type
 hi link tMark Keyword
 hi link tComment Comment
-hi link tTag Todo
-hi link tContact String
+hi link tTag String
+hi link tContact PreProc
 hi link tPickTag Type
 hi link tTagInfo LineNr
 hi link tOkLine Comment
