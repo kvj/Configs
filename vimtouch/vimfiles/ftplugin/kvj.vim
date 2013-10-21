@@ -492,7 +492,7 @@ function! s:CursorHour()
 		let line = search('^'.strftime('%H', dt).':00', 'wn')
 		if line>0
 			exec 'sign place '.s:signHour.' line='.line.' name=tttHour file='.expand('%:p')
-			"echom 'Cursor moved: '.strftime(s:hmFormat, dt)
+			" echom 'Cursor moved: '.strftime(s:hmFormat, dt)
 			call cursor(line, 0)
 			normal! zz
 		endif
@@ -532,15 +532,31 @@ fun! s:CursorTask()
 				" Not a task
 				continue
 			endif
+			let signType = 'tttTask'
+			if exists('g:tttTaskExclude')
+				" Have list of tasks tags to exclude
+				let infos = s:GetAll(task[1], s:infoRexp)
+				let found = 0
+				for info in g:tttTaskExclude
+					if index(infos, info) != -1
+						" Found
+						let found = 1
+						break
+					endif
+				endfor
+				if found
+					let signType = 'tttSkipTask'
+				endif
+			endif
 			" Put mark
 			exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
-			exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name=tttTask buffer='.bufnr('%')
+			exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name='.signType.' buffer='.bufnr('%')
 			let signNo += 1
 		endfor
 	endfor
 	if signNo<s:taskSigns
 		for i in range(signNo, s:taskSigns-1)
-			echom 'Remove sign' i
+			" echom 'Remove sign' i
 			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
 		endfor
 	endif
@@ -556,6 +572,7 @@ endf
 function! s:Enable_Markers()
 	sign define tttHour text=>> texthl=Search
 	sign define tttTask text=[] texthl=Todo
+	sign define tttSkipTask linehl=tOkLine
 	if b:cr == 'hour'
 		"Enable hour sign
 		if exists('g:android')
@@ -567,12 +584,12 @@ function! s:Enable_Markers()
 		else
 			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
 		endif
-		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorHour()
+		autocmd FileReadPost,BufWritePost <buffer> call s:CursorHour()
 		call s:CursorHour()
 	endif
 	if b:cr == 'task'
 		call s:CursorTask()
-		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorTask()
+		autocmd FileReadPost,BufWritePost <buffer> call s:CursorTask()
 	endif
 endfunction
 
@@ -594,7 +611,7 @@ function! s:ProcessTab(tab, path)
 	return 0
 endfunction
 
-function! JumpToWindow(path)
+function! Jump2Window(path)
 	let tab = tabpagenr()
 	let tabs = tabpagenr('$')
 	"echom 'Locating: '.a:path.' '.tab.' of '.tabs
@@ -625,7 +642,7 @@ function! s:Enable_Hotkeys()
 	endif
 	for [filePath, key] in items(g:tttHotKeys)
 		let path = glob(g:tttRoot.'/'.filePath)
-		exe 'nn <buffer> <silent><localleader>'.key.' :call JumpToWindow("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
+		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump2Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
 		"echom 'Bound key '.key.' to file: '.path
 	endfor
 endfunction
@@ -812,6 +829,7 @@ function! s:ParseAttrs(text, index)
 endfunction
 
 function! s:Load()
+	au! * <buffer>
 	normal mx
 	let linenr = 0
 	let foldsmade = 0
