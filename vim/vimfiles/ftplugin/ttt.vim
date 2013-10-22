@@ -584,12 +584,12 @@ function! s:Enable_Markers()
 		else
 			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
 		endif
-		autocmd FileReadPost,BufWritePost <buffer> call s:CursorHour()
+		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorHour()
 		call s:CursorHour()
 	endif
 	if b:cr == 'task'
 		call s:CursorTask()
-		autocmd FileReadPost,BufWritePost <buffer> call s:CursorTask()
+		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorTask()
 	endif
 endfunction
 
@@ -605,6 +605,7 @@ function! s:ProcessTab(tab, path)
 			let winno = bufwinnr(bufname(bufno))
 			"echom 'Will focus on: '.winno
 			exe winno.'wincmd w'
+			doau FileChangedShellPost
 			return 1
 		endif
 	endfor
@@ -629,6 +630,7 @@ function! Jump2Window(path)
 	endwhile
 	"Edit in current
 	exe 'e '.a:path
+	doau FileChangedShellPost
 	return 0
 endfunction
 
