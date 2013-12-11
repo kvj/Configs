@@ -343,4 +343,14 @@ nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
 nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
 nnoremap <silent><LEADER>m :source ~/.s.vim<CR>
 
+function! GitPullPush(cmd, origin, master)
+	let remote = input('Remote? ', a:origin)
+	let branch = input('Branch? ', a:master)
+	exe ''.a:cmd.' '.remote.' '.branch
+endfunction
+
+nnoremap <silent><LEADER>gs :Gstatus<CR>
+nnoremap <silent><LEADER>gu :call GitPullPush('Git push', 'origin', 'master')<CR>
+nnoremap <silent><LEADER>gf :call GitPullPush('Git pull', 'origin', 'master')<CR>
+
 "source ~/.vimrc.local

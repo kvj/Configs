@@ -16,9 +16,9 @@ snippet ife
 	} else { // ${3}
 	};
 snippet trc
-	try { // ${4}
-	} catch (${1:e}) { // ${2}
-		${3://TODO: Handle exception}
+	try { // ${3}
+	} catch (${1:e}) {
+		${2://TODO: Handle exception}
 	};
 # else
 snippet el
@@ -79,4 +79,4 @@ snippet log
 snippet al
 	alert('${1}');
 snippet bi
-	.bind(${1:this})
+	.bind(this)
