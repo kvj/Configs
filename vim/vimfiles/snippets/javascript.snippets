@@ -55,7 +55,12 @@ snippet case
 		break;
 # for (...) {...}
 snippet for
-	for (var ${1:i} = ${2:0}; $1 < ${3}; $1++) { // ${4}
+	for (var ${1:i} = ${2:0}; $1 < ${3:array}; $1++) { // ${4}
+	};
+# for (...) {var item = [];}
+snippet fori
+	for (var ${1:i} = ${2:0}; $1 < ${3:array}.length; $1++) { // ${5}
+		var ${4:item} = $3[$1];
 	};
 # for in (...) {...}
 snippet fore
