@@ -310,7 +310,7 @@ vnoremap <C-J> <ESC>:wincmd h<CR>
 "vnoremap <silent><LEADER>. <ESC>:make! alt<CR>:cl<CR>
 
 "Make
-"nnoremap <silent><LEADER>m :make!<CR>:cl<CR>
+nnoremap <silent><LEADER>. :make!<CR>:cl<CR>
 "inoremap <silent><LEADER>m <ESC>:make!<CR>:cl<CR>
 "vnoremap <silent><LEADER>m <ESC>:make!<CR>:cl<CR>
 
@@ -340,12 +340,12 @@ nnoremap <silent><LEADER>a ggVG
 "vnoremap <silent><LEADER>a <ESC>ggVG
 
 nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
-nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
+" nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
 nnoremap <silent><LEADER>m :source ~/.s.vim<CR>
 
 function! GitPullPush(cmd, origin, master)
-	let remote = input('Remote? ', a:origin)
-	let branch = input('Branch? ', a:master)
+	let remote = input('['.a:cmd.']Remote? ', a:origin)
+	let branch = input('['.a:cmd.']Branch? ', a:master)
 	exe ''.a:cmd.' '.remote.' '.branch
 endfunction
 
