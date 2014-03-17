@@ -1,7 +1,5 @@
-if exists('vim_config')
-	exec 'set runtimepath+='.globpath(g:vim_config,'vimfiles').','.globpath(g:vim_config,'vimfiles/after')
-	let g:snippets_dir=globpath(g:vim_config, 'vimfiles/snippets')
-endif
+exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
+execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
 
 set termencoding=utf-8
 set fileencodings=utf-8
