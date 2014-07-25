@@ -32,7 +32,7 @@ set guicursor=a:blinkon300-blinkoff200
 set autoread
 set timeout timeoutlen=500 ttimeoutlen=100
 "cc=80
-
+set colorcolumn=100
 
 "set statusline=%1*%m%*%2*%r%*%F%=\ Col:%3*%03c%*\ Ln:%3*%03l%*/%3*%03L%*\ File:%3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
 
@@ -207,6 +207,7 @@ vnoremap > >gv
 
 "Copy
 vnoremap y ymygv<ESC>
+vnoremap <silent><LEADER>y "+y<ESC>
 
 "Restore pos
 nnoremap bb `mzz
@@ -239,7 +240,7 @@ nnoremap <silent><LEADER>w :BufExplorer<CR>
 "vnoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
 
 "Close win
-nnoremap <silent><LEADER>q :close<CR>
+nnoremap <silent><LEADER>q :q<CR>
 "inoremap <silent><LEADER>q <C-O>:close<CR>
 "vnoremap <silent><LEADER>q <C-O>:close<CR>
 
@@ -285,6 +286,7 @@ vnoremap <C-L> <ESC>:wincmd l<CR>
 
 "Reload buffer
 nnoremap <silent><LEADER>e :e<CR>
+nnoremap <silent><LEADER>r :redr!<CR>
 
 "Prev win
 nnoremap <C-J> :wincmd h<CR>
@@ -292,9 +294,9 @@ inoremap <C-J> <ESC>:wincmd h<CR>
 vnoremap <C-J> <ESC>:wincmd h<CR>
 
 "Win size
-"nnoremap <C-1> :vertical resize -1<CR>
+nnoremap <C-U> :vertical resize -1<CR>
 "nnoremap <C-4> :vertical resize +1<CR>
-"nnoremap <C-2> :resize -1<CR>
+nnoremap <C-O> :resize -1<CR>
 "nnoremap <C-3> :resize +1<CR>
 
 "Next tab
@@ -350,5 +352,7 @@ endfunction
 nnoremap <silent><LEADER>gs :Gstatus<CR>
 nnoremap <silent><LEADER>gu :call GitPullPush('Git push', 'origin', 'master')<CR>
 nnoremap <silent><LEADER>gf :call GitPullPush('Git pull', 'origin', 'master')<CR>
+nnoremap <silent><LEADER>gt :!tig status<CR>
+nnoremap <silent><LEADER>gl :!tig<CR>
 
 "source ~/.vimrc.local
