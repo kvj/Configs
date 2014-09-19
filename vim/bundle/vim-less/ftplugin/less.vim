@@ -21,6 +21,7 @@ setlocal suffixesadd=.less
 setlocal comments=s1:/*,mb:*,ex:*/
 
 let &l:include = '^\s*@import\s\+\%(url(\)\=["'']\='
+setlocal makeprg="lessc % > %:p:r.css"
 
-autocmd BufWritePost <buffer> !lessc % > %:p:r.css
+" autocmd BufWritePost <buffer> !lessc % > %:p:r.css
 " vim:set sw=2:
