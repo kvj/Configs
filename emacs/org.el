@@ -1,10 +1,5 @@
 (setq mark-diary-entries-in-calendar t)
 (setq org-agenda-files (directory-files org-directory t ".*.org$"))
-;(setq org-agenda-files (list 
-;			(concat org-directory "main.org") 
-;			(concat org-directory "dates.org") 
-;			(concat org-directory "zinbox.org"))
-;)
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary t)
 (setq org-agenda-skip-deadline-if-done t)
@@ -14,7 +9,6 @@
 (setq org-enforce-todo-checkbox-dependencies t)
 (setq org-hide-leading-stars t)
 (setq org-log-done 'time)
-;(setq org-log-done 'note)
 (setq org-special-ctrl-a/e t)
 (setq org-special-ctrl-k t)
 (setq org-startup-folded t)
@@ -23,8 +17,6 @@
 (setq org-agenda-skip-scheduled-if-deadline-is-shown t)
 (setq org-agenda-span 3)
 (setq org-agenda-start-on-weekday nil)
-;(setq org-startup-indented t)
-;(setq org-display-custom-times t)
 (setq org-hierarchical-todo-statistics t)
 (setq org-enforce-todo-dependencies t)
 (setq org-enforce-todo-checkbox-dependencies t)
@@ -44,7 +36,6 @@
 (setq org-refile-targets (quote (
 	(nil :maxlevel . 9)
 	(org-agenda-files :level . 1)
-	;("_journal.org" :level . 3)
 )))
 (setq org-refile-allow-creating-parent-nodes "confirm")
 (setq org-todo-keyword-faces '(
@@ -57,30 +48,17 @@
         ("HABIT" :foreground "blue")
 ))
 (require 'org)
-;(setq org-google-weather-format "%c %l%s - %h%s")
-;(require 'org-google-weather)
-
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-cr" 'remember)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 
-(org-remember-insinuate)
-
 (require 'remember)
 (add-hook 'remember-mode-hook 'org-remember-apply-template)
 ;(define-key global-map [(control meta ?r)] 'remember)
 
 (setq org-default-notes-file (concat org-directory "zinbox.org"))
-
-;; mobile org support
-;(setq org-mobile-directory "~/MobileOrg/")
-;(setq org-mobile-files (directory-files org-directory t "^[a-z].*.org$"))
-;(setq org-mobile-inbox-for-pull (concat org-directory "zinbox.org"))
-;(setq org-mobile-agendas (list "mm" "a"))
-;(setq org-agenda-overriding-columns-format "%55ITEM %8TODO %14CLOSED")
-;(setq org-mobile-files (quote ("main.org")))
 
 (setq org-agenda-custom-commands '(
 ;				   ("w" todo "TODO")
@@ -101,11 +79,7 @@
 			))
 			(alltodo "Other tasks" (
 				(org-agenda-overriding-header "Other tasks")
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-			(tags "+CATEGORY=\"Inbox\"" (
-				(org-agenda-overriding-header "Inbox")
-				(org-agenda-files (list (concat org-directory "zinbox.org")))
+				(org-agenda-files (list (concat org-directory "main.org")))
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 		) (
@@ -123,11 +97,7 @@
 			))
 			(alltodo "Other tasks" (
 				(org-agenda-overriding-header "Other tasks")
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-			(tags "+CATEGORY=\"Inbox\"" (
-				(org-agenda-overriding-header "Inbox")
-				(org-agenda-files (list (concat org-directory "zinbox.org")))
+				(org-agenda-files (list (concat org-directory "main.org")))
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 		) (
@@ -152,9 +122,10 @@
 (setq org-agenda-todo-ignore-scheduled t)
 (setq org-capture-templates
 	'(
-		("t" "Todo" entry (file+headline (concat org-directory "zinbox.org") "Inbox") "* TODO %?\n  %u")
-		("a" "Appontment" entry (file+headline (concat org-directory "zinbox.org") "Inbox") "* APPT %?\n  %u")
-		("b" "Bug" entry (file+headline (concat org-directory "zinbox.org") "Inbox") "* BUG %?\n  %u")
+		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Journal") "* TODO %?\n  %u")
+		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?\n  %u")
+		("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
+		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
 		;;("p" "Pinned" entry (file+datetree+prompt (concat org-directory "journal.org")) "* PIN %?")
 	)
