@@ -34,6 +34,9 @@ function! Add_New_Line(top, content, indent)
 	if a:top == 1
 		normal! gg
 	endif
+	if a:top == 2
+		normal! G
+	endif
 	if a:content == 'time'
 		let nowDate = strftime(s:dmFormat)
 		let header = getline(1)
@@ -42,9 +45,12 @@ function! Add_New_Line(top, content, indent)
 			call cursor(1, 0)
 		endif
 	endif
-	let ex = "A\n"
+	let ex = "o"
 	if a:indent == 1
 		let ex = ex . "\t"
+	endif
+	if a:indent == -1
+		let ex = ex . "\<esc>0Di"
 	endif
 	if a:content == 'time'
 		let ex = ex . strftime('%H:%M').' '
@@ -524,7 +530,7 @@ fun! s:CursorTask()
 	let signNo = 0
 	for pos in rootlines
 		" echom 'Found root:' pos[0] pos[2]
-		let tasklines = s:BufferSearchForLines('.*'.s:tagRexp.'$', 0, pos[0]+1, pos[2])
+		let tasklines = s:BufferSearchForLines('.*'.s:tagRexp.'\( /\)\?$', 0, pos[0]+1, pos[2])
 		for task in tasklines
 			let tags = s:GetAll(task[1], s:tagRexp)
 			" echom 'Task:' task[0] task[1] len(tags) tags[-1]
@@ -953,8 +959,9 @@ setlocal fillchars=fold:\
 
 let maplocalleader = "t"
 
-nnoremap <buffer> <silent><localleader>t :call Add_New_Line(0, '-', 1)<CR>
+nnoremap <buffer> <silent><localleader>u :call Add_New_Line(0, '-', 1)<CR>
 nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
+nnoremap <buffer> <silent><localleader>t :call Add_New_Line(2, "\t-", -1)<CR>
 nnoremap <buffer> <silent><localleader>l :call Add_New_Line(1, 'time', 1)<CR>
 "nnoremap <buffer> <silent><localleader>f :call Fold_Marked()<CR>
 nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
@@ -964,6 +971,7 @@ nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
 nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
 nnoremap <buffer> <silent><localleader>o :call Set_Tag(1, 'ok')<CR>
 nnoremap <buffer> <silent><localleader>i :call Set_Tag(1, 'list')<CR>
+nnoremap <buffer> <silent><localleader>k :call Set_Tag(1, 'task')<CR>
 nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>

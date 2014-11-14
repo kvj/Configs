@@ -1,4 +1,5 @@
 exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
+
 execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
 
 set termencoding=utf-8
@@ -33,6 +34,7 @@ set autoread
 set timeout timeoutlen=500 ttimeoutlen=100
 "cc=80
 set colorcolumn=100
+set sessionoptions-=options
 
 "set statusline=%1*%m%*%2*%r%*%F%=\ Col:%3*%03c%*\ Ln:%3*%03l%*/%3*%03L%*\ File:%3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
 
@@ -160,7 +162,7 @@ let g:NERDTreeQuitOnOpen = 1
 let g:VerticalToolWindowSide = 'right'
 let g:EclimJavaHierarchyDefaultAction = 'edit'
 
-let g:tttHotKeys = {'00_Organizer/01.ttt': 'x', '00_Organizer/07.ttt': 'w', '01_Timeline/00.ttt': 'z'}
+"let g:tttHotKeys = {'00_Organizer/01.ttt': 'x', '00_Organizer/07.ttt': 'w', '01_Timeline/00.ttt': 'z'}
 
 set ssop-=options
 set ssop-=folds
