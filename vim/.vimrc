@@ -1,5 +1,9 @@
 exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
 
+if exists('g:vimLite')
+	let g:pathogen_disabled = ['airline', 'coffee', 'editorconfig', 'vim-go', 'vim-less', 'vimwiki']
+endif
+
 execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
 
 set termencoding=utf-8
@@ -36,10 +40,12 @@ set timeout timeoutlen=500 ttimeoutlen=100
 set colorcolumn=100
 set sessionoptions-=options
 
-"set statusline=%1*%m%*%2*%r%*%F%=\ Col:%3*%03c%*\ Ln:%3*%03l%*/%3*%03L%*\ File:%3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
-
 set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
-set list listchars=tab:>.,trail:~,extends:*
+if exists('g:vimLite')
+	set statusline=%1*%m%*%2*%r%*%f%=\ Col:%3*%03c%*x%3*%03l%*/%3*%03L%*\ %3*%{&filetype}%*/%3*%{&fileformat}%*/%3*%{&fileencoding}%*%<
+endif
+set listchars=tab:>.,trail:~,extends:*
+set nolist
 
 let g:showmarks_enable = 1
 hi! link ShowMarksHLl LineNr
@@ -167,14 +173,9 @@ let g:EclimJavaHierarchyDefaultAction = 'edit'
 set ssop-=options
 set ssop-=folds
 
-colorscheme solarized
-
 if has('gui_running')
     set guioptions-=T
     set guioptions-=m
-    "colorscheme desertEx
-    "set guifont=Droid\ Sans\ Mono:h10
-    "set guifont=Ubuntu\ Mono:h10
     set lines=70
     set columns=200
     set vb t_vb="<Esc>|10f"

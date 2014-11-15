@@ -1,3 +1,6 @@
-let g:vim_config="~/Configs/vim"
+let g:vim_config = "~/Dev/Configs/vim"
+"let g:vimLite = 1
+
+let g:tttRoot = "~/ownCloud/Personal2"
+
 exec 'source '.globpath(g:vim_config, '.vimrc')
-set nolist
