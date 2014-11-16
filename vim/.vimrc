@@ -1,7 +1,7 @@
 exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
 
 if exists('g:vimLite')
-	let g:pathogen_disabled = ['airline', 'coffee', 'editorconfig', 'vim-go', 'vim-less', 'vimwiki']
+	let g:pathogen_disabled = ['airline', 'coffee', 'editorconfig', 'vim-go', 'vim-less', 'vimwiki', 'fugitive', 'taglist']
 endif
 
 execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
@@ -9,9 +9,12 @@ execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
 set termencoding=utf-8
 set fileencodings=utf-8
 set encoding=utf-8
-language messages C
-language ctype C
-language time C
+if !exists('g:vimLang')
+	let g:vimLang = 'C'
+endif
+exec 'normal language messages '.g:vimLang
+exec 'normal language ctype '.g:vimLang
+exec 'normal language time '.g:vimLang
 set langmenu=en_US.UTF-8
 set autoread
 set mouse=a
