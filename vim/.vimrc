@@ -2,6 +2,8 @@ exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
 
 if exists('g:vimLite')
 	let g:pathogen_disabled = ['airline', 'coffee', 'editorconfig', 'vim-go', 'vim-less', 'vimwiki', 'fugitive', 'taglist']
+else
+	let g:pathogen_disabled = ['']
 endif
 
 execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
