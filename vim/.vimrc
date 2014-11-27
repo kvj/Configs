@@ -173,7 +173,9 @@ let g:NERDTreeQuitOnOpen = 1
 let g:VerticalToolWindowSide = 'right'
 let g:EclimJavaHierarchyDefaultAction = 'edit'
 
-"let g:tttHotKeys = {'00_Organizer/01.ttt': 'x', '00_Organizer/07.ttt': 'w', '01_Timeline/00.ttt': 'z'}
+if !exists('g:tttHotKeys')
+	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
+endif
 
 set ssop-=options
 set ssop-=folds
