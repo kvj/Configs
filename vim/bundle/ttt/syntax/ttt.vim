@@ -23,11 +23,15 @@ exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| 
 exe 'syn region tExtBlock start=''^\z(\s*\)'.s:extBlockBegin.' '''.markIndentBlock.' keepend contains=@ExtBlockSyntax'
 
 function! s:enableExtBlockSyntax(code, name)
+	if !filereadable('syntax/'.a:name.'.vim')
+		return 0
+	endif
 	let ft=toupper(a:code)
 	let group='ExtSyntax'.ft
 	execute 'syntax include @'.group.' syntax/'.a:name.'.vim'
 	execute 'syntax region tExtGroup'.ft.' matchgroup=tExtGroupMark start=''^\s*'.s:extBlockBegin.'\(\s\|\n\)'.a:code.'\s.*\n''rs=e skip=''\n'' end=''$'' contained contains=@'.group
 	execute 'syn cluster ExtBlockSyntax add=tExtGroup'.ft
+	return 1
 endfunction
 
 call s:enableExtBlockSyntax('puml', 'plantuml')
