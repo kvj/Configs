@@ -2,6 +2,8 @@ exec 'source '.globpath(g:vim_config, 'bundle/pathogen.vim')
 
 if exists('g:vimLite')
 	let g:pathogen_disabled = ['airline', 'coffee', 'editorconfig', 'vim-go', 'vim-less', 'vimwiki', 'fugitive', 'taglist']
+else
+	let g:pathogen_disabled = ['']
 endif
 
 execute pathogen#infect(globpath(g:vim_config, 'bundle').'/{}')
@@ -171,7 +173,9 @@ let g:NERDTreeQuitOnOpen = 1
 let g:VerticalToolWindowSide = 'right'
 let g:EclimJavaHierarchyDefaultAction = 'edit'
 
-"let g:tttHotKeys = {'00_Organizer/01.ttt': 'x', '00_Organizer/07.ttt': 'w', '01_Timeline/00.ttt': 'z'}
+if !exists('g:tttHotKeys')
+	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
+endif
 
 set ssop-=options
 set ssop-=folds

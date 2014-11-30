@@ -13,9 +13,9 @@ let b:cr = ''
 let b:amode = ''
 let b:qbar = 'def'
 
-let b:qbar_def = ['<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tw tw', '<Esc>to to', '<Esc>ti ti', '<Esc>tt<kOn> tt']
-let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
-let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
+let b:qbar_def = ['<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tk tk', '<Esc>to to']
+"let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
+"let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
 
 let b:lastHourUpdate = 0
 
@@ -618,27 +618,29 @@ function! s:ProcessTab(tab, path)
 	return 0
 endfunction
 
-function! Jump2Window(path)
-	let tab = tabpagenr()
-	let tabs = tabpagenr('$')
-	"echom 'Locating: '.a:path.' '.tab.' of '.tabs
-	if s:ProcessTab(tab, a:path) == 1
-		"Switched in currect tab
-		return 1
-	endif
-	let idx = 1
-	while idx <= tabs
-		if s:ProcessTab(idx, a:path) == 1
-			"Found in other tab
+if !exists('*Jump_Window')
+	function! Jump_Window(path)
+		let tab = tabpagenr()
+		let tabs = tabpagenr('$')
+		" echom 'Locating: '.a:path.' '.tab.' of '.tabs
+		if s:ProcessTab(tab, a:path) == 1
+			"Switched in currect tab
 			return 1
 		endif
-		let idx += 1
-	endwhile
-	"Edit in current
-	exe 'e '.a:path
-	doau FileChangedShellPost
-	return 0
-endfunction
+		let idx = 1
+		while idx <= tabs
+			if s:ProcessTab(idx, a:path) == 1
+				"Found in other tab
+				return 1
+			endif
+			let idx += 1
+		endwhile
+		"Edit in current
+		exe 'e '.a:path
+		doau FileChangedShellPost
+		return 0
+	endfunction
+endif
 
 function! s:Enable_Hotkeys()
 	if !exists('g:tttHotKeys')
@@ -650,8 +652,8 @@ function! s:Enable_Hotkeys()
 	endif
 	for [filePath, key] in items(g:tttHotKeys)
 		let path = glob(g:tttRoot.'/'.filePath)
-		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump2Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
-		"echom 'Bound key '.key.' to file: '.path
+		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump_Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
+		" echom 'Bound key '.key.' to file: '.path
 	endfor
 endfunction
 
