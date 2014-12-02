@@ -23,7 +23,7 @@ set mouse=a
 set wildmenu
 set magic
 set more
-set cmdheight=3
+set cmdheight=1
 set noerrorbells
 set vb t_vb=
 set showmatch
@@ -65,9 +65,6 @@ set tabstop=4
 
 " (Auto)indent uses 4 characters
 set shiftwidth=4
-
-" spaces instead of tabs
-"set expandtab
 
 " guess indentation
 set autoindent
@@ -162,12 +159,6 @@ let g:miniBufExplUseSingleClick = 1
 let g:miniBufExplMaxSize = 1
 let g:NERDTreeShowBookmarks = 1
 let g:NERDTreeQuitOnOpen = 1
-"let g:miniBufExplorerMoreThanOne = 0
-"let g:calendar_focus_today = 1
-"let g:calendar_navi = ''
-"let g:calendar_monday = 1
-"let g:calendar_weeknm = 1
-"let g:calendar_datetime = 'title'
 
 "Eclim stuff
 let g:VerticalToolWindowSide = 'right'
@@ -200,15 +191,7 @@ let mapleader='f'
 
 map Q gq
 
-"Edit .vimrc
-"nnoremap <silent><LEADER>v :e $MYVIMRC<CR>
-
-"Reload .vimrc
-"nnoremap <silent><LEADER>s :source $MYVIMRC<CR>
-
 "New paste
-"nnoremap <C-P> :set paste<CR>.:set nopaste<CR>
-"inoremap <silent><LEADER>v <ESC>pa
 nnoremap <silent><LEADER>v jmpPV`pk
 
 "Save selection
@@ -217,7 +200,6 @@ vnoremap > >gv
 
 "Copy
 vnoremap y ymygv<ESC>
-vnoremap <silent><LEADER>y "+y<ESC>
 
 "Restore pos
 nnoremap bb `mzz
@@ -225,49 +207,29 @@ nnoremap bb `mzz
 "Complete line
 "inoremap <C-L> <C-X><C-L>
 
-"nnoremap <silent><LEADER>3 :%s/>\s*</>\r</g<CR>ggVG=
 "Save
 nnoremap <silent><LEADER>s :wa<CR>
-"inoremap <silent><LEADER>2 <ESC>:w<CR>
-"vnoremap <silent><LEADER>2 <ESC>:w<CR>
 
 "TagList
-"nnoremap <silent><LEADER>o :TlistOpen<CR>
-"inoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
-"vnoremap <silent><LEADER>o <ESC>:TlistOpen<CR>
 nnoremap <silent><LEADER>o :TlistToggle<CR>
-"inoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
-"vnoremap <silent><LEADER>o <ESC>:TlistToggle<CR>
 
 "Project
 "nnoremap <silent><LEADER>p :Project<CR>
-"inoremap <silent><LEADER>p <ESC>:Project<CR>
-"vnoremap <silent><LEADER>p <ESC>:Project<CR>
 
 "Show open windows
 nnoremap <silent><LEADER>w :BufExplorer<CR>
-"inoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
-"vnoremap <silent><LEADER>w <ESC>:BufExplorer<CR>
 
 "Close win
 nnoremap <silent><LEADER>q :q<CR>
-"inoremap <silent><LEADER>q <C-O>:close<CR>
-"vnoremap <silent><LEADER>q <C-O>:close<CR>
 
 "Close win#2
 nnoremap <silent><LEADER>Q :qa<CR>
-"inoremap <silent><LEADER>Q <C-O>:q!<CR>
-"vnoremap <silent><LEADER>Q <C-O>:q!<CR>
 
 "Next tab
 nnoremap <silent><LEADER>f :e #<CR>
-"inoremap <silent><LEADER>, <ESC>:e #<CR>
-"vnoremap <silent><LEADER>, <ESC>:e #<CR>
 
 "Toggle tree
 nnoremap <silent><LEADER>t :NERDTreeToggle<CR>
-"inoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
-"vnoremap <silent><LEADER>t <ESC>:NERDTreeToggle<CR>
 
 "Repeat search
 "nnoremap <C-A> :/<CR>
@@ -294,10 +256,6 @@ nnoremap <C-L> :wincmd l<CR>
 inoremap <C-L> <ESC>:wincmd l<CR>
 vnoremap <C-L> <ESC>:wincmd l<CR>
 
-"Reload buffer
-nnoremap <silent><LEADER>e :e<CR>
-nnoremap <silent><LEADER>r :redr!<CR>
-
 "Prev win
 nnoremap <C-J> :wincmd h<CR>
 inoremap <C-J> <ESC>:wincmd h<CR>
@@ -308,6 +266,10 @@ nnoremap <C-U> :vertical resize -1<CR>
 "nnoremap <C-4> :vertical resize +1<CR>
 nnoremap <C-O> :resize -1<CR>
 "nnoremap <C-3> :resize +1<CR>
+
+"Reload buffer
+nnoremap <silent><LEADER>e :e<CR>
+nnoremap <silent><LEADER>r :redr!<CR>
 
 "Next tab
 "nnoremap <C-TAB> :bNext<CR>
@@ -349,19 +311,36 @@ nnoremap <silent><LEADER>a ggVG
 "inoremap <silent><LEADER>a <ESC>ggVG
 "vnoremap <silent><LEADER>a <ESC>ggVG
 
+"System clipboard
+vnoremap <silent><LEADER>cy "+y
+nnoremap <silent><LEADER>cp "+p
+vnoremap <silent><LEADER>cd "+d
+
+"Folding
+nnoremap <silent><LEADER>z, zm
+nnoremap <silent><LEADER>z. zr
+nnoremap <silent><LEADER>za zO
+nnoremap <silent><LEADER>zc zC
+nnoremap <silent><LEADER>z1 :setlocal foldlevel=0<CR>
+nnoremap <silent><LEADER>z2 :setlocal foldlevel=1<CR>
+nnoremap <silent><LEADER>z3 :setlocal foldlevel=2<CR>
+nnoremap <silent><LEADER>z4 :setlocal foldlevel=3<CR>
+
 nnoremap <silent><LEADER>x :mksession! ~/.s.vim<CR>:qa<CR>
 " nnoremap <silent><LEADER>n :mksession! ~/.s.vim<CR>
 nnoremap <silent><LEADER>m :source ~/.s.vim<CR>
 
-function! GitPullPush(cmd, origin, master)
-	let remote = input('['.a:cmd.']Remote? ', a:origin)
-	let branch = input('['.a:cmd.']Branch? ', a:master)
+function! GitPullPush(cmd)
+	let repo = fugitive#head()
+	let origin = 'origin'
+	let remote = input('['.a:cmd.']Remote? ', origin)
+	let branch = input('['.a:cmd.']Branch? ', repo)
 	exe ''.a:cmd.' '.remote.' '.branch
 endfunction
 
 nnoremap <silent><LEADER>gs :Gstatus<CR>
-nnoremap <silent><LEADER>gu :call GitPullPush('Git push', 'origin', 'master')<CR>
-nnoremap <silent><LEADER>gf :call GitPullPush('Git pull', 'origin', 'master')<CR>
+nnoremap <silent><LEADER>gu :call GitPullPush('Git push')<CR>
+nnoremap <silent><LEADER>gf :call GitPullPush('Git pull')<CR>
 nnoremap <silent><LEADER>gt :!tig status<CR>
 nnoremap <silent><LEADER>gl :!tig<CR>
 
