@@ -1,19 +1,19 @@
 apply from: System.getProperty("user.home")+"/.config/config.gradle";
 
-androidSetupSignConfig = { config ->
+def androidSetupSignConfig (config) {
     config.storeFile = file(keysFile)
     config.storePassword = keysPassword
     config.keyPassword = keysPassword
     config.keyAlias = keysAlias
 }
 
-androidAutoVersion = { config, txtVersion ->
+def androidAutoVersion (config, txtVersion) {
     def version = Integer.parseInt(new Date().format("yyMMddHHmm"), 10)
     config.versionCode = version
     config.versionName = txtVersion+version
 }
 
-androidEnablePushLink = { p, variants, afterTask ->
+def androidEnablePushLink (p, variants, afterTask) {
     def taskName = "deployToPushLink"
     def newTask = p.tasks.create(taskName)
     newTask.doFirst {
@@ -31,5 +31,10 @@ androidEnablePushLink = { p, variants, afterTask ->
     }
     // assembleRelease
     afterTask.finalizedBy = [newTask]
+}
+
+ext{
+	androidSetupSignConfig = this.&androidSetupSignConfig
+	androidAutoVersion = this.&androidAutoVersion
 }
 
