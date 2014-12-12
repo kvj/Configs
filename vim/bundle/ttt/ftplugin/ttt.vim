@@ -977,6 +977,7 @@ nnoremap <buffer> <silent><localleader>k :call Set_Tag(1, 'task')<CR>
 nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
+nnoremap <buffer> <silent><localleader>qa :call ttt#showReport()<CR>
 
 call s:Load()
 call s:Enable_Markers()
