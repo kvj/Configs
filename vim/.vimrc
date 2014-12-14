@@ -168,6 +168,28 @@ if !exists('g:tttHotKeys')
 	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
 endif
 
+let g:tttReports = {
+	\'_': {
+		\'parts': [{
+			\'files': 'ttt:0*_*.ttt',
+			\'tags': 'inbox',
+			\'title': 'Inbox:'
+			\}, {
+			\'files': 'ttt:1*_*.ttt',
+			\'type': '-=*',
+			\'calendar': '',
+			\'title': 'Today:'
+			\}, {
+			\'files': 'ttt:2*_*.ttt',
+			\'tags': 'work pin',
+			\'type': '=',
+			\'title': 'Work tasks:'
+			\}
+		\],
+		\'title': 'Check this'
+	\}
+\}
+
 set ssop-=options
 set ssop-=folds
 
