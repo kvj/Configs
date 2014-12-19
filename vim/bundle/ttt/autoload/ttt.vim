@@ -135,6 +135,8 @@ fun! ParseTimestamp(text)
 		let dtFinish = copy(dtStart)
 	endif
 	let result = {}
+	let result['start'] = a:text[0]
+	let result['finish'] = a:text[-1:]
 	if len(dtStart) > 0
 		"Have start date
 		let result['dtStart'] = dtStart
@@ -225,55 +227,64 @@ fun! CompareDateTime(arr1, arr2)
 	return 0
 endf
 
-fun! ProcessLines(lines, from, to, accept, report, now)
+fun! ProcessLines(lines, from, to, accept, report, now, tags)
 	"call Log('ProcessLines', a:from, a:to, a:accept)
 	let tm = a:now
 	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
 	let result = []
-	let tags = []
-	if has_key(a:report, 'tags')
-		let tags = split(a:report['tags'], ' ')
-	endif
 	let i = a:from
 	while i < a:to
 		let line = a:lines[i]
 		let p = ParseLine(line)
 		let hasTag = 0
-		for t in tags
-			if index(p['tags'], t) != -1
+		let acceptLine = a:accept
+		for t in a:tags
+			if index(p['tags'], strpart(t, 1)) != -1
 				let hasTag = 1
+				if t[0] == '+'
+					let acceptLine = 1 "Tag with plus - accept this and children
+				else
+					let acceptLine = 0 "Tag with minus - ignore this and children
+				endif
 				break
 			endif
 		endfor
-		if (p['type'] != '') && (a:accept || hasTag)
-			"Task in some state
-			if !has_key(a:report, 'type') || (stridx(a:report['type'], p['type']) != -1)
-				" Requested type or type not important
-				"call Log('Add task:', p['type'], p['text'])
-				call add(result, {
-					\'index': i,
-					\'text': p['text'],
-					\'priority': p['priority'],
-					\'type': p['type']
-				\})
+		let ignoreTask = 0
+		if !acceptLine "Line not accepted
+			let ignoreTask = 1
+		endif
+		if p['type'] == '' "No type for this line
+			let ignoreTask = 1
+		endif
+		if !ignoreTask && has_key(a:report, 'type') && (stridx(a:report['type'], p['type']) == -1) "Type requested but does not fit
+			let ignoreTask = 1
+		endif
+		if !ignoreTask && get(a:report, 'calendar', 0) "Calendar type task
+			let ignoreTask = 1 "Stop processing
+			if has_key(p, 'date') "Task has date - OK
+				let startCompare = CompareDateTime(p['date']['dtStart'], dateArr)
+				if startCompare == 0
+					call add(result, {
+						\'priority': 0,
+						\'index': i,
+						\'text': p['text'],
+						\'date': p['date'],
+						\'type': p['type']
+					\})
+				endif
 			endif
 		endif
-		if has_key(a:report, 'calendar') && has_key(p, 'date')
-			"Calendar mode - compare dates
-			let startCompare = CompareDateTime(p['date']['dtStart'], dateArr)
-			if startCompare == 0
-				call add(result, {
-					\'priority': 0,
-					\'index': i,
-					\'text': p['text'],
-					\'date': p['date'],
-					\'type': p['type']
-				\})
-			endif
+		if !ignoreTask "No other problems - ordinal task
+			call add(result, {
+				\'index': i,
+				\'text': p['text'],
+				\'priority': p['priority'],
+				\'type': p['type']
+			\})
 		endif
 		let end = EndOfIndent(a:lines, i, a:to)
 		if end > i
-			call extend(result, ProcessLines(a:lines, i+1, end+1, a:accept || hasTag, a:report, a:now))
+			call extend(result, ProcessLines(a:lines, i+1, end+1, acceptLine, a:report, a:now, a:tags))
 		endif
 		let i = end + 1
 	endwhile
@@ -281,9 +292,9 @@ fun! ProcessLines(lines, from, to, accept, report, now)
 endf
 
 "Parse one file
-fun! ParseOneFile(path, report, now)
+fun! ParseOneFile(path, report, now, tags)
 	let lines = ReadOneFile(a:path)
-	return ProcessLines(lines, 0, len(lines), 0, a:report, a:now)
+	return ProcessLines(lines, 0, len(lines), 1, a:report, a:now, a:tags)
 endf
 
 fun! Pad(num)
@@ -325,10 +336,14 @@ fun! RenderReport(name, now)
 		let lines = add(lines, item['title'])
 		let data = add(data, {'title': item['title']})
 		let files = FindFiles(item['files'])
+		let tags = []
+		if has_key(item, 'tags')
+			let tags = split(item['tags'], ' ')
+		endif
 		"call Log('Part:', item['files'], len(files))
 		let alltasks = []
 		for f in files
-			let tasks = ParseOneFile(f, item, a:now)
+			let tasks = ParseOneFile(f, item, a:now, tags)
 			for t in tasks
 				let t['file'] = f
 			endfor
@@ -358,7 +373,35 @@ fun! RenderReport(name, now)
 	return lines
 endf
 
-fun! Jump2Task()
+fun! MakeJump2Split()
+	let curr = winnr()
+	let foundWin = -1
+	let size = -1
+	let idx = 1
+	while idx <= winnr('$')
+		if idx != curr
+			let s = winwidth(idx)*winheight(idx)
+			if s > size
+				let foundWin = idx
+				let size = s
+			endif
+		endif
+		let idx += 1
+	endwhile
+	if foundWin != -1 "Found big enough win
+		exe ''.foundWin.'wincmd w'
+		return foundWin
+	endif
+	" Have to split
+	let cmd = 'sp'
+	"if winwidth(0) > winheight(0)
+	"	let cmd = 'vs'
+	"endif
+	exe cmd
+	return winnr()
+endf
+
+fun! Jump2Task(mode)
 	let line = line('.') - 1
 	if line >= len(b:data)
 		return 0
@@ -370,6 +413,9 @@ fun! Jump2Task()
 		if FindBuffer(task['file'], 'f')
 			"call Log('Jumped', task['file'])
 		else
+			if a:mode == 1
+				call MakeJump2Split()
+			endif
 			exe 'e '.task['file']
 		endif
 		exe ''.(task['index']+1)
@@ -429,7 +475,7 @@ fun! ttt#showReport(name, autoCreate)
 	let bufferName = '['.s:reportPrefix.''.a:name.']'
 	let reportName = a:name
 	if a:name == ''
-		let reportName = '_'
+		let reportName = g:tttReportDefault
 	endif
 	if FindBuffer(bufferName, 't') == 0
 		if !a:autoCreate
@@ -439,11 +485,14 @@ fun! ttt#showReport(name, autoCreate)
 		setlocal buftype=nofile
 		setlocal noswapfile
 		setlocal ft=ttt
-		nnoremap <script> <buffer> <silent> <CR> :call Jump2Task()<CR>
+		let b:qbar = 'report'
+		nnoremap <script> <buffer> <silent> <CR> :call Jump2Task(0)<CR>
+		nnoremap <script> <buffer> <silent> <Space> :call Jump2Task(1)<CR>
 		nnoremap <script> <buffer> <silent> r :call RefreshReport()<CR>
 		nnoremap <script> <buffer> <silent> q :call MoveDate('-')<CR>
 		nnoremap <script> <buffer> <silent> e :call MoveDate('+')<CR>
 		nnoremap <script> <buffer> <silent> w :call MoveDate('')<CR>
+		nnoremap <script> <buffer> <silent> s :wa<CR>
 		let b:currentTime = localtime()
 	else
 		"call Log('jumped to Report', bufferName)

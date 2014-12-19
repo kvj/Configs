@@ -168,25 +168,46 @@ if !exists('g:tttHotKeys')
 	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
 endif
 
+if !exists('g:tttReportDefault')
+	let g:tttReportDefault = 'Work'
+endif
+let tttCalLocation = 'ttt:Calendar/1*_*.ttt'
+let tttProjLocation = 'ttt:Project/2*_*.ttt'
+let tttIndexLocation = 'ttt:0*_*.ttt'
 let g:tttReports = {
-	\'_': {
+	\'Work': {
 		\'parts': [{
-			\'files': 'ttt:0*_*.ttt',
-			\'tags': 'inbox',
-			\'title': 'Inbox:'
-			\}, {
-			\'files': 'ttt:1*_*.ttt',
+			\'files': tttCalLocation,
 			\'type': '-=*',
-			\'calendar': '',
+			\'calendar': 1,
 			\'title': 'Today:'
 			\}, {
-			\'files': 'ttt:2*_*.ttt',
-			\'tags': 'work pin',
+			\'files': tttProjLocation,
+			\'tags': '-home +pin',
 			\'type': '=',
 			\'title': 'Work tasks:'
+			\}, {
+			\'files': tttIndexLocation,
+			\'title': 'Inbox:'
 			\}
-		\],
-		\'title': 'Check this'
+		\]
+	\},
+	\'Home': {
+		\'parts': [{
+			\'files': tttCalLocation,
+			\'type': '-=*',
+			\'calendar': 1,
+			\'title': 'Today:'
+			\}, {
+			\'files': tttProjLocation,
+			\'tags': '-work +pin',
+			\'type': '=',
+			\'title': 'Home tasks:'
+			\}, {
+			\'files': tttIndexLocation,
+			\'title': 'Inbox:'
+			\}
+		\]
 	\}
 \}
 
