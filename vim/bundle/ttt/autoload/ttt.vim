@@ -107,12 +107,12 @@ fun! Indent(line)
 	return len(tabs)
 endf
 
-fun! Indented(num)
+fun! FillChars(num, char)
 	let res = ''
 	let idx = 0
 	while idx < a:num
 		let idx += 1
-		let res .= "\t"
+		let res .= a:char
 	endwhile
 	return res
 endf
@@ -402,7 +402,7 @@ fun! RenderReport(name, now)
 		"call Log('Total tasks:', len(alltasks))
 		for t in alltasks
 			"call Log('Task:', t['text'])
-			let txt = "\t".t['type'].' '
+			let txt = "\t".t['type'].FillChars(t['priority'], '!').' '
 			if has_key(t, 'date')
 				let dt = t['date']
 				if has_key(dt, 'tmStart')
@@ -478,7 +478,7 @@ fun! ChangeSignHere(sign)
 		return 0
 	endif
 	let ind = Indent(line)
-	let text = Indented(ind) . a:sign . strpart(line, ind + 1)
+	let text = FillChars(ind, "\t") . a:sign . strpart(line, ind + 1)
 	call setline('.', text)
 	return 1
 endf
@@ -614,6 +614,7 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
 		nnoremap <script> <buffer> <silent> 2 :call ChangeSign('=')<CR>
 		nnoremap <script> <buffer> <silent> 3 :call ChangeSign('#')<CR>
+		nnoremap <script> <buffer> <silent> 4 :call ChangeSign('~')<CR>
 		let b:currentTime = localtime()
 	else
 		"call Log('jumped to Report', bufferName)

@@ -729,6 +729,7 @@ nnoremap <buffer> <silent><localleader>a :call ttt#showReport('', 2)<CR>
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
+nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('~')<CR>
 
 call s:Load()
 call s:Enable_Markers()
