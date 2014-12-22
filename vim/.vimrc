@@ -37,7 +37,7 @@ set modeline
 set modelines=5
 "set t_Co=256
 set smartindent
-set laststatus=2
+set laststatus=3
 set guicursor=a:blinkon300-blinkoff200
 set autoread
 set timeout timeoutlen=500 ttimeoutlen=100

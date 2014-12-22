@@ -9,11 +9,10 @@ let b:tp = ''
 let b:tdef = ''
 let b:date = 0
 let b:cron = ''
-let b:cr = ''
 let b:amode = ''
 let b:qbar = 'def'
 
-let b:qbar_def = ['<Esc>fe fe', '<Esc>tqa !a', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn', '<Esc>tk tk', '<Esc>to to']
+let b:qbar_def = ['<Esc>fe fe', '<Esc>ta !a', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn', '<Esc>tk tk', '<Esc>to to']
 let b:qbar_report = ['r', 'q', 'w', 'a', '<Space> sp', '<Enter> en', 's']
 "let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
 "let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
@@ -311,149 +310,6 @@ function! s:CheckCronStatement(line, date)
 	return task
 endfunction
 
-"Loads decided tasks for that week from 04.ttt, loads recurrent tasks from
-"05.ttt and puts them into every day of week
-function! s:Mode07(lines, dt)
-	"dt is basically start of week (Monday in our case)
-	let lines04 = s:LoadFile('04.ttt')
-	let parts = s:SearchForLines(lines04, '^W.*\s'.strftime(s:dmFormat, a:dt), 1)
-	if len(parts) == 0
-		"Not found
-		echom 'Tasks were not found for this week'
-		return
-	endif
-	let [idx, line, endidx] = parts[0]
-	while idx<endidx
-		let idx += 1
-		let parts = matchlist(lines04[idx], '^\t-\s'.s:rxDate.'\?\('.s:rxTime.'\)\?\(.\+\)')
-		"call s:PrintList(parts)
-		if empty(parts) "Sub-child/text - skip
-			continue
-		endif
-		let task = "\t- "
-		let addidx = 1 "To top by default
-		if !empty(parts[1]) "Have date
-			let timeline = s:SearchForLines(a:lines, '^'.parts[2].'\/'.parts[3].'\s', 1)
-			if len(timeline)>0 "Found
-				"echo 'Search for: '.parts[6].':'.parts[7]
-				let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], parts[6], parts[7], parts[8])
-			else
-				let task .= parts[1].' ' "Keep date anyway with task
-			endif
-		endif
-		let task .= parts[5].parts[8]
-		call insert(a:lines, task, addidx)
-		let lastchild = s:SearchForLastChild(lines04, idx)
-		call extend(a:lines, lines04[idx+1:lastchild], addidx+1)
-	endwhile
-	let lines05 = s:LoadFile('05.ttt') "Recurrent tasks
-	let parts = s:SearchForLines(lines05, '^\t-\s', 1)
-	let day = 0
-	while day<7
-		let date = s:AddToDate(a:dt, 'd', day)
-		for part in parts
-			let task = s:CheckCronStatement(part[1], date)
-			if !empty(task)
-				"echom 'Cron check: '.part[1].' OK '.task
-				let timeline = s:SearchForLines(a:lines, '^'.strftime('%m\/%d', date).'\s', 1)
-				if len(timeline)>0 "Found
-					let m = matchlist(part[1], '^\t-\s'.s:rxTime.'\?')
-					let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], m[2], m[3], task)
-					call insert(a:lines, task, addidx)
-					let lastchild = s:SearchForLastChild(lines05, part[0])
-					"echom 'Add task: '.idx.' lastchild: '.lastchild.' from '.lines07[idx].' to '.lines07[lastchild]
-					call extend(a:lines, lines05[part[0]+1:lastchild], addidx+1)
-				else
-					echom 'Can not find date in file: '.strftime('%m\/%d', date)
-				endif
-			endif
-		endfor
-		let day += 1
-	endwhile
-endfunction
-
-" 1 = hour, 3 = min
-let s:rexpHourMin = '^\t-\s\(\d\{2\}\)\?\(:\(\d\{2\}\)\)\?'
-
-"Tries to find a place among children start..end according to hour (can be
-"empty) and minutes
-function! s:FindPlaceForChild(lines, start, end, hour, min, debug)
-	"echo 'FindPlaceForChild: '.a:hour.':'.a:min.' to '.a:lines[a:start-1].' = '.a:debug. ' children = '.(a:end-a:start)
-	let lastEmpty = -1
-	for i in range(a:start, a:end)
-		let m = matchlist(a:lines[i], s:rexpHourMin)
-		"call s:PrintList(m)
-		if empty(m)
-			"No time found - it's OK. Invalid or child line
-			continue
-		endif
-		"echo 'Line: '.a:lines[i]' '.m[1].' == '.a:hour.', '.m[3].' == '.a:min
-		if empty(m[3])
-			" No date/time in line
-			let lastEmpty = i+1
-			continue
-		endif
-		"call s:PrintList(m)
-		if m[1] == a:hour
-			"Hours are same
-			if str2nr(m[3])>str2nr(a:min)
-				" First time minute is after requested
-				return i "Means 'add before this'
-			endif
-		else
-			if str2nr(m[1])>str2nr(a:hour)
-				" First time hour is after requested
-				return i "Means 'add before this'
-			endif
-		endif
-	endfor
-	if lastEmpty == -1 || !empty(a:min)
-		" Another option - we have a time but didn't find good place for it -
-		" go to bottom
-		let lastEmpty = a:end+1 "Very last
-	endif
-	" No match - add before lastEmpty
-	return lastEmpty
-endfunction
-
-"Loads assigned tasks for that day from 07.ttt and puts those under selected
-"hour
-function! s:Mode01(lines, dt)
-	let lines07 = s:LoadFile('07.ttt')
-	let parts = s:SearchForLines(lines07, '^'.strftime(s:dmFormat, a:dt), 1)
-	"echom 'Loaded 07: '.len(lines07).' parts: '.len(parts)
-	if len(parts) == 0
-		"Not found
-		echom 'Tasks were not found for this day'
-		return
-	endif
-	let [idx, line, endidx] = parts[0]
-	"echom 'Tasks: from '.idx.' to '.endidx.', line: '.line
-	while idx<endidx
-		let idx += 1
-		let parts = matchlist(lines07[idx], '^\t-\s'.s:rxTime.'\?\(.\+\)')
-		if empty(parts) "Sub-child/text - skip
-			continue
-		endif
-		let task = "\t- "
-		let addidx = 1 "To big task by default
-		if !empty(parts[1]) "Have time
-			let timeline = s:SearchForLines(a:lines, '^'.parts[2].':00', 1)
-			if len(timeline)>0 "Found
-				let addidx = s:FindPlaceForChild(a:lines, timeline[0][0]+1, timeline[0][2], '', parts[3], parts[4])
-				if parts[3] != '00' "Have minutes
-					let task .= ':'.parts[3].' '
-				endif
-			endif
-		endif
-		let task .= parts[4]
-		call insert(a:lines, task, addidx)
-		let lastchild = s:SearchForLastChild(lines07, idx)
-		"echom 'Add task: '.idx.' lastchild: '.lastchild.' from '.lines07[idx].' to '.lines07[lastchild]
-		call extend(a:lines, lines07[idx+1:lastchild], addidx+1)
-	endwhile
-endfunction
-
 function! Insert_Template(clear)
 	let tmpl = input('Enter template: ', b:tdef)
 	if empty(tmpl)
@@ -491,24 +347,6 @@ function! Insert_Template(clear)
 	echom 'Inserted template '.tmpl
 endfunction
 
-function! s:CursorHour()
-	let dt = localtime()
-	if dt-b:lastHourUpdate>s:cursorUpdateInterval*60
-		exec 'sign unplace '.s:signHour.' file='.expand('%:p')
-		let b:lastHourUpdate = dt
-		let line = search('^'.strftime('%H', dt).':00', 'wn')
-		if line>0
-			exec 'sign place '.s:signHour.' line='.line.' name=tttHour file='.expand('%:p')
-			" echom 'Cursor moved: '.strftime(s:hmFormat, dt)
-			call cursor(line, 0)
-			normal! zz
-		endif
-	endif
-endfunction
-
-let s:tagRexp = '\s#\([a-z0-9]\+\)'
-let s:infoRexp = '\s-\([a-z0-9]\+\)'
-
 " Returns all items in line
 fun! s:GetAll(line, rexp)
 	let idx = 0
@@ -523,81 +361,10 @@ fun! s:GetAll(line, rexp)
 	endwhile
 endf
 
-let s:taskSigns = 0
-
-" Updates task markers
-fun! s:CursorTask()
-	let rootlines = s:BufferSearchForLines('^[^\t].*[^\( /\)]$', 1)
-	let signNo = 0
-	for pos in rootlines
-		" echom 'Found root:' pos[0] pos[2]
-		let tasklines = s:BufferSearchForLines('.*'.s:tagRexp.'\( /\)\?$', 0, pos[0]+1, pos[2])
-		for task in tasklines
-			let tags = s:GetAll(task[1], s:tagRexp)
-			" echom 'Task:' task[0] task[1] len(tags) tags[-1]
-			if tags[-1] != 'task'
-				" Not a task
-				continue
-			endif
-			let signType = 'tttTask'
-			if exists('g:tttTaskExclude')
-				" Have list of tasks tags to exclude
-				let infos = s:GetAll(task[1], s:infoRexp)
-				let found = 0
-				for info in g:tttTaskExclude
-					if index(infos, info) != -1
-						" Found
-						let found = 1
-						break
-					endif
-				endfor
-				if found
-					let signType = 'tttSkipTask'
-				endif
-			endif
-			" Put mark
-			exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
-			exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name='.signType.' buffer='.bufnr('%')
-			let signNo += 1
-		endfor
-	endfor
-	if signNo<s:taskSigns
-		for i in range(signNo, s:taskSigns-1)
-			" echom 'Remove sign' i
-			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
-		endfor
-	endif
-	let s:taskSigns = signNo
-	"echo 'Found tasks:' s:taskSigns
-endf
-
-fun! CursorHourInterval(obj, subscription)
-	echom 'Cursor moved at: '.strftime(s:hmFormat)
-	call s:CursorHour()
-endf
-
 function! s:Enable_Markers()
-	sign define tttHour text=>> texthl=Search
 	sign define tttTask text=[] texthl=Todo
-	sign define tttSkipTask linehl=tOkLine
-	if b:cr == 'hour'
-		"Enable hour sign
-		if exists('g:android')
-			let dt = localtime()
-			let dt = s:AddToDate(dt, 'i', 60-s:DateItem(dt, 'i'))
-			let sub = g:Android_Subscribe(g:Android_Execute('timer', {'interval': 60*60, 'time': dt}), function('CursorHourInterval'))
-			"Remove subscription on exit
-			exe "autocmd BufUnload <buffer> call g:Android_Execute('timer', {'subscription': ".sub."})"
-		else
-			autocmd CursorHold,CursorHoldI,FocusGained,FocusLost <buffer> call s:CursorHour()
-		endif
-		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorHour()
-		call s:CursorHour()
-	endif
-	if b:cr == 'task'
-		call s:CursorTask()
-		autocmd FileChangedShellPost,BufWritePost <buffer> call s:CursorTask()
-	endif
+	call ttt#CursorTask()
+	autocmd FileChangedShellPost,BufWritePost <buffer> call ttt#CursorTask()
 endfunction
 
 function! s:ProcessTab(tab, path)
@@ -625,7 +392,7 @@ if !exists('*Jump_Window')
 		let tabs = tabpagenr('$')
 		" echom 'Locating: '.a:path.' '.tab.' of '.tabs
 		if s:ProcessTab(tab, a:path) == 1
-			"Switched in currect tab
+			"Switched in current tab
 			return 1
 		endif
 		let idx = 1
@@ -900,21 +667,6 @@ function! s:MakeIndent(num)
 	return str
 endfunction
 
-function! Set_Tag(remove, tag)
-	let idx = line('.')
-	let line = getline(idx)
-	let m = matchlist(line, s:refillRexp)
-	let str = m[1].m[2].m[3].m[6]
-	if !a:remove
-		let str .= m[7]
-	endif
-	if !empty(a:tag)
-		let str .= ' #'.a:tag
-	endif
-	let str .= m[8]
-	call setline('.', str)
-endfunction
-
 function! Copy_Tree(indent)
 	let idx = line('.')
 	let line = getline(idx)
@@ -965,20 +717,18 @@ let maplocalleader = "t"
 nnoremap <buffer> <silent><localleader>u :call Add_New_Line(0, '-', 1)<CR>
 nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
 nnoremap <buffer> <silent><localleader>t :call Add_New_Line(2, "\t-", -1)<CR>
-nnoremap <buffer> <silent><localleader>l :call Add_New_Line(1, 'time', 1)<CR>
-"nnoremap <buffer> <silent><localleader>f :call Fold_Marked()<CR>
-nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
-nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
+"nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
+"nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
 nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
 nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
 nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
-nnoremap <buffer> <silent><localleader>o :call Set_Tag(1, 'ok')<CR>
-nnoremap <buffer> <silent><localleader>i :call Set_Tag(1, 'list')<CR>
-nnoremap <buffer> <silent><localleader>k :call Set_Tag(1, 'task')<CR>
 nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
-nnoremap <buffer> <silent><localleader>qa :call ttt#showReport('', 1)<CR>
+nnoremap <buffer> <silent><localleader>a :call ttt#showReport('', 2)<CR>
+nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
+nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
+nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
 
 call s:Load()
 call s:Enable_Markers()

@@ -22,6 +22,44 @@ fun! Log(...)
 	echom buf
 endf
 
+function! BufferSearchForLines(rexp)
+	let idx = 1
+	let end = line('$')
+	let result = []
+	while idx<=end
+		let line = getline(idx)
+		if match(line, a:rexp) != -1
+			"Found
+			let item = [idx, line]
+			call add(result, item)
+		endif
+		let idx += 1
+	endwhile
+	return result
+endfunction
+
+fun! ttt#CursorTask()
+	if !exists('b:taskSigns')
+		let b:taskSigns = 0
+	endif
+	let signNo = 0
+	let tasklines = BufferSearchForLines('\t\+=!\{,5}\s.*$')
+	for task in tasklines
+		let signType = 'tttTask'
+		" Put mark
+		exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
+		exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name='.signType.' buffer='.bufnr('%')
+		let signNo += 1
+	endfor
+	if signNo<b:taskSigns
+		for i in range(signNo, b:taskSigns-1)
+			" echom 'Remove sign' i
+			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
+		endfor
+	endif
+	let b:taskSigns = signNo
+endf
+
 fun! FindBuffer(name, mode)
 	"Searches for a named buffer
 	let windows = winnr('$')
@@ -67,6 +105,16 @@ endf
 fun! Indent(line)
 	let tabs = matchstr(a:line, '^\t*')
 	return len(tabs)
+endf
+
+fun! Indented(num)
+	let res = ''
+	let idx = 0
+	while idx < a:num
+		let idx += 1
+		let res .= "\t"
+	endwhile
+	return res
 endf
 
 "Extract part of date and converts to number
@@ -423,6 +471,64 @@ fun! Jump2Task(mode)
 	return 1
 endf
 
+fun! ChangeSignHere(sign)
+	let line = getline('.')
+	let parsed = ParseLine(line)
+	if parsed['type'] == ''
+		return 0
+	endif
+	let ind = Indent(line)
+	let text = Indented(ind) . a:sign . strpart(line, ind + 1)
+	call setline('.', text)
+	return 1
+endf
+
+fun! ChangeSign(sign)
+	let curr = winnr()
+	call Jump2Task(1)
+	call ChangeSignHere(a:sign)
+	exe ''.curr.'wincmd w'
+endf
+
+fun! ttt#changeSign(sign)
+	return ChangeSignHere(a:sign)
+endf
+
+fun! IfDefined(name)
+	if exists(a:name)
+		exe 'let val = '.a:name
+		return val
+	endif
+	return ''
+endf
+
+fun! AppendLineHere(content)
+	normal! G
+	let ex = "o\<esc>0Di"
+	let ex = ex . a:content
+    exec 'normal! ' . ex
+	if exists('g:android')
+		" Raise keyboard
+		call g:Android_Execute('input', {'request': 'keyboard_show'})
+	endif
+	startinsert!
+endf
+
+fun! AppendLine(file, content)
+	if a:file == ''
+		call Log('Target not defined')
+		return 0
+	endif
+	let paths = FindFiles(a:file)
+	if FindBuffer(paths[0], 'f')
+		"call Log('Jumped', task['file'])
+	else
+		call MakeJump2Split()
+		exe 'e '.paths[0]
+	endif
+	return AppendLineHere(a:content)
+endf
+
 "Add value to date
 function! AddToDate(dt, item, value)
 	if !a:value
@@ -462,12 +568,20 @@ fun! MoveDate(dir)
 endf
 
 fun! RefreshReport()
+	let line = line('.')
 	let lines = RenderReport(b:reportName, b:currentTime)
 	setlocal modifiable
 	"call Log('showReport', len(lines))
 	%d
 	call setline(1, lines)
 	setlocal nomodifiable
+	call cursor(line, 1)
+	call ttt#CursorTask()
+endf
+
+fun! SaveReload()
+	wa
+	call RefreshReport()
 endf
 
 fun! ttt#showReport(name, autoCreate)
@@ -481,6 +595,9 @@ fun! ttt#showReport(name, autoCreate)
 		if !a:autoCreate
 			return 0
 		endif
+		if a:autoCreate == 2
+			call MakeJump2Split()
+		endif
         execute 'silent keepjumps hide edit'.bufferName
 		setlocal buftype=nofile
 		setlocal noswapfile
@@ -492,13 +609,21 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> q :call MoveDate('-')<CR>
 		nnoremap <script> <buffer> <silent> e :call MoveDate('+')<CR>
 		nnoremap <script> <buffer> <silent> w :call MoveDate('')<CR>
-		nnoremap <script> <buffer> <silent> s :wa<CR>
+		nnoremap <script> <buffer> <silent> s :call SaveReload()<CR>
+		nnoremap <script> <buffer> <silent> a :call AppendLine(IfDefined('g:tttInbox'), "\t- ")<CR>
+		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
+		nnoremap <script> <buffer> <silent> 2 :call ChangeSign('=')<CR>
+		nnoremap <script> <buffer> <silent> 3 :call ChangeSign('#')<CR>
 		let b:currentTime = localtime()
 	else
 		"call Log('jumped to Report', bufferName)
 	endif
 	let b:reportName = reportName
 	call RefreshReport()
-	exe ''.currentWin.'wincmd w'
+	" exe ''.currentWin.'wincmd w'
 	return 1
 endf
+
+if exists('g:tttShowReport')
+	au VimEnter * call ttt#showReport(g:tttShowReport, 2)
+endif
