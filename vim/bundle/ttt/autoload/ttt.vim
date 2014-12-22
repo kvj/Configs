@@ -261,6 +261,19 @@ fun! EndOfIndent(lines, from, to)
 	return a:to - 1
 endf
 
+fun! EndOfIndentBuffer(from, to)
+	let indent = Indent(getline(a:from))
+	let i = a:from + 1
+	while i <= a:to
+		let ind = Indent(getline(i))
+		if (ind <= indent) && (ind != -1)
+			return i - 1
+		endif
+		let i += 1
+	endwhile
+	return a:to
+endf
+
 fun! CompareDateTime(arr1, arr2)
 	let i = 0
 	while i < 3
@@ -307,28 +320,44 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 		if !ignoreTask && has_key(a:report, 'type') && (stridx(a:report['type'], p['type']) == -1) "Type requested but does not fit
 			let ignoreTask = 1
 		endif
-		if !ignoreTask && get(a:report, 'calendar', 0) "Calendar type task
-			let ignoreTask = 1 "Stop processing
-			if has_key(p, 'date') "Task has date - OK
-				let startCompare = CompareDateTime(p['date']['dtStart'], dateArr)
-				if startCompare == 0
-					call add(result, {
-						\'priority': 0,
-						\'index': i,
-						\'text': p['text'],
-						\'date': p['date'],
-						\'type': p['type']
-					\})
-				endif
+		if !ignoreTask && has_key(p, 'date')
+			" Task with date
+			let dt = p['date']
+			let startCompare = CompareDateTime(dt['dtStart'], dateArr)
+			let finishCompare = startCompare
+			if has_key(dt, 'dtFinish')
+				let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
+			endif
+			let pos = 0 " Position of task related to now
+			if startCompare < 0 && finishCompare < 0
+				let pos = 1
+			endif
+			if startCompare > 0 && finishCompare > 0
+				let pos = -1
+			endif
+			if pos == -1 && dt['start'] == '['
+				" Before now and closed start bracket - not due
+				let ignoreTask = 1
+			endif
+			if pos == 1 && dt['finish'] == ']'
+				" After now and closed end bracket - not from
+				let ignoreTask = 1
 			endif
 		endif
-		if !ignoreTask "No other problems - ordinal task
-			call add(result, {
+		if !ignoreTask && get(a:report, 'calendar', 0) && !has_key(p, 'date')
+			let ignoreTask = 1 "Stop processing
+		endif
+		if !ignoreTask "No other problems - add
+			let task = {
 				\'index': i,
 				\'text': p['text'],
 				\'priority': p['priority'],
 				\'type': p['type']
-			\})
+			\}
+			if has_key(p, 'date')
+				let task['date'] = p['date']
+			endif
+			call add(result, task)
 		endif
 		let end = EndOfIndent(a:lines, i, a:to)
 		if end > i
@@ -363,17 +392,28 @@ endf
 "Parse report etc
 fun! RenderReport(name, now)
 	func! SortTasks(i1, i2)
-		if has_key(a:i1, 'date') && has_key(a:i2, 'date')
+		let dates = has_key(a:i1, 'date') + has_key(a:i2, 'date')
+		let pdiff = a:i1['priority'] - a:i2['priority']
+		if dates == 2
+			if pdiff != 0
+				return -pdiff
+			endif
+			let starts = CompareDateTime(a:i1['date']['dtStart'], a:i2['date']['dtStart'])
+			if starts != 0
+				return starts
+			endif
 			if has_key(a:i1['date'], 'tmStart') && has_key(a:i2['date'], 'tmStart')
 				return CompareDateTime(a:i1['date']['tmStart'], a:i2['date']['tmStart'])
 			endif
 			return has_key(a:i1['date'], 'tmStart') - has_key(a:i2['date'], 'tmStart')
 		endif
-		let pdiff = a:i1['priority'] - a:i2['priority']
 		if pdiff != 0
 			return -pdiff
 		endif
-		return 0
+		if dates != 0
+			return dates
+		endif
+		return -pdiff
 	endf
 	let report = g:tttReports[a:name]
 	let lines = []
@@ -405,6 +445,20 @@ fun! RenderReport(name, now)
 			let txt = "\t".t['type'].FillChars(t['priority'], '!').' '
 			if has_key(t, 'date')
 				let dt = t['date']
+				let startCompare = CompareDateTime(dt['dtStart'], dateArr)
+				let finishCompare = startCompare
+				if startCompare < 0
+					let txt .= RenderDate(dt['dtStart']).' ~ '
+				endif
+				if startCompare > 0
+					let txt .= '~ ' . RenderDate(dt['dtStart']).' '
+				endif
+				if has_key(dt, 'dtFinish')
+					let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
+					if finishCompare != 0
+						let txt .= '~ ' . RenderDate(dt['dtFinish']).' '
+					endif
+				endif
 				if has_key(dt, 'tmStart')
 					let txt .= RenderTime(dt['tmStart']).' '
 					if has_key(dt, 'tmFinish')
@@ -481,6 +535,28 @@ fun! ChangeSignHere(sign)
 	let text = FillChars(ind, "\t") . a:sign . strpart(line, ind + 1)
 	call setline('.', text)
 	return 1
+endf
+
+fun! SelectHere()
+	let idx = line('.')
+	let lastline = EndOfIndentBuffer(idx, line('$'))
+	normal! V
+	if lastline>idx
+		exe 'normal! '.(lastline-idx).'j'
+	endif
+endf
+
+fun! SelectBlock()
+	call Jump2Task(1)
+	call SelectHere()
+endf
+
+fun! CopyBlock()
+	let curr = winnr()
+	call Jump2Task(1)
+	call SelectHere()
+	normal! y
+	exe ''.curr.'wincmd w'
 endf
 
 fun! ChangeSign(sign)
@@ -611,6 +687,8 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> w :call MoveDate('')<CR>
 		nnoremap <script> <buffer> <silent> s :call SaveReload()<CR>
 		nnoremap <script> <buffer> <silent> a :call AppendLine(IfDefined('g:tttInbox'), "\t- ")<CR>
+		nnoremap <script> <buffer> <silent> x :call SelectBlock()<CR>
+		nnoremap <script> <buffer> <silent> y :call CopyBlock()<CR>
 		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
 		nnoremap <script> <buffer> <silent> 2 :call ChangeSign('=')<CR>
 		nnoremap <script> <buffer> <silent> 3 :call ChangeSign('#')<CR>
