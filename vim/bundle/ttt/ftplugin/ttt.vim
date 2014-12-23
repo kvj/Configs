@@ -10,10 +10,10 @@ let b:tdef = ''
 let b:date = 0
 let b:cron = ''
 let b:amode = ''
-let b:qbar = 'def'
+let b:qbar = ttt#ifDefined('b:qbar', 'def')
 
 let b:qbar_def = ['<Esc>fe fe', '<Esc>ta !a', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn', '<Esc>tk tk', '<Esc>to to']
-let b:qbar_report = ['r', 'q', 'w', 'a', '<Space> sp', '<Enter> en', 's']
+let b:qbar_report = ['r', 'l', 'a', 'q', 'w', 'e', '<Space> sp', '<Enter> en', 's']
 "let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
 "let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
 

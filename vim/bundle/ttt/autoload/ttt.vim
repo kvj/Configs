@@ -382,11 +382,11 @@ fun! Pad(num)
 endf
 
 fun! RenderDate(arr)
-	return Pad(a:arr[0]).'/'.a:arr[1].'/'.a:arr[2]
+	return Pad(a:arr[0]).'/'.Pad(a:arr[1]).'/'.Pad(a:arr[2])
 endf
 
 fun! RenderTime(arr)
-	return ''.a:arr[0].':'.Pad(a:arr[1])
+	return Pad(a:arr[0]).':'.Pad(a:arr[1])
 endf
 
 "Parse report etc
@@ -495,7 +495,7 @@ fun! MakeJump2Split()
 		return foundWin
 	endif
 	" Have to split
-	let cmd = 'sp'
+	let cmd = ''.ttt#ifDefined('g:tttSplitSize', '').'sp'
 	"if winwidth(0) > winheight(0)
 	"	let cmd = 'vs'
 	"endif
@@ -570,12 +570,12 @@ fun! ttt#changeSign(sign)
 	return ChangeSignHere(a:sign)
 endf
 
-fun! IfDefined(name)
+fun! ttt#ifDefined(name, def)
 	if exists(a:name)
 		exe 'let val = '.a:name
 		return val
 	endif
-	return ''
+	return a:def
 endf
 
 fun! AppendLineHere(content)
@@ -603,6 +603,24 @@ fun! AppendLine(file, content)
 		exe 'e '.paths[0]
 	endif
 	return AppendLineHere(a:content)
+endf
+
+fun! AppendLog(file, content)
+	if a:file == ''
+		call Log('Target not defined')
+		return 0
+	endif
+	let paths = FindFiles(a:file)
+	if !FindBuffer(paths[0], 'f')
+		call MakeJump2Split()
+		exe 'e '.paths[0]
+	endif
+	let content = a:content
+	let tm = localtime()
+	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
+	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
+	let content .= '['.RenderDate(dateArr).' '.RenderTime(timeArr).'] '
+	return AppendLineHere(content)
 endf
 
 "Add value to date
@@ -677,8 +695,8 @@ fun! ttt#showReport(name, autoCreate)
         execute 'silent keepjumps hide edit'.bufferName
 		setlocal buftype=nofile
 		setlocal noswapfile
-		setlocal ft=ttt
 		let b:qbar = 'report'
+		setlocal ft=ttt
 		nnoremap <script> <buffer> <silent> <CR> :call Jump2Task(0)<CR>
 		nnoremap <script> <buffer> <silent> <Space> :call Jump2Task(1)<CR>
 		nnoremap <script> <buffer> <silent> r :call RefreshReport()<CR>
@@ -686,7 +704,8 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> e :call MoveDate('+')<CR>
 		nnoremap <script> <buffer> <silent> w :call MoveDate('')<CR>
 		nnoremap <script> <buffer> <silent> s :call SaveReload()<CR>
-		nnoremap <script> <buffer> <silent> a :call AppendLine(IfDefined('g:tttInbox'), "\t- ")<CR>
+		nnoremap <script> <buffer> <silent> a :call AppendLine(ttt#ifDefined('g:tttInbox', ''), "\t- ")<CR>
+		nnoremap <script> <buffer> <silent> l :call AppendLog(ttt#ifDefined('g:tttLog', ''), "\t- ")<CR>
 		nnoremap <script> <buffer> <silent> x :call SelectBlock()<CR>
 		nnoremap <script> <buffer> <silent> y :call CopyBlock()<CR>
 		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
