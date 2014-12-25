@@ -27,6 +27,7 @@ call EnableLineSyntaxt('Done', '#')
 call EnableLineSyntaxt('Wait', '\~')
 call EnableLineSyntaxt('Cancel', '/')
 call EnableLineSyntaxt('Calendar', '\*')
+call EnableLineSyntaxt('Triage', '?')
 
 function! s:enableExtBlockSyntax(code, name)
 	if !filereadable('syntax/'.a:name.'.vim')
@@ -54,11 +55,11 @@ hi link tComment Comment
 hi link tTag String
 hi link tContact PreProc
 hi link tPriority Todo
-hi link tOkLine Comment
-hi link tDoneLine Type
+hi link tDoneLine Comment
 hi link tCancelLine LineNr
 hi link tProgressLine Normal
 hi link tWaitLine Folded
+hi link tTriageLine Keyword
 hi link tBegin Question
 hi link tOkTag Statement
 hi link tBlockStartEnd String

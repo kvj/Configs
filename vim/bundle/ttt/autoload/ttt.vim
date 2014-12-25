@@ -207,7 +207,7 @@ fun! ParseTimestamp(text)
 endf
 
 "Parse line into prefix, text, date-time and tags. Return dictionary
-let s:parseLineRexp = '^\t*\(\([-+\*#~=]\)\(\!*\)\s\+\)\?\(.*\)\s*$'
+let s:parseLineRexp = '^\t*\(\([^\s]\)\(\!*\)\s\+\)\?\(.*\)\s*$'
 fun! ParseLine(line)
 	let m = matchlist(a:line, s:parseLineRexp)
 	let result = {
@@ -578,7 +578,7 @@ fun! ttt#ifDefined(name, def)
 	return a:def
 endf
 
-fun! AppendLineHere(content)
+fun! AppendLineHere(content, cursor)
 	normal! G
 	let ex = "o\<esc>0Di"
 	let ex = ex . a:content
@@ -588,6 +588,7 @@ fun! AppendLineHere(content)
 		call g:Android_Execute('input', {'request': 'keyboard_show'})
 	endif
 	startinsert!
+	call cursor(line('.'), a:cursor)
 endf
 
 fun! AppendLine(file, content)
@@ -602,7 +603,7 @@ fun! AppendLine(file, content)
 		call MakeJump2Split()
 		exe 'e '.paths[0]
 	endif
-	return AppendLineHere(a:content)
+	return AppendLineHere(a:content, 99)
 endf
 
 fun! AppendLog(file, content)
@@ -619,8 +620,8 @@ fun! AppendLog(file, content)
 	let tm = localtime()
 	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
 	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content .= '['.RenderDate(dateArr).' '.RenderTime(timeArr).'] '
-	return AppendLineHere(content)
+	let content .= ' ['.RenderDate(dateArr).' '.RenderTime(timeArr).'] '
+	return AppendLineHere(content, 4)
 endf
 
 "Add value to date

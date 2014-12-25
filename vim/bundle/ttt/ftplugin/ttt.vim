@@ -4,6 +4,7 @@ setlocal tabstop=2
 setlocal shiftwidth=2
 setlocal foldmethod=indent
 setlocal noexpandtab
+setlocal foldignore=
 
 let b:tp = ''
 let b:tdef = ''

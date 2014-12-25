@@ -178,13 +178,13 @@ let g:tttReports = {
 	\'Work': {
 		\'parts': [{
 			\'files': tttCalLocation,
-			\'type': '-=*',
+			\'type': '=*',
 			\'calendar': 1,
 			\'title': 'Today:'
 			\}, {
 			\'files': tttProjLocation,
 			\'tags': '-home +pin',
-			\'type': '=',
+			\'type': '=?',
 			\'title': 'Work tasks:'
 			\}, {
 			\'files': tttIndexLocation,
@@ -195,13 +195,13 @@ let g:tttReports = {
 	\'Home': {
 		\'parts': [{
 			\'files': tttCalLocation,
-			\'type': '-=*',
+			\'type': '=*',
 			\'calendar': 1,
 			\'title': 'Today:'
 			\}, {
 			\'files': tttProjLocation,
 			\'tags': '-work +pin',
-			\'type': '=',
+			\'type': '=?',
 			\'title': 'Home tasks:'
 			\}, {
 			\'files': tttIndexLocation,
