@@ -679,6 +679,21 @@ fun! SaveReload()
 	call RefreshReport()
 endf
 
+fun! CollapseExpand()
+	let size = 10
+	if exists('g:tttExpandSize')
+		let size = g:tttExpandSize
+	endif
+	if b:expanded
+		exe 'resize '.b:collapseSize
+		let b:expanded = 0
+	else
+		let b:expanded = 1
+		let b:collapseSize = winheight('.')
+		exe 'resize '.(b:collapseSize+size)
+	endif
+endf
+
 fun! ttt#showReport(name, autoCreate)
 	let currentWin = winnr()
 	let bufferName = '['.s:reportPrefix.''.a:name.']'
@@ -697,6 +712,7 @@ fun! ttt#showReport(name, autoCreate)
 		setlocal buftype=nofile
 		setlocal noswapfile
 		let b:qbar = 'report'
+		let b:expanded = 0
 		setlocal ft=ttt
 		nnoremap <script> <buffer> <silent> <CR> :call Jump2Task(0)<CR>
 		nnoremap <script> <buffer> <silent> <Space> :call Jump2Task(1)<CR>
@@ -709,10 +725,12 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> l :call AppendLog(ttt#ifDefined('g:tttLog', ''), "\t- ")<CR>
 		nnoremap <script> <buffer> <silent> x :call SelectBlock()<CR>
 		nnoremap <script> <buffer> <silent> y :call CopyBlock()<CR>
+		nnoremap <script> <buffer> <silent> k :call CollapseExpand()<CR>
 		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
 		nnoremap <script> <buffer> <silent> 2 :call ChangeSign('=')<CR>
 		nnoremap <script> <buffer> <silent> 3 :call ChangeSign('#')<CR>
 		nnoremap <script> <buffer> <silent> 4 :call ChangeSign('~')<CR>
+		nnoremap <script> <buffer> <silent> 5 :call ChangeSign('?')<CR>
 		let b:currentTime = localtime()
 	else
 		"call Log('jumped to Report', bufferName)

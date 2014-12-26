@@ -727,10 +727,13 @@ nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 nnoremap <buffer> <silent><localleader>a :call ttt#showReport('', 2)<CR>
+nnoremap <buffer> <silent><localleader>qh :call ttt#showReport('Home', 2)<CR>
+nnoremap <buffer> <silent><localleader>qw :call ttt#showReport('Work', 2)<CR>
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
 nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('~')<CR>
+nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('?')<CR>
 
 call s:Load()
 call s:Enable_Markers()
