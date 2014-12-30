@@ -734,6 +734,7 @@ nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
 nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('~')<CR>
 nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('?')<CR>
+vnoremap <buffer> <silent> w <ESC>:call ttt#sendSelection('pebble', 'widget')<CR>
 
 call s:Load()
 call s:Enable_Markers()

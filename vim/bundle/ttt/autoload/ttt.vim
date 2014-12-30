@@ -22,6 +22,34 @@ fun! Log(...)
 	echom buf
 endf
 
+fun! ttt#sendSelection(dest, name)
+	let start = line("'<")
+	let finish = line("'>")
+	if start>finish
+		let start = finish
+		let finish = line("'<")
+	endif
+	let lines = []
+	let ind = Indent(getline(start))
+	let idx = start
+	while idx <= finish
+		let line = strpart(getline(idx), ind)
+		let line = substitute(line, '\t', '  ', 'g')
+		call add(lines, line)
+		let idx += 1
+	endwhile
+	if !exists('g:android')
+		return 0
+	endif
+	call g:Android_Execute('widget', 
+				\ {'lines': lines,
+				\  'dest':  a:dest,
+				\  'name':  a:name
+				\ })
+	call Log('Send selection', start, finish, len(lines))
+	return 1
+endf
+
 function! BufferSearchForLines(rexp)
 	let idx = 1
 	let end = line('$')
