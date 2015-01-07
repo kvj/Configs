@@ -488,7 +488,7 @@ fun! RenderReport(name, now)
 				if startCompare > 0
 					let txt .= '~ ' . RenderDate(dt['dtStart']).' '
 				endif
-				if has_key(dt, 'dtFinish')
+				if has_key(dt, 'dtFinish') && CompareDateTime(dt['dtStart'], dt['dtFinish']) != 0
 					let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
 					if finishCompare != 0
 						let txt .= '~ ' . RenderDate(dt['dtFinish']).' '
