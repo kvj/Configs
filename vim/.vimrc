@@ -188,6 +188,8 @@ let g:tttReports = {
 			\'title': 'Work tasks:'
 			\}, {
 			\'files': tttIndexLocation,
+			\'all': 1,
+			\'root': 1,
 			\'title': 'Inbox:'
 			\}
 		\]
@@ -205,6 +207,8 @@ let g:tttReports = {
 			\'title': 'Home tasks:'
 			\}, {
 			\'files': tttIndexLocation,
+			\'all': 1,
+			\'root': 1,
 			\'title': 'Inbox:'
 			\}
 		\]

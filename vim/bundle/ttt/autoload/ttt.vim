@@ -371,6 +371,9 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 				" After now and closed end bracket - not from
 				let ignoreTask = 1
 			endif
+			if get(a:report, 'all', 0) "Useful for inboxes - ignore dates
+				let ignoreTask = 0
+			endif
 		endif
 		if !ignoreTask && get(a:report, 'calendar', 0) && !has_key(p, 'date')
 			let ignoreTask = 1 "Stop processing
@@ -389,7 +392,11 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 		endif
 		let end = EndOfIndent(a:lines, i, a:to)
 		if end > i
-			call extend(result, ProcessLines(a:lines, i+1, end+1, acceptLine, a:report, a:now, a:tags))
+			if !ignoreTask && get(a:report, 'root', 0)
+				" Only first level tasks
+			else
+				call extend(result, ProcessLines(a:lines, i+1, end+1, acceptLine, a:report, a:now, a:tags))
+			endif
 		endif
 		let i = end + 1
 	endwhile
