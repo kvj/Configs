@@ -378,6 +378,7 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 		if !ignoreTask && get(a:report, 'calendar', 0) && !has_key(p, 'date')
 			let ignoreTask = 1 "Stop processing
 		endif
+		let end = EndOfIndent(a:lines, i, a:to)
 		if !ignoreTask "No other problems - add
 			let task = {
 				\'index': i,
@@ -388,9 +389,11 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 			if has_key(p, 'date')
 				let task['date'] = p['date']
 			endif
+			if end > i
+				let task['children'] = end - i
+			endif
 			call add(result, task)
 		endif
-		let end = EndOfIndent(a:lines, i, a:to)
 		if end > i
 			if !ignoreTask && get(a:report, 'root', 0)
 				" Only first level tasks
@@ -502,6 +505,9 @@ fun! RenderReport(name, now)
 				endif
 			endif
 			let txt .= t['text']
+			if has_key(t, 'children')
+				let txt .= ' ['.t['children'].']'
+			endif
 			let lines = add(lines, txt)
 			let data = add(data, {'task': t})
 		endfor
@@ -655,7 +661,7 @@ fun! AppendLog(file, content)
 	let tm = localtime()
 	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
 	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content .= ' ['.RenderDate(dateArr).' '.RenderTime(timeArr).'] '
+	let content .= ' ['.RenderDate(dateArr).' '.RenderTime(timeArr).']'
 	return AppendLineHere(content, 4)
 endf
 

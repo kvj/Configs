@@ -3,6 +3,7 @@ let s:extBlockBegin = '#begin'
 let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 
 syn match tTime '\d\{1,2}:\d\{2}'
+syn match tSize '\s\[\d\+\]'hs=s+1
 syn match tComment '^\s*\/\{2}\s.*$'
 syn match tDate '\d\{2}\/\d\{1,2}\/\d\{1,2}'
 syn match tTag '#[a-z0-9]\+'
@@ -52,6 +53,7 @@ hi link tTime Identifier
 "hi link tDuration Type
 hi link tMark Keyword
 hi link tComment Comment
+hi link tSize Folded
 hi link tTag String
 hi link tContact PreProc
 hi link tPriority Todo
