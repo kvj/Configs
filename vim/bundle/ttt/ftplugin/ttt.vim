@@ -702,7 +702,7 @@ function! Copy_Tree(indent)
 	echo "Copied to register"
 endfunction
 
-function! b:Fold_Text()
+function! s:Fold_Text()
 	let nl = v:foldend - v:foldstart + 1
 	let indent = s:Indent(getline(v:foldstart-1))
 	let res = s:MakeIndent(indent+2)
@@ -710,7 +710,7 @@ function! b:Fold_Text()
 	return res
 endfunction
 
-setlocal foldtext=b:Fold_Text()
+setlocal foldtext=s:Fold_Text()
 setlocal fillchars=fold:\ 
 
 let maplocalleader = "t"
