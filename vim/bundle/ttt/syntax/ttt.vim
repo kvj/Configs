@@ -11,7 +11,7 @@ syn match tPriority '!\{1,5}\s'he=e-1
 syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1
 exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
 syn match tTitle '^\s*[A-Z0-9].*:'he=e-1
-syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority
+syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tSize
 "exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
 "exe 'syn region tDoneLine start=''^\z(\s*\)#^\s.\+'''.markIndentBlock.' contains=@BlockHL'
 "syn cluster ExtBlockSyntax contains=tBegin
