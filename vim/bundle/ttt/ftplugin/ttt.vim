@@ -729,6 +729,7 @@ nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
 nnoremap <buffer> <silent><localleader>a :call ttt#showReport('', 2)<CR>
 nnoremap <buffer> <silent><localleader>qh :call ttt#showReport('Home', 2)<CR>
 nnoremap <buffer> <silent><localleader>qw :call ttt#showReport('Work', 2)<CR>
+nnoremap <buffer> <silent><localleader>ql :call ttt#showReport('Log', 2)<CR>
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>

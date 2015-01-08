@@ -174,6 +174,7 @@ endif
 let tttCalLocation = 'ttt:Calendar/1*_*.ttt'
 let tttProjLocation = 'ttt:Project/2*_*.ttt'
 let tttIndexLocation = 'ttt:0*_*.ttt'
+let tttLogLocation = 'ttt:Journal/8*_*.ttt'
 let g:tttReports = {
 	\'Work': {
 		\'parts': [{
@@ -210,6 +211,16 @@ let g:tttReports = {
 			\'all': 1,
 			\'root': 1,
 			\'title': 'Inbox:'
+			\}
+		\]
+	\},
+	\'Log': {
+		\'parts': [{
+			\'files': tttLogLocation,
+			\'type': '-*?=',
+			\'calendar': 1,
+			\'root': 1,
+			\'title': 'Today Log:'
 			\}
 		\]
 	\}
