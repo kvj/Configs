@@ -175,7 +175,7 @@ fun! s:T_PutRaw(num)
 endf
 
 fun! s:T_PutStr(str)
-	return s:T_PutRaw(len(a:str)).substitute(a:str, "'", "'", "g").','
+	return s:T_PutRaw(strlen(substitute(a:str, ".", "x", "g"))).substitute(a:str, "'", "'", "g").','
 endf
 
 fun! s:T_PutValue(value)
