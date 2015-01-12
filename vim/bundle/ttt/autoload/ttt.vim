@@ -46,7 +46,6 @@ fun! ttt#sendSelection(dest, name)
 				\  'dest':  a:dest,
 				\  'name':  a:name
 				\ })
-	call Log('Send selection', start, finish, len(lines))
 	return 1
 endf
 
@@ -752,6 +751,7 @@ fun! ttt#showReport(name, autoCreate)
         execute 'silent keepjumps hide edit'.bufferName
 		setlocal buftype=nofile
 		setlocal noswapfile
+		setlocal nonumber
 		let b:qbar = 'report'
 		let b:expanded = 0
 		setlocal ft=ttt
