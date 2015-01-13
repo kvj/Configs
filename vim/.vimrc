@@ -179,7 +179,7 @@ let g:tttReports = {
 	\'Work': {
 		\'parts': [{
 			\'files': tttCalLocation,
-			\'type': '=*',
+			\'type': '=*?',
 			\'calendar': 1,
 			\'title': 'Today:'
 			\}, {
@@ -198,7 +198,7 @@ let g:tttReports = {
 	\'Home': {
 		\'parts': [{
 			\'files': tttCalLocation,
-			\'type': '=*',
+			\'type': '=*?',
 			\'calendar': 1,
 			\'title': 'Today:'
 			\}, {
