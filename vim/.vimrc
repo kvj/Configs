@@ -22,7 +22,7 @@ set autoread
 set mouse=niv
 set wildmenu
 set magic
-set more
+set nomore
 set cmdheight=2
 set noerrorbells
 set vb t_vb=
@@ -39,7 +39,6 @@ set modelines=5
 set smartindent
 set laststatus=2
 set guicursor=a:blinkon300-blinkoff200
-set autoread
 set timeout timeoutlen=500 ttimeoutlen=100
 "cc=80
 set colorcolumn=100
