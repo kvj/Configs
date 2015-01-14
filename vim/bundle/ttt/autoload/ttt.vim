@@ -237,10 +237,28 @@ endf
 let s:parseLineRexp = '^\t*\(\([^\s]\)\(\!*\)\s\+\)\?\(.*\)\s*$'
 fun! ParseLine(line)
 	let m = matchlist(a:line, s:parseLineRexp)
+	let weight = len(m[3])*10
+	let type = m[2]
+	if type == '/'
+		let weight += 1
+	endif
+	if type == '~'
+		let weight += 2
+	endif
+	if type == '-'
+		let weight += 3
+	endif
+	if type == '?'
+		let weight += 4
+	endif
+	if type == '='
+		let weight += 5
+	endif
 	let result = {
-		\'type': m[2],
+		\'type': type,
 		\'priority': len(m[3]),
-		\'tags': []
+		\'tags': [],
+		\'weight': weight
 	\}
 	let text = m[4]
 	"call Log('ParseLine', result['type'], text, a:line)
@@ -383,6 +401,7 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 				\'index': i,
 				\'text': p['text'],
 				\'priority': p['priority'],
+				\'weight': p['weight'],
 				\'type': p['type']
 			\}
 			if has_key(p, 'date')
@@ -430,7 +449,7 @@ endf
 fun! RenderReport(name, now)
 	func! SortTasks(i1, i2)
 		let dates = has_key(a:i1, 'date') + has_key(a:i2, 'date')
-		let pdiff = a:i1['priority'] - a:i2['priority']
+		let pdiff = a:i1['weight'] - a:i2['weight']
 		if dates == 2
 			if pdiff != 0
 				return -pdiff
@@ -450,6 +469,7 @@ fun! RenderReport(name, now)
 		if dates != 0
 			return dates
 		endif
+		" Sort by task sign
 		return -pdiff
 	endf
 	let report = g:tttReports[a:name]
