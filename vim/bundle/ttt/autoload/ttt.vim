@@ -233,27 +233,32 @@ fun! ParseTimestamp(text)
 	return result
 endf
 
+fun! Type2Weight(type)
+	if a:type == '/'
+		return 1
+	endif
+	if a:type == '~'
+		return 2
+	endif
+	if a:type == '-'
+		return 3
+	endif
+	if a:type == '?'
+		return 4
+	endif
+	if a:type == '='
+		return 5
+	endif
+	return 0
+endf
+
 "Parse line into prefix, text, date-time and tags. Return dictionary
 let s:parseLineRexp = '^\t*\(\([^\s]\)\(\!*\)\s\+\)\?\(.*\)\s*$'
 fun! ParseLine(line)
 	let m = matchlist(a:line, s:parseLineRexp)
 	let weight = len(m[3])*10
 	let type = m[2]
-	if type == '/'
-		let weight += 1
-	endif
-	if type == '~'
-		let weight += 2
-	endif
-	if type == '-'
-		let weight += 3
-	endif
-	if type == '?'
-		let weight += 4
-	endif
-	if type == '='
-		let weight += 5
-	endif
+	let weight += Type2Weight(type)
 	let result = {
 		\'type': type,
 		\'priority': len(m[3]),
@@ -333,10 +338,10 @@ fun! CompareDateTime(arr1, arr2)
 	return 0
 endf
 
-fun! ProcessLines(lines, from, to, accept, report, now, tags)
+fun! ProcessLines(lines, from, to, accept, report, dfrom, dto, tags)
 	"call Log('ProcessLines', a:from, a:to, a:accept)
-	let tm = a:now
-	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
+	let dateFrom = [DateItemPart(a:dfrom, 'y'), DateItemPart(a:dfrom, 'm'), DateItemPart(a:dfrom, 'd')]
+	let dateTo = [DateItemPart(a:dto, 'y'), DateItemPart(a:dto, 'm'), DateItemPart(a:dto, 'd')]
 	let result = []
 	let i = a:from
 	while i < a:to
@@ -368,10 +373,12 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 		if !ignoreTask && has_key(p, 'date')
 			" Task with date
 			let dt = p['date']
-			let startCompare = CompareDateTime(dt['dtStart'], dateArr)
+			let startCompare = CompareDateTime(dt['dtStart'], dateFrom)
 			let finishCompare = startCompare
 			if has_key(dt, 'dtFinish')
-				let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
+				let finishCompare = CompareDateTime(dt['dtFinish'], dateTo)
+			else
+				let finishCompare = CompareDateTime(dt['dtStart'], dateTo)
 			endif
 			let pos = 0 " Position of task related to now
 			if startCompare < 0 && finishCompare < 0
@@ -416,7 +423,10 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 			if !ignoreTask && get(a:report, 'root', 0)
 				" Only first level tasks
 			else
-				call extend(result, ProcessLines(a:lines, i+1, end+1, acceptLine, a:report, a:now, a:tags))
+				call extend(result, ProcessLines(a:lines, 
+							\i+1, end+1, acceptLine, a:report, 
+							\a:dfrom, a:dto, 
+							\a:tags))
 			endif
 		endif
 		let i = end + 1
@@ -425,9 +435,9 @@ fun! ProcessLines(lines, from, to, accept, report, now, tags)
 endf
 
 "Parse one file
-fun! ParseOneFile(path, report, now, tags)
+fun! ParseOneFile(path, report, dfrom, dto, tags)
 	let lines = ReadOneFile(a:path)
-	return ProcessLines(lines, 0, len(lines), 1, a:report, a:now, a:tags)
+	return ProcessLines(lines, 0, len(lines), 1, a:report, a:dfrom, a:dto, a:tags)
 endf
 
 fun! Pad(num)
@@ -445,39 +455,119 @@ fun! RenderTime(arr)
 	return Pad(a:arr[0]).':'.Pad(a:arr[1])
 endf
 
-"Parse report etc
-fun! RenderReport(name, now)
-	func! SortTasks(i1, i2)
-		let dates = has_key(a:i1, 'date') + has_key(a:i2, 'date')
-		let pdiff = a:i1['weight'] - a:i2['weight']
-		if dates == 2
-			if pdiff != 0
-				return -pdiff
-			endif
-			let starts = CompareDateTime(a:i1['date']['dtStart'], a:i2['date']['dtStart'])
-			if starts != 0
-				return starts
-			endif
-			if has_key(a:i1['date'], 'tmStart') && has_key(a:i2['date'], 'tmStart')
-				return CompareDateTime(a:i1['date']['tmStart'], a:i2['date']['tmStart'])
-			endif
-			return has_key(a:i1['date'], 'tmStart') - has_key(a:i2['date'], 'tmStart')
-		endif
+fun! AdjustDate(tm, value)
+	let res = a:tm
+	let min = 60
+	let hr = min * 60
+	let day = hr * 24
+	if has_key(a:value, 'h')
+		let res += hr * a:value['h']
+	endif
+	if has_key(a:value, 'd')
+		let res += day * a:value['d']
+	endif
+	if has_key(a:value, 'w')
+		let res += day * a:value['w'] * 7
+	endif
+	if has_key(a:value, 'm')
+		let res += day * a:value['m'] * 30
+	endif
+	if has_key(a:value, 'y')
+		let res += day * a:value['m'] * 365
+	endif
+	return res
+endf
+
+func! SortTasks(i1, i2)
+	let dates = has_key(a:i1, 'date') + has_key(a:i2, 'date')
+	let pdiff = a:i1['weight'] - a:i2['weight']
+	if dates == 2
 		if pdiff != 0
 			return -pdiff
 		endif
-		if dates != 0
-			return dates
+		let starts = CompareDateTime(a:i1['date']['dtStart'], a:i2['date']['dtStart'])
+		if starts != 0
+			return starts
 		endif
-		" Sort by task sign
+		if has_key(a:i1['date'], 'tmStart') && has_key(a:i2['date'], 'tmStart')
+			return CompareDateTime(a:i1['date']['tmStart'], a:i2['date']['tmStart'])
+		endif
+		return has_key(a:i1['date'], 'tmStart') - has_key(a:i2['date'], 'tmStart')
+	endif
+	if pdiff != 0
 		return -pdiff
-	endf
+	endif
+	if dates != 0
+		return dates
+	endif
+	" Sort by task sign
+	return -pdiff
+endf
+
+fun! GroupReport(item, tasks)
+	if !has_key(a:item, 'group')
+		return [{'tasks': a:tasks, 'prefix': "\t"}]
+	endif
+	let group = a:item['group']
+	let result = []
+	for t in a:tasks
+		let g = {}
+		if group == 'day'
+			let g = {
+				\'tasks': [],
+				\'prefix': "\t\t",
+				\'id': RenderDate(t['date']['dtStart']),
+				\'title': "\t".RenderDate(t['date']['dtStart']).': /',
+				\'date': t['date'],
+				\'dtStart': t['date']['dtStart'],
+				\'weight': 0
+			\}
+		endif
+		if group == 'type'
+			let g = {
+				\'tasks': [],
+				\'prefix': "\t\t",
+				\'id': t['type'],
+				\'title': "\tItems with ".t['type'].':',
+				\'weight': Type2Weight(t['type'])
+			\}
+		endif
+		if !has_key(g, 'id')
+			continue
+		endif
+		let newg = 1
+		for gg in result
+			if gg['id'] == g['id']
+				let newg = 0
+				let g = gg
+				break
+			endif
+		endfor
+		if newg
+			call add(result, g)
+		endif
+		call add(g['tasks'], t)
+	endfor
+	call sort(result, "SortTasks")
+	return result
+endf
+
+"Parse report etc
+fun! RenderReport(name, now)
 	let report = g:tttReports[a:name]
 	let lines = []
 	let dateArr = [DateItemPart(a:now, 'y'), DateItemPart(a:now, 'm'), DateItemPart(a:now, 'd')]
 	call add(lines, 'For '.RenderDate(dateArr))
 	let data = [{'title': 'Root'}]
 	for item in report['parts']
+		let dfrom = a:now
+		if has_key(item, 'from')
+			let dfrom = AdjustDate(dfrom, item['from'])
+		endif
+		let dto = a:now
+		if has_key(item, 'to')
+			let dto = AdjustDate(dto, item['to'])
+		endif
 		let lines = add(lines, item['title'])
 		let data = add(data, {'title': item['title']})
 		let files = FindFiles(item['files'])
@@ -485,50 +575,60 @@ fun! RenderReport(name, now)
 		if has_key(item, 'tags')
 			let tags = split(item['tags'], ' ')
 		endif
-		"call Log('Part:', item['files'], len(files))
+		" call Log('Part:', item['files'], dfrom, dto)
 		let alltasks = []
 		for f in files
-			let tasks = ParseOneFile(f, item, a:now, tags)
+			let tasks = ParseOneFile(f, item, dfrom, dto, tags)
 			for t in tasks
 				let t['file'] = f
 			endfor
 			call extend(alltasks, tasks)
 			"call Log('File', f, len(tasks))
 		endfor
-		call sort(alltasks, "SortTasks")
-		"call Log('Total tasks:', len(alltasks))
-		for t in alltasks
-			"call Log('Task:', t['text'])
-			let txt = "\t".t['type'].FillChars(t['priority'], '!').' '
-			if has_key(t, 'date')
-				let dt = t['date']
-				let startCompare = CompareDateTime(dt['dtStart'], dateArr)
-				let finishCompare = startCompare
-				if startCompare < 0
-					let txt .= RenderDate(dt['dtStart']).' ~ '
-				endif
-				if startCompare > 0
-					let txt .= '~ ' . RenderDate(dt['dtStart']).' '
-				endif
-				if has_key(dt, 'dtFinish') && CompareDateTime(dt['dtStart'], dt['dtFinish']) != 0
-					let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
-					if finishCompare != 0
-						let txt .= '~ ' . RenderDate(dt['dtFinish']).' '
+		let groups = GroupReport(item, alltasks)
+		for gr in groups
+			call sort(gr['tasks'], "SortTasks")
+			if has_key(gr, 'title')
+				call add(lines, gr['title'])
+			endif
+			let dateArr = [DateItemPart(a:now, 'y'), DateItemPart(a:now, 'm'), DateItemPart(a:now, 'd')]
+			if has_key(gr, 'dtStart')
+				let dateArr = gr['dtStart']
+			endif
+			"call Log('Total tasks:', len(alltasks))
+			for t in gr['tasks']
+				"call Log('Task:', t['text'])
+				let txt = gr['prefix'].t['type'].FillChars(t['priority'], '!').' '
+				if has_key(t, 'date')
+					let dt = t['date']
+					let startCompare = CompareDateTime(dt['dtStart'], dateArr)
+					let finishCompare = startCompare
+					if startCompare < 0
+						let txt .= RenderDate(dt['dtStart']).' ~ '
+					endif
+					if startCompare > 0
+						let txt .= '~ ' . RenderDate(dt['dtStart']).' '
+					endif
+					if has_key(dt, 'dtFinish') && CompareDateTime(dt['dtStart'], dt['dtFinish']) != 0
+						let finishCompare = CompareDateTime(dt['dtFinish'], dateArr)
+						if finishCompare != 0
+							let txt .= '~ ' . RenderDate(dt['dtFinish']).' '
+						endif
+					endif
+					if has_key(dt, 'tmStart')
+						let txt .= RenderTime(dt['tmStart']).' '
+						if has_key(dt, 'tmFinish')
+							let txt .= '- '.RenderTime(dt['tmFinish']).' '
+						endif
 					endif
 				endif
-				if has_key(dt, 'tmStart')
-					let txt .= RenderTime(dt['tmStart']).' '
-					if has_key(dt, 'tmFinish')
-						let txt .= '- '.RenderTime(dt['tmFinish']).' '
-					endif
+				let txt .= t['text']
+				if has_key(t, 'children')
+					let txt .= ' ['.t['children'].']'
 				endif
-			endif
-			let txt .= t['text']
-			if has_key(t, 'children')
-				let txt .= ' ['.t['children'].']'
-			endif
-			let lines = add(lines, txt)
-			let data = add(data, {'task': t})
+				let lines = add(lines, txt)
+				let data = add(data, {'task': t})
+			endfor
 		endfor
 	endfor
 	let b:data = data
@@ -732,6 +832,7 @@ fun! RefreshReport()
 	setlocal nomodifiable
 	call cursor(line, 1)
 	call ttt#CursorTask()
+	setlocal ft=ttt
 endf
 
 fun! SaveReload()
