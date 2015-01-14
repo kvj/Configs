@@ -19,11 +19,11 @@ exec 'normal language ctype '.g:vimLang
 exec 'normal language time '.g:vimLang
 set langmenu=en_US.UTF-8
 set autoread
-set mouse=a
+set mouse=niv
 set wildmenu
 set magic
 set more
-set cmdheight=1
+set cmdheight=2
 set noerrorbells
 set vb t_vb=
 set showmatch
@@ -37,7 +37,7 @@ set modeline
 set modelines=5
 "set t_Co=256
 set smartindent
-set laststatus=3
+set laststatus=2
 set guicursor=a:blinkon300-blinkoff200
 set autoread
 set timeout timeoutlen=500 ttimeoutlen=100
