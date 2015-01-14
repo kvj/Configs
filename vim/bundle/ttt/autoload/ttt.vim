@@ -766,7 +766,7 @@ fun! ttt#showReport(name, autoCreate)
 		nnoremap <script> <buffer> <silent> l :call AppendLog(ttt#ifDefined('g:tttLog', ''), "\t- ")<CR>
 		nnoremap <script> <buffer> <silent> x :call SelectBlock()<CR>
 		nnoremap <script> <buffer> <silent> y :call CopyBlock()<CR>
-		nnoremap <script> <buffer> <silent> b :call CollapseExpand()<CR>
+		nnoremap <script> <buffer> <silent> h :call CollapseExpand()<CR>
 		nnoremap <script> <buffer> <silent> 1 :call ChangeSign('-')<CR>
 		nnoremap <script> <buffer> <silent> 2 :call ChangeSign('=')<CR>
 		nnoremap <script> <buffer> <silent> 3 :call ChangeSign('#')<CR>
