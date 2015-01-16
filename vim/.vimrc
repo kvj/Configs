@@ -163,6 +163,8 @@ let g:NERDTreeQuitOnOpen = 1
 let g:VerticalToolWindowSide = 'right'
 let g:EclimJavaHierarchyDefaultAction = 'edit'
 
+let g:airline_section_warning = ''
+
 if !exists('g:tttHotKeys')
 	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
 endif
