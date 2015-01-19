@@ -409,6 +409,7 @@ fun! ProcessLines(lines, from, to, accept, report, dfrom, dto, tags)
 				\'text': p['text'],
 				\'priority': p['priority'],
 				\'weight': p['weight'],
+				\'tags': p['tags'],
 				\'type': p['type']
 			\}
 			if has_key(p, 'date')
@@ -623,6 +624,12 @@ fun! RenderReport(name, now)
 					endif
 				endif
 				let txt .= t['text']
+				if has_key(t, 'tags')
+					" Append tags
+					for tag in t['tags']
+						let txt .= ' #'.tag
+					endfor
+				endif
 				if has_key(t, 'children')
 					let txt .= ' ['.t['children'].']'
 				endif
