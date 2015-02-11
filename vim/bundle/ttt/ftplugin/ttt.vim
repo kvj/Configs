@@ -13,8 +13,8 @@ let b:cron = ''
 let b:amode = ''
 let b:qbar = ttt#ifDefined('b:qbar', 'def')
 
-let b:qbar_def = ['<Esc>fe fe', '<Esc>ta !a', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn', '<Esc>tk tk', '<Esc>to to', '<Esc>tql !l']
-let b:qbar_report = ['h', 'l', 'a', 'w', 's', '<Space> sp', '<Enter> en', 'q', 'e']
+let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn']
+" let b:qbar_report = ['h', 'l', 'a', 'w', 's', '<Space> sp', '<Enter> en', 'q', 'e']
 "let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
 "let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
 
@@ -699,7 +699,7 @@ function! Copy_Tree(indent)
 		let i += 1
 	endw
 	let @" = block
-	echo "Copied to register"
+	" echo "Copied to register"
 endfunction
 
 function! s:Fold_Text()
@@ -718,6 +718,7 @@ let maplocalleader = "t"
 nnoremap <buffer> <silent><localleader>u :call Add_New_Line(0, '-', 1)<CR>
 nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
 nnoremap <buffer> <silent><localleader>t :call Add_New_Line(2, "\t-", -1)<CR>
+nnoremap <buffer> <silent><localleader>l :call ttt#appendLog()<CR>
 "nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
 "nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
 nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
@@ -726,10 +727,6 @@ nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
 nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
 nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
 nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
-nnoremap <buffer> <silent><localleader>a :call ttt#showReport('', 2)<CR>
-nnoremap <buffer> <silent><localleader>qh :call ttt#showReport('Home', 2)<CR>
-nnoremap <buffer> <silent><localleader>qw :call ttt#showReport('Work', 2)<CR>
-nnoremap <buffer> <silent><localleader>ql :call ttt#showReport('Log', 2)<CR>
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>

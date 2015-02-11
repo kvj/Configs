@@ -169,64 +169,6 @@ if !exists('g:tttHotKeys')
 	let g:tttHotKeys = {'00_Journal.ttt': 'x'}
 endif
 
-if !exists('g:tttReportDefault')
-	let g:tttReportDefault = 'Work'
-endif
-let tttCalLocation = 'ttt:Calendar/1*_*.ttt'
-let tttProjLocation = 'ttt:Project/2*_*.ttt'
-let tttIndexLocation = 'ttt:0*_*.ttt'
-let tttLogLocation = 'ttt:Journal/8*_*.ttt'
-let g:tttReports = {
-	\'Work': {
-		\'parts': [{
-			\'files': tttCalLocation,
-			\'type': '=*?',
-			\'calendar': 1,
-			\'title': 'Today:'
-			\}, {
-			\'files': tttProjLocation,
-			\'tags': '-home +pin',
-			\'type': '=?',
-			\'title': 'Work tasks:'
-			\}, {
-			\'files': tttIndexLocation,
-			\'all': 1,
-			\'root': 1,
-			\'title': 'Inbox:'
-			\}
-		\]
-	\},
-	\'Home': {
-		\'parts': [{
-			\'files': tttCalLocation,
-			\'type': '=*?',
-			\'calendar': 1,
-			\'title': 'Today:'
-			\}, {
-			\'files': tttProjLocation,
-			\'tags': '-work +pin',
-			\'type': '=?',
-			\'title': 'Home tasks:'
-			\}, {
-			\'files': tttIndexLocation,
-			\'all': 1,
-			\'root': 1,
-			\'title': 'Inbox:'
-			\}
-		\]
-	\},
-	\'Log': {
-		\'parts': [{
-			\'files': tttLogLocation,
-			\'type': '-*?=',
-			\'calendar': 1,
-			\'root': 1,
-			\'title': 'Today Log:'
-			\}
-		\]
-	\}
-\}
-
 set ssop-=options
 set ssop-=folds
 

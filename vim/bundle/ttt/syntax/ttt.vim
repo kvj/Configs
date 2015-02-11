@@ -1,4 +1,3 @@
-let s:okTags = ['ok', 'list']
 let s:extBlockBegin = '#begin'
 let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 
@@ -7,14 +6,13 @@ syn match tSize '\s\[\d\+\]'hs=s+1
 syn match tComment '^\s*\/\{2}\s.*$'
 syn match tDate '\d\{2}\/\d\{1,2}\/\d\{1,2}'
 syn match tTag '#[a-z0-9]\+'
-syn match tPriority '!\{1,5}\s'he=e-1
+syn match tPriority '\s[#=-?]!\{1,5}\s'he=e-1,hs=s+2
 syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1
-exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
+" exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
 syn match tTitle '^\s*[A-Z0-9].*:'he=e-1
 syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tSize
 "exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
 "exe 'syn region tDoneLine start=''^\z(\s*\)#^\s.\+'''.markIndentBlock.' contains=@BlockHL'
-"syn cluster ExtBlockSyntax contains=tBegin
 
 exe 'syn region tExtBlock start=''^\z(\s*\)'.s:extBlockBegin.' '''.s:markIndentBlock.' keepend contains=@ExtBlockSyntax'
 
@@ -63,6 +61,6 @@ hi link tProgressLine Normal
 hi link tWaitLine Folded
 hi link tTriageLine Keyword
 hi link tBegin Question
-hi link tOkTag Statement
+" hi link tOkTag Statement
 hi link tBlockStartEnd String
 "hi link tExtGroupMark Comment
