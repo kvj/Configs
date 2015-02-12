@@ -354,8 +354,8 @@ fun! ttt#appendLog()
 	let tm = localtime()
 	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
 	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content = ''.RenderDate(dateArr).' '.RenderTime(timeArr).client.":\n\t - "
-	return AppendLineHere(content, 4)
+	let content = ''.RenderDate(dateArr).' '.RenderTime(timeArr).client.":\n\t"
+	return AppendLineHere(content, 2)
 endf
 
 fun! AppendLog(file, content)
