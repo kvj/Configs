@@ -13,7 +13,7 @@ let b:cron = ''
 let b:amode = ''
 let b:qbar = ttt#ifDefined('b:qbar', 'def')
 
-let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tz tz', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn']
+let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>tz tz', '<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn']
 " let b:qbar_report = ['h', 'l', 'a', 'w', 's', '<Space> sp', '<Enter> en', 'q', 'e']
 "let b:qbar_01 = ['<Esc>fs<kOff> fs', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', '<Esc>tz tz', '<Esc>tw tw']
 "let b:qbar_00 = ['<Esc>fs<kOff> fs', '<Esc>tl<kOn> tl', '<Esc>tx tx', '<Esc>tw tw', '<Esc>ggta<kOn> ta', '<Esc>tt<kOn> tt', '<Esc>tn<kOn> tn', 'to', 'ti']
@@ -420,7 +420,11 @@ function! s:Enable_Hotkeys()
 		return
 	endif
 	for [filePath, key] in items(g:tttHotKeys)
-		let path = glob(g:tttRoot.'/'.filePath)
+		let path = g:tttRoot.'/'.filePath
+		let resolved = glob(path)
+		if len(resolved)>0
+			let path = resolved
+		endif
 		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump_Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
 		" echom 'Bound key '.key.' to file: '.path
 	endfor
