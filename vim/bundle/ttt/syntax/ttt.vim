@@ -9,8 +9,8 @@ syn match tTag '#[a-z0-9]\+'
 syn match tPriority '\s[#=-?]!\{1,5}\s'he=e-1,hs=s+2
 syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1
 " exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
-syn match tTitle '^\s*[A-Z0-9].*:'he=e-1
 syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tSize
+syn match tTitle '^\s*[A-Z0-9].*:\( /\)\?$'he=e-1 contains=@BlockHL
 "exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
 "exe 'syn region tDoneLine start=''^\z(\s*\)#^\s.\+'''.markIndentBlock.' contains=@BlockHL'
 
@@ -46,7 +46,7 @@ call s:enableExtBlockSyntax('js', 'javascript')
 exec 'syn match tBegin ''\s*'.s:extBlockBegin.'\s''he=e-1 contained containedin=tExtGroupMark'
 "syn cluster ExtBlockSyntax add=tBegin
 hi link tTitle Title
-hi link tDate Special
+hi link tDate Identifier
 hi link tTime Identifier
 "hi link tDuration Type
 hi link tMark Keyword

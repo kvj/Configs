@@ -317,8 +317,8 @@ fun! ttt#ifDefined(name, def)
 endf
 
 fun! AppendLineHere(content, cursor)
-	normal! G
 	edit
+	normal! G
 	let ex = "o\<esc>0Di"
 	let ex = ex . a:content
     exec 'normal! ' . ex
@@ -354,9 +354,8 @@ fun! ttt#appendLog()
 	let tm = localtime()
 	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
 	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content = ''.RenderDate(dateArr).' '.RenderTime(timeArr).client.":\n\t"
-	return AppendLineHere(content, 2)
-
+	let content = ''.RenderDate(dateArr).' '.RenderTime(timeArr).client.":\n\t - "
+	return AppendLineHere(content, 4)
 endf
 
 fun! AppendLog(file, content)
