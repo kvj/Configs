@@ -2,14 +2,14 @@ let s:extBlockBegin = '#begin'
 let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 
 syn match tTime '\d\{1,2}:\d\{2}'
-syn match tSize '\s\[\d\+\]'hs=s+1
+syn match tLocation '\s\[.\+\]'hs=s+1
 syn match tComment '^\s*\/\{2}\s.*$'
-syn match tDate '\d\{2}\/\d\{1,2}\/\d\{1,2}'
+syn match tDate '\(\d\{2}\/\)\?\d\{1,2}\/\d\{1,2}'
 syn match tTag '#[a-z0-9]\+'
 syn match tPriority '\s[#=-?]!\{1,5}\s'he=e-1,hs=s+2
 syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1
 " exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
-syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tSize
+syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tLocation
 syn match tTitle '^\s*[A-Z0-9].*:\( /\)\?$'he=e-1 contains=@BlockHL
 "exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
 "exe 'syn region tDoneLine start=''^\z(\s*\)#^\s.\+'''.markIndentBlock.' contains=@BlockHL'
@@ -46,12 +46,12 @@ call s:enableExtBlockSyntax('js', 'javascript')
 exec 'syn match tBegin ''\s*'.s:extBlockBegin.'\s''he=e-1 contained containedin=tExtGroupMark'
 "syn cluster ExtBlockSyntax add=tBegin
 hi link tTitle Title
-hi link tDate Identifier
-hi link tTime Identifier
+hi link tDate Keyword
+hi link tTime Keyword
 "hi link tDuration Type
-hi link tMark Keyword
+"hi link tMark Keyword
 hi link tComment Comment
-hi link tSize Folded
+hi link tLocation Folded
 hi link tTag String
 hi link tContact PreProc
 hi link tPriority Todo

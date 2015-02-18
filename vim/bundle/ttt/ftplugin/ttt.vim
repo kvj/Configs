@@ -12,6 +12,7 @@ let b:date = 0
 let b:cron = ''
 let b:amode = ''
 let b:qbar = ttt#ifDefined('b:qbar', 'def')
+let b:jump = ''
 
 let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>tz tz', '<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn']
 " let b:qbar_report = ['h', 'l', 'a', 'w', 's', '<Space> sp', '<Enter> en', 'q', 'e']
@@ -415,18 +416,9 @@ function! s:Enable_Hotkeys()
 	if !exists('g:tttHotKeys')
 		return
 	endif
-	if !exists('g:tttRoot')
-		echom 'Root not defined. Please set g:tttRoot'
-		return
-	endif
 	for [filePath, key] in items(g:tttHotKeys)
-		let path = g:tttRoot.'/'.filePath
-		let resolved = glob(path)
-		if len(resolved)>0
-			let path = resolved
-		endif
+		let path = ttt#findFile(filePath)
 		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump_Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
-		" echom 'Bound key '.key.' to file: '.path
 	endfor
 endfunction
 
@@ -646,6 +638,12 @@ function! s:Load()
 			autocmd BufLeave <buffer> call g:Android_Execute('quickbar', {'default': 1})
 			exe "autocmd BufEnter <buffer> ".cmd
 		endif
+	endif
+	if exists('g:tttNoNumber') && g:tttNoNumber == 1
+		setlocal nonumber
+	endif
+	if b:jump == 'b'
+		normal Gzz
 	endif
 endfunction
 

@@ -166,9 +166,9 @@ let g:EclimJavaHierarchyDefaultAction = 'edit'
 let g:airline_section_warning = ''
 
 if !exists('g:tttHotKeys')
-	let g:tttHotKeys = {'00_Log.ttt': 'x'}
+	let g:tttHotKeys = {'ttt:00_Log.ttt': 'x'}
 	if exists('g:tttClient')
-		let g:tttHotKeys['Inbox/00_'.g:tttClient.'.ttt'] = 'z'
+		let g:tttHotKeys['ttt:Inbox/00_'.g:tttClient.'.ttt'] = 'z'
 	endif
 endif
 

@@ -113,6 +113,10 @@ fun! FindBuffer(name, mode)
 	return 0
 endfunction
 
+fun! ttt#findFile(file)
+	return FindFiles(a:file)[0]
+endf
+
 "Expand file list definition into array of paths
 fun! FindFiles(file)
 	let fname = a:file
@@ -120,7 +124,11 @@ fun! FindFiles(file)
 		"ttt files
 		let fname = g:tttRoot.'/'.strpart(fname, 4)
 	endif
-	return split(glob(fname), '\n')
+	let resolved = glob(fname)
+	if len(resolved)>0
+		let fname = resolved
+	endif
+	return split(fname, '\n')
 endf
 
 "Read file into list of lines
@@ -261,6 +269,24 @@ fun! MakeJump2Split()
 	"endif
 	exe cmd
 	return winnr()
+endf
+
+let s:rxLine = '^\(\t*\)\([#=\-?~/]\)\(!\{1,5}\)\?\s\(.*\)$'
+
+fun!ParseLine(text)
+	let m = matchlist(a:text, s:rxLine)
+	if len(m)>0
+		return 
+			\{
+				\'type': m[2],
+				\'priority': len(m[3])
+			\}
+	endif
+	return 
+		\{
+			\'type': '',
+			\'priority': 0
+		\}
 endf
 
 fun! ChangeSignHere(sign)
