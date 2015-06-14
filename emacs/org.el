@@ -23,10 +23,10 @@
 (setq org-log-into-drawer nil)
 (setq org-drawers '("PROPERTIES" "CLOCK" "PATH"))
 (setq org-habit-done-word "MADE")
-(setq org-modules (quote (org-crypt org-docview org-info org-habit org-mew org-mhe org-remember org-mobile org-timer)))
+(setq org-modules (quote (org-docview org-info org-habit org-mew org-mhe org-timer)))
 (setq org-todo-keywords
-           '((sequence "BUG(b)" "TODO(t)" "REPORT(r@)" "WAIT(w@/@)" "|" "DONE(d@/@)" "CANCEL(c@)")
-             (sequence "APPT(a)" "|" "FINISH(f@)" "CANCEL(c@)")
+           '((sequence "TODO(t)" "WAIT(w@/@)" "|" "DONE(d@/@)" "CANCEL(c@)")
+			 (sequence "APPT(a)" "|" "DONE(d@/@)")
              (sequence "|" "NOTE(n)" "JOURN(j)")
 	         (sequence "HABIT(h)" "|" "MADE(m)")
 	        )
@@ -50,27 +50,13 @@
 (require 'org)
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-cr" 'remember)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
-
-(require 'remember)
-(add-hook 'remember-mode-hook 'org-remember-apply-template)
-;(define-key global-map [(control meta ?r)] 'remember)
 
 (setq org-default-notes-file (concat org-directory "zinbox.org"))
 
 (setq org-agenda-custom-commands '(
-;				   ("w" todo "TODO")
-;				   ("h" "Now" (
-;				   		(tags-todo "+TODO=TODO")
-;				   			(agenda (org-agenda-ndays 3) (org-agenda-show-all-dates nil)
-;				   			)
-;				   		)
-;				   )
-;				   ("W" agenda "Agenda 21" ((org-agenda-ndays 21)
-;						   (org-agenda-show-all-dates nil)))
-	("w" "Main"
+	("w" "Office"
 		(
 			(agenda "Today" (
 				(org-agenda-overriding-header "Today")
@@ -83,12 +69,11 @@
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 		) (
-;			(org-agenda-overriding-header "Today")
 			(org-agenda-filter-preset '("-home"))
 			(org-agenda-compact-blocks t)
 		)
 	)
-	("mm" "Main"
+	("h" "Home"
 		(
 			(agenda "Agenda" (
 				(org-agenda-overriding-header "Today")
@@ -101,78 +86,26 @@
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 		) (
-;			(org-agenda-overriding-header "Today")
 			(org-agenda-compact-blocks t)
-		)
-	)
-;	("w" agenda "Today"
-;		((org-agenda-ndays 1)
-;		(org-agenda-sorting-strategy '(todo-state-up priority-down effort-down))
-;		(org-agenda-overriding-header "Today"))
-;	)
-	("r" "Review" 
-		(
-			(tags "+CLOSED<\"<-7d>\"" (
-				(org-agenda-sorting-strategy '(todo-state-up))
-				(org-agenda-overriding-header "Review")
-			))
 		)
 	)
 ))
 (setq org-agenda-todo-ignore-scheduled t)
 (setq org-capture-templates
 	'(
-		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Journal") "* TODO %?\n  %u")
-		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?\n  %u")
-		("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
-		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
+		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
+		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?")
+		;("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
+		;("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
-		;;("p" "Pinned" entry (file+datetree+prompt (concat org-directory "journal.org")) "* PIN %?")
 	)
 )
 
-;(defun org-mobile-pullpush nil nil 
-;  (interactive)
-;  (message "MobileOrg pull&push...")
-;  (org-mobile-pull)
-;  (org-mobile-push)
-;  (message "MobileOrg pull&push done")
-;)
-
-;(run-at-time "30 sec" 1800 'org-mobile-pullpush)
-
-;(define-key global-map "\C-cm" 'org-mobile-pullpush)
-
-;(custom-set-variables
-; '(org-remember-store-without-prompt t)
-; '(org-remember-templates
-;   (quote (
-;	("ToDo" ?t "* TODO %?\n  %u" "main.org" "Tasks")
-;	("Note" ?n "* NOTE %?\n  %u")
-;	("Appt" ?a "* APPT %?\n  %u" "main.org" "Tasks")
-;	("Bug" ?b "* BUG %?\n  %u" "main.org" "Tasks")
-;	("Journal" ?j "* JOURN %?\n  %U" (file+datetree+prompt "_journal.org"))
-;	("Password" ?p "* %?\n  Username: \n  Password: " "zinbox.org")
-;	("Outline" ?o "* %?" "zinbox.org")
-;   )))
-; '(remember-annotation-functions (quote (org-remember-annotation)))
-; '(remember-handler-functions (quote (org-remember-handler)))
-;)
 (setq org-hide-block-startup t)
-(require 'org-crypt)
-;(org-crypt-use-before-save-magic)
-;(setq org-tags-exclude-from-inheritance (quote ("crypt")))
-;(setq org-crypt-key "0B3A72C2")
-;(setq org-crypt-disable-auto-save 'encrypt)
-
-;(add-hook 'after-init-hook '(lambda () (org-agenda-list)))
+;(require 'org-crypt)
 
 (setq org-agenda-window-setup 'current-window)
 (setq org-clone-delete-id t)
-;(require 'org-location-google-maps)
-;(require 'ob)
-;(require 'ob-exp)
-;(require 'ob-plantuml)
 (org-babel-do-load-languages
  (quote org-babel-load-languages)
  (quote ((emacs-lisp . t)
@@ -184,7 +117,6 @@
 )
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 ;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
-;(add-hook 'org-babel-after-execute-hook 'bh/display-inline-images 'append)
 (defun bh/display-inline-images ()
   (condition-case nil
       (org-display-inline-images)
@@ -195,4 +127,3 @@
    (setq org-file-apps
      (append '(("\\.png\\'" . default)) org-file-apps ))))
 (setq org-confirm-babel-evaluate nil)
-;(org-current-export-file "no-export")

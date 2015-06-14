@@ -10,7 +10,7 @@
 ;(cua-mode t)
 (setq ps-paper-type 'a4)
 (setq initial-buffer-choice t)
-(setq tab-width 4)
+(setq tab-width 2)
 (setq visible-bell t)
 (setq make-backup-files nil)
 (transient-mark-mode t)
