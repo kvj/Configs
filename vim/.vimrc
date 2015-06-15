@@ -342,9 +342,29 @@ function! GitPullPush(cmd)
 	exe ''.a:cmd.' '.remote.' '.branch
 endfunction
 
+function! GitRebaseMerge()
+	let origin = 'origin'
+	let repo = 'master'
+	let remote = input('[Git pull/rebase]Remote? ', origin)
+	let branch = input('[Git pull/rebase]Branch? ', repo)
+	exe 'Git fetch '.remote
+	exe 'Git rebase '.remote.'/'.branch
+endfunction
+
+function! GitRebaseWork()
+	let origin = 'origin'
+	let repo = 'master'
+	let remote = input('[Git rebase local]Remote? ', origin)
+	let branch = input('[Git rebase local]Branch? ', repo)
+	exe 'Git rebase -i '.remote.'/'.branch
+endfunction
+
 nnoremap <silent><LEADER>gs :Gstatus<CR>
 nnoremap <silent><LEADER>gu :call GitPullPush('Git push')<CR>
 nnoremap <silent><LEADER>gf :call GitPullPush('Git pull')<CR>
+nnoremap <silent><LEADER>gr :call GitRebaseMerge()<CR>
+nnoremap <silent><LEADER>gi :call GitRebaseWork()<CR>
+nnoremap <silent><LEADER>ga :Git rebase --
 nnoremap <silent><LEADER>gt :!tig status<CR>
 nnoremap <silent><LEADER>gl :!tig<CR>
 
