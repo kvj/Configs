@@ -96,7 +96,7 @@
 		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
 		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?")
 		;("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
-		;("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
+		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
 	)
 )
