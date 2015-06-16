@@ -114,6 +114,11 @@
      (append '(("\\.png\\'" . default)) org-file-apps ))))
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
-(add-hook 'emacs-startup-hook '(lambda ()
-								 (if k-org-auto-open-agenda-key
-								   (org-agenda nil k-org-auto-open-agenda-key))))
+(add-hook 'emacs-startup-hook
+		  '(lambda ()
+			 (if k-org-auto-open-agenda-key
+			   (org-agenda nil k-org-auto-open-agenda-key))))
+(add-hook 'org-agenda-mode-hook
+		  (lambda ()
+			(add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
+			(auto-save-mode)))
