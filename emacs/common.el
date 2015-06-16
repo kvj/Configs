@@ -39,4 +39,4 @@
 (global-auto-revert-mode t)
 ;(require 'image)
 (global-visual-line-mode t)
-
+(setq inhibit-splash-screen t)

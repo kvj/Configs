@@ -1,7 +1,7 @@
 (setq mark-diary-entries-in-calendar t)
 (setq org-agenda-files (directory-files org-directory t ".*.org$"))
 (setq org-agenda-include-all-todo nil)
-(setq org-agenda-include-diary t)
+(setq org-agenda-include-diary nil)
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-deadline-warning-days 2)
 (setq org-agenda-skip-scheduled-if-done t)
@@ -26,8 +26,7 @@
 (setq org-modules (quote (org-docview org-info org-habit org-mew org-mhe org-timer)))
 (setq org-todo-keywords
            '((sequence "TODO(t)" "WAIT(w@/@)" "|" "DONE(d@/@)" "CANCEL(c@)")
-			 (sequence "APPT(a)" "|" "DONE(d@/@)")
-             (sequence "|" "NOTE(n)" "JOURN(j)")
+             (sequence "|" "APPT(a)" "NOTE(n)" "JOURN(j)")
 	         (sequence "HABIT(h)" "|" "MADE(m)")
 	        )
 )
@@ -40,42 +39,28 @@
 (setq org-refile-allow-creating-parent-nodes "confirm")
 (setq org-todo-keyword-faces '(
 	("TODO" . org-warning) 
-	("BUG" . org-warning) 
 	("WAIT" :foreground "gray" :weight: bold)
-	("REPORT" :foreground "orange" :weight: bold)
 	("APPT" :foreground "magenta" :weight: bold)
         ("CANCEL" :foreground "forest green" :weight: bold)
         ("HABIT" :foreground "blue")
 ))
+
+(setq org-capture-use-agenda-date nil)
+(setq org-agenda-dim-blocked-tasks nil)
+(setq org-agenda-inhibit-startup nil)
+(setq org-agenda-use-tag-inheritance nil)
 (require 'org)
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 
-(setq org-default-notes-file (concat org-directory "zinbox.org"))
+;(setq org-default-notes-file (concat org-directory "zinbox.org"))
 
 (setq org-agenda-custom-commands '(
 	("w" "Office"
 		(
 			(agenda "Today" (
-				(org-agenda-overriding-header "Today")
-				(org-agenda-ndays 1)
-				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
-			))
-			(alltodo "Other tasks" (
-				(org-agenda-overriding-header "Other tasks")
-				(org-agenda-files (list (concat org-directory "main.org")))
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-		) (
-			(org-agenda-filter-preset '("-home"))
-			(org-agenda-compact-blocks t)
-		)
-	)
-	("h" "Home"
-		(
-			(agenda "Agenda" (
 				(org-agenda-overriding-header "Today")
 				(org-agenda-ndays 1)
 				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
@@ -96,12 +81,13 @@
 		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
 		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?")
 		;("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
-		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %?\n  %u")
+		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* %T %?")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
 	)
 )
 
 (setq org-hide-block-startup t)
+(setq org-clock-persist t)
 ;(require 'org-crypt)
 
 (setq org-agenda-window-setup 'current-window)
@@ -127,3 +113,7 @@
    (setq org-file-apps
      (append '(("\\.png\\'" . default)) org-file-apps ))))
 (setq org-confirm-babel-evaluate nil)
+(defvar k-org-auto-open-agenda-key nil)
+(add-hook 'emacs-startup-hook '(lambda ()
+								 (if k-org-auto-open-agenda-key
+								   (org-agenda nil k-org-auto-open-agenda-key))))
