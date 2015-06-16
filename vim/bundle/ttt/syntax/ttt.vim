@@ -2,7 +2,7 @@ let s:extBlockBegin = '#begin'
 let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 
 syn match tTime '\d\{1,2}:\d\{2}'
-syn match tLocation '\s\[.\+\]'hs=s+1
+syn match tLocation '\s\[.\{-}\]'hs=s+1
 syn match tComment '^\s*\/\{2}\s.*$'
 syn match tDate '\(\d\{2}\/\)\?\d\{1,2}\/\d\{1,2}'
 syn match tTag '#[a-z0-9]\+'
