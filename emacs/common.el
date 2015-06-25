@@ -2,6 +2,7 @@
 ;(setq default-directory "~")
 ;(cd "~")
 (put 'upcase-region 'disabled nil)
+(menu-bar-mode 0)
 (windmove-default-keybindings)
 ;(tool-bar-mode nil)
 (column-number-mode t)
