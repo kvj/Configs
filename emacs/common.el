@@ -40,6 +40,7 @@
 (global-auto-revert-mode t)
 ;(require 'image)
 (global-visual-line-mode t)
+(global-set-key (kbd "C-q") 'other-window)
 (setq inhibit-splash-screen t)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))

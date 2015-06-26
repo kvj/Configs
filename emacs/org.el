@@ -6,6 +6,7 @@
 (setq org-deadline-warning-days 2)
 (setq org-agenda-skip-scheduled-if-done t)
 ;(setq org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
+;(setq org-popup-calendar-for-date-prompt nil)
 (setq org-hide-leading-stars t)
 (setq org-log-done 'time)
 (setq org-special-ctrl-a/e t)
@@ -58,6 +59,7 @@
 (setq org-agenda-start-on-weekday 1)
 (setq org-cycle-separator-lines 0)
 (setq org-catch-invisible-edits 'error)
+(setq org-agenda-current-time-string ">> - - - - - - -")
 
 (require 'org-install)
 (global-set-key "\C-cl" 'org-store-link)
@@ -101,8 +103,7 @@
 	'(
 		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
 		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?")
-		;("b" "Bug" entry (file+headline (concat org-directory "main.org") "Journal") "* BUG %?\n  %u")
-		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* # %T %?")
+		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* # %? %T")
 		("p" "Todo (inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Inbox") "* TODO %?")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
 	)
@@ -144,6 +145,7 @@
 				  (interactive) 
 				  (org-agenda-exit)
 				  (save-buffers-kill-terminal)))
+	(org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
 	(org-defkey org-agenda-mode-map "p" 
 				(lambda () 
 				  (interactive) 
@@ -158,10 +160,10 @@
 				(lambda () 
 				  (interactive) 
 				  (org-capture-finalize nil)))
-	(org-defkey org-capture-mode-map "|"
-				(lambda () 
-				  (interactive) 
-				  (org-capture-kill)))))
+	(org-defkey org-capture-mode-map "|" 'org-capture-kill)
+	(org-defkey org-capture-mode-map "\M-;" 'org-timer-start)
+	(org-defkey org-capture-mode-map "\M--" 'org-timer-item)
+	(org-defkey org-capture-mode-map "\M-:" 'org-timer-pause-or-continue)))
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
 (add-hook 'emacs-startup-hook
