@@ -1,5 +1,5 @@
 (setq mark-diary-entries-in-calendar t)
-(setq org-agenda-files (directory-files org-directory t "[a-z].*.org$"))
+(setq org-agenda-files (directory-files org-directory t "^[a-z].*\.org$"))
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
 (setq org-agenda-skip-deadline-if-done t)
@@ -41,12 +41,13 @@
 )))
 (setq org-refile-allow-creating-parent-nodes "confirm")
 (setq org-todo-keyword-faces '(
-	("!" :foreground "orange" :weight: bold)
+	("!" :foreground "brightyellow" :weight: bold)
 	("~" :foreground "cyan" :weight: bold)
-	("WAIT" :foreground "gray" :weight: bold)
+	("NEXT" :foreground "brightblue" :weight: bold)
+	("WAIT" :foreground "white" :weight: bold)
 	("A" :foreground "magenta" :weight: bold)
-        ("CANCEL" :foreground "forest green" :weight: bold)
-        ("HABIT" :foreground "blue")
+    ("CANCEL" :foreground "gray" :weight: bold)
+    ("HABIT" :foreground "green")
 ))
 
 (setq org-capture-use-agenda-date nil)
@@ -77,19 +78,14 @@
 				(org-agenda-ndays 1)
 				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
 			))
-			(alltodo "Other tasks" (
-				(org-agenda-overriding-header "Other tasks")
-				(org-agenda-files (list (concat org-directory "main.org")))
+			(alltodo "Tasks" (
+				(org-agenda-overriding-header "Tasks")
+				(org-agenda-files (directory-files org-directory t "^m.*\.org$"))
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 			(todo "NEXT" (
 				(org-agenda-overriding-header "Next tasks")
-				(org-agenda-files (directory-files org-directory t "p_.*.org$"))
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-			(alltodo "Inbox" (
-				(org-agenda-overriding-header "Inbox")
-				(org-agenda-files (directory-files org-directory t "i_.*.org$"))
+				(org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
 				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 			))
 		) (
@@ -101,10 +97,10 @@
 (defvar k-org-capture-inbox "main.org")
 (setq org-capture-templates
 	'(
-		("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
-		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* APPT %?")
-		("n" "Note" entry (file+headline (concat org-directory "main.org") "Journal") "* # %? %T")
-		("p" "Todo (inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Inbox") "* TODO %?")
+		;("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
+		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* A %?")
+		("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
+		("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Calendar") "* TODO %?")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
 	)
 )
@@ -135,8 +131,10 @@
 
 (add-hook 'org-mode-hook
   '(lambda ()
-   (setq org-file-apps
-     (append '(("\\.png\\'" . default)) org-file-apps ))))
+	 (org-defkey org-capture-mode-map "\M-;" 'org-timer-start)
+	 (org-defkey org-capture-mode-map "\M--" 'org-timer-item)
+	 (org-defkey org-capture-mode-map "\M-:" 'org-timer-pause-or-continue)
+	 (setq org-file-apps (append '(("\\.png\\'" . default)) org-file-apps ))))
 
 (add-hook 'org-agenda-mode-hook
   '(lambda ()
@@ -160,10 +158,7 @@
 				(lambda () 
 				  (interactive) 
 				  (org-capture-finalize nil)))
-	(org-defkey org-capture-mode-map "|" 'org-capture-kill)
-	(org-defkey org-capture-mode-map "\M-;" 'org-timer-start)
-	(org-defkey org-capture-mode-map "\M--" 'org-timer-item)
-	(org-defkey org-capture-mode-map "\M-:" 'org-timer-pause-or-continue)))
+	(org-defkey org-capture-mode-map "|" 'org-capture-kill)))
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
 (add-hook 'emacs-startup-hook
