@@ -54,15 +54,17 @@
 (setq org-agenda-dim-blocked-tasks nil)
 (setq org-agenda-inhibit-startup nil)
 (setq org-agenda-use-tag-inheritance nil)
-(setq org-agenda-start-with-log-mode t)
+(setq org-tags-exclude-from-inheritance '("pin"))
+(setq org-agenda-start-with-log-mode nil)
 (setq org-agenda-repeating-timestamp-show-all t)
 (setq org-agenda-show-all-dates t)
 (setq org-agenda-start-on-weekday 1)
 (setq org-cycle-separator-lines 0)
 (setq org-catch-invisible-edits 'error)
 (setq org-agenda-current-time-string ">> - - - - - - -")
+(setq org-use-speed-commands t)
 
-(require 'org-install)
+(require 'org)
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
@@ -77,6 +79,11 @@
 				(org-agenda-overriding-header "Today")
 				(org-agenda-ndays 1)
 				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
+			))
+			(tags "+pin" (
+				(org-agenda-overriding-header "Pinned")
+				(org-agenda-files (directory-files org-directory t "^m.*\.org$"))
+				(org-agenda-sorting-strategy '(priority-down))
 			))
 			(alltodo "Tasks" (
 				(org-agenda-overriding-header "Tasks")
@@ -98,7 +105,7 @@
 (setq org-capture-templates
 	'(
 		;("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
-		("a" "Appontment" entry (file+headline (concat org-directory "main.org") "Calendar") "* A %?")
+		("a" "Appontment" entry (file+headline (concat org-directory k-org-capture-inbox) "Calendar") "* A %?")
 		("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
 		("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Calendar") "* TODO %?")
 		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
@@ -131,9 +138,12 @@
 
 (add-hook 'org-mode-hook
   '(lambda ()
-	 (org-defkey org-capture-mode-map "\M-;" 'org-timer-start)
-	 (org-defkey org-capture-mode-map "\M--" 'org-timer-item)
-	 (org-defkey org-capture-mode-map "\M-:" 'org-timer-pause-or-continue)
+	 (org-defkey org-mode-map "\M-;" 'org-timer-start)
+	 (org-defkey org-mode-map "\M--" 'org-timer-item)
+	 (org-defkey org-mode-map "\M-:" 
+				 (lambda()
+				   (interactive)
+				   (org-timer-pause-or-continue t)))
 	 (setq org-file-apps (append '(("\\.png\\'" . default)) org-file-apps ))))
 
 (add-hook 'org-agenda-mode-hook

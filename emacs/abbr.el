@@ -3,4 +3,6 @@
 ; Work is in progress
 (define-abbrev-table 
   'org-mode-abbrev-table '(
-						   ("fr" "- []" nil 0)))
+						   ("0i" "- [ ]" nil 0)
+						   ("0h" "**" nil 0)
+						   ))
