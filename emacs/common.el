@@ -27,7 +27,8 @@
 (let ((default-directory "~/.emacs.d/site-lisp/"))
       (normal-top-level-add-to-load-path '("."))
       (normal-top-level-add-subdirs-to-load-path)
-)
+      )
+(add-to-list 'load-path (concat config-dir "lisp/"))
 
 (set-language-environment 'utf-8)
 (set-locale-environment "C")
@@ -61,3 +62,4 @@
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d C" x)) (kbd (format "%s<right>" tkey)))
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d D" x)) (kbd (format "%s<left>" tkey)))
 			 (setq x (+ x 1))))))
+(require 'editorconfig)
