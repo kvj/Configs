@@ -170,6 +170,7 @@
 	(org-defkey org-capture-mode-map "|" 'org-capture-kill)))
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
+(defvar k-org-goto-zero nil)
 (add-hook 'emacs-startup-hook
 		  '(lambda ()
 			 (if k-org-auto-open-agenda-key
@@ -178,4 +179,8 @@
 		  (lambda ()
 			(add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
 			(auto-save-mode)))
+(add-hook 'org-agenda-after-show-hook
+	  (lambda ()
+	    (if k-org-goto-zero
+		(goto-char (point-at-bol)))))
 (require 'org-mpw)
