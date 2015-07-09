@@ -62,4 +62,3 @@
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d C" x)) (kbd (format "%s<right>" tkey)))
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d D" x)) (kbd (format "%s<left>" tkey)))
 			 (setq x (+ x 1))))))
-(require 'editorconfig)
