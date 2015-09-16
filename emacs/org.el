@@ -137,6 +137,7 @@
 
 (add-hook 'org-mode-hook
   '(lambda ()
+	 (org-defkey org-mode-map "\M-p" 'org-mpw-password)
 	 (org-defkey org-mode-map "\M-;" 'org-timer-start)
 	 (org-defkey org-mode-map "\M--" 'org-timer-item)
 	 (org-defkey org-mode-map "\M-:" 
@@ -183,4 +184,7 @@
 	  (lambda ()
 	    (if k-org-goto-zero
 		(goto-char (point-at-bol)))))
+
+(setq org-mpw-name "Konstantin")
+
 (require 'org-mpw)
