@@ -5,8 +5,7 @@
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-deadline-warning-days 2)
 (setq org-agenda-skip-scheduled-if-done t)
-;(setq org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
-;(setq org-popup-calendar-for-date-prompt nil)
+;(setq org-popup-calendar-for-date-prompt nil) ; Add to mobile
 (setq org-hide-leading-stars t)
 (setq org-log-done 'time)
 (setq org-special-ctrl-a/e t)
@@ -16,6 +15,7 @@
 (setq org-agenda-skip-scheduled-if-deadline-is-shown t)
 (setq org-agenda-span 3)
 (setq org-agenda-start-on-weekday nil)
+(setq org-agenda-scheduled-leaders '("S:", "%dx:"))
 (setq org-hierarchical-todo-statistics t)
 (setq org-enforce-todo-dependencies t)
 (setq org-enforce-todo-checkbox-dependencies t)
@@ -28,7 +28,7 @@
 (setq org-modules (quote (org-info org-habit org-timer)))
 (defvar k-org-capture-inbox "main.org")
 (setq org-todo-keywords
-           '((sequence "T(t)" "~(~)" "N(n)" "?(w@/@)" "|" "A(a)" "#(#)" "!(!)" "#(d)" "X(x@)")
+           '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
 	         (sequence "H(h)" "|" "M(m)")
 	        )
 )
@@ -40,8 +40,6 @@
 )))
 (setq org-refile-allow-creating-parent-nodes "confirm")
 (setq org-todo-keyword-faces '(
-	("!" :foreground "brightyellow" :weight: bold)
-	("~" :foreground "cyan" :weight: bold)
 	("N" :foreground "brightblue" :weight: bold)
 	("?" :foreground "white" :weight: bold)
 	("A" :foreground "magenta" :weight: bold)
@@ -69,8 +67,6 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 
-;(setq org-default-notes-file (concat org-directory "zinbox.org"))
-
 (setq org-agenda-custom-commands '(
 	("w" "Office"
 		(
@@ -78,11 +74,6 @@
 				(org-agenda-overriding-header "Today")
 				(org-agenda-ndays 1)
 				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
-			))
-			(tags "+pin" (
-				(org-agenda-overriding-header "Pinned")
-				(org-agenda-files (directory-files org-directory t "^m.*\.org$"))
-				(org-agenda-sorting-strategy '(priority-down))
 			))
 			(alltodo "Tasks" (
 				(org-agenda-overriding-header "Tasks")
@@ -103,18 +94,15 @@
 (defvar k-org-capture-inbox "main.org")
 (setq org-capture-templates
 	'(
-		;("t" "Todo" entry (file+headline (concat org-directory "main.org") "Calendar") "* TODO %?")
-		("a" "Appontment" entry (file+headline (concat org-directory k-org-capture-inbox) "Calendar") "* A %?")
 		("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
-		("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Calendar") "* T %?")
-		;("j" "Journal" entry (file+datetree (concat org-directory "journal.org")) "* JOURN %<%H:%M> %?")
+		("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
+		("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^T")
 	)
 )
 
 (setq org-hide-block-startup t)
 (setq org-clock-persist t)
 (org-clock-persistence-insinuate)
-;(require 'org-crypt)
 
 (setq org-agenda-window-setup 'current-window)
 (setq org-clone-delete-id t)
@@ -129,10 +117,6 @@
 )
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 ;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
-(defun bh/display-inline-images ()
-  (condition-case nil
-      (org-display-inline-images)
-    (error nil)))
 (setq org-babel-results-keyword "results")
 
 (add-hook 'org-mode-hook
@@ -143,8 +127,7 @@
 	 (org-defkey org-mode-map "\M-:" 
 				 (lambda()
 				   (interactive)
-				   (org-timer-pause-or-continue t)))
-	 (setq org-file-apps (append '(("\\.png\\'" . default)) org-file-apps ))))
+				   (org-timer-pause-or-continue t)))))
 
 (add-hook 'org-agenda-mode-hook
   '(lambda ()
