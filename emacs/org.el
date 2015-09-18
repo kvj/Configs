@@ -67,38 +67,34 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 
-(setq org-agenda-custom-commands '(
+(setq org-agenda-custom-commands 
+      '(
 	("w" "Office"
-		(
-			(agenda "Today" (
-				(org-agenda-overriding-header "Today")
-				(org-agenda-ndays 1)
-				(org-agenda-sorting-strategy '(habit-down time-up todo-state-up priority-down))
-			))
-			(alltodo "Tasks" (
-				(org-agenda-overriding-header "Tasks")
-				(org-agenda-files (directory-files org-directory t "^m.*\.org$"))
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-			(todo "N" (
-				(org-agenda-overriding-header "Next tasks")
-				(org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
-				(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
-			))
-		) (
-			(org-agenda-compact-blocks t)
-		)
-	)
-))
+	 (
+	  (agenda "Today" (
+			   (org-agenda-overriding-header "Today")
+			   (org-agenda-ndays 1)
+			   (org-agenda-sorting-strategy 
+			    '(habit-down time-up todo-state-up priority-down))))
+	  (alltodo "Tasks" (
+			    (org-agenda-overriding-header "Tasks")
+			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
+			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+	  (todo "N" (
+		     (org-agenda-overriding-header "Next tasks")
+		     (org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
+		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))) 
+	 ((org-agenda-compact-blocks t)))))
+
 (setq org-agenda-todo-ignore-scheduled t)
 (defvar k-org-capture-inbox "main.org")
 (setq org-capture-templates
 	'(
-		("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
-		("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
-		("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^T")
+	  ("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
+	  ("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
+	  ("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^T")
+	  )
 	)
-)
 
 (setq org-hide-block-startup t)
 (setq org-clock-persist t)
@@ -121,52 +117,53 @@
 
 (add-hook 'org-mode-hook
   '(lambda ()
-	 (org-defkey org-mode-map "\M-p" 'org-mpw-password)
-	 (org-defkey org-mode-map "\M-o" 
-		     (lambda()
-		       (interactive)
-		       (org-mpw-password t)))
-	 (org-defkey org-mode-map "\M-;" 'org-timer-start)
-	 (org-defkey org-mode-map "\M--" 'org-timer-item)
-	 (org-defkey org-mode-map "\M-:" 
-				 (lambda()
-				   (interactive)
-				   (org-timer-pause-or-continue t)))))
+     
+     (org-defkey org-mode-map "\M-p" 'org-mpw-password)
+     (org-defkey org-mode-map "\M-o" 
+		 (lambda()
+		   (interactive)
+		   (org-mpw-password t)))
+     (org-defkey org-mode-map "\M-;" 'org-timer-start)
+     (org-defkey org-mode-map "\M--" 'org-timer-item)
+     (org-defkey org-mode-map "\M-:" 
+		 (lambda()
+		   (interactive)
+		   (org-timer-pause-or-continue t)))))
 
 (add-hook 'org-agenda-mode-hook
   '(lambda ()
-	(org-defkey org-agenda-mode-map "x" 
-				(lambda () 
-				  (interactive) 
-				  (org-agenda-exit)
-				  (save-buffers-kill-terminal)))
-	(org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
-	(org-defkey org-agenda-mode-map "p" 
-				(lambda () 
-				  (interactive) 
-				  (org-capture nil "p")))
-	(org-defkey org-agenda-mode-map "n" 
-				(lambda () 
-				  (interactive) 
-				  (org-capture nil "n")))))
+     (org-defkey org-agenda-mode-map "x" 
+		 (lambda () 
+		   (interactive) 
+		   (org-agenda-exit)
+		   (save-buffers-kill-terminal)))
+     (org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
+     (org-defkey org-agenda-mode-map "p" 
+		 (lambda () 
+		   (interactive) 
+		   (org-capture nil "p")))
+     (org-defkey org-agenda-mode-map "n" 
+		 (lambda () 
+		   (interactive) 
+		   (org-capture nil "n")))))
 (add-hook 'org-capture-mode-hook
   '(lambda ()
-	(org-defkey org-capture-mode-map "\\"
-				(lambda () 
-				  (interactive) 
-				  (org-capture-finalize nil)))
-	(org-defkey org-capture-mode-map "|" 'org-capture-kill)))
+     (org-defkey org-capture-mode-map "\\"
+		 (lambda () 
+		   (interactive) 
+		   (org-capture-finalize nil)))
+     (org-defkey org-capture-mode-map "|" 'org-capture-kill)))
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero nil)
 (add-hook 'emacs-startup-hook
-		  '(lambda ()
-			 (if k-org-auto-open-agenda-key
-			   (org-agenda nil k-org-auto-open-agenda-key))))
+	  '(lambda ()
+	     (if k-org-auto-open-agenda-key
+		 (org-agenda nil k-org-auto-open-agenda-key))))
 (add-hook 'org-agenda-mode-hook
-		  (lambda ()
-			(add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
-			(auto-save-mode)))
+	  (lambda ()
+	    (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
+	    (auto-save-mode)))
 (add-hook 'org-agenda-after-show-hook
 	  (lambda ()
 	    (if k-org-goto-zero
