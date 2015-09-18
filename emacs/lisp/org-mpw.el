@@ -73,6 +73,31 @@
   :type 'string
   :group 'org-mpw)
 
+(defcustom org-mpw-cache 0
+  "Number of seconds to keep master pass in cache"
+  :type 'integer
+  :group 'org-mpw)
+
+(defvar org-mpw-cached-pass nil)
+(defvar org-mpw-cache-timer nil)
+
+(defun org-mpw-clear-cache ()
+  "Clear cache, if set"
+  (when org-mpw-cache-timer
+    (cancel-timer org-mpw-cache-timer)
+    (setq org-mpw-cache-timer nil))
+  (setq org-mpw-cached-pass nil))
+
+(defun org-mpw-cache-pass (pass)
+  "Cache master pass, if configured"
+  (when (> org-mpw-cache 0)
+    (when org-mpw-cache-timer
+      (cancel-timer org-mpw-cache-timer))
+    (setq org-mpw-cached-pass pass)
+    (setq org-mpw-cache-timer
+	  (run-at-time (format "%d sec" org-mpw-cache) nil 'org-mpw-clear-cache)))
+  pass)
+
 (defun org-mpw-get-name ()
   "Return name"
   (save-excursion
@@ -102,15 +127,17 @@
 	(org-entry-get nil org-mpw-type-property t)
         org-mpw-type-default)))
 
-(defun org-mpw-get-master ()
-  "Read master pass or return cached TODO"
-  (read-passwd "Master pass:"))
+(defun org-mpw-get-master (name)
+  "Read master pass or return cached"
+  (if org-mpw-cached-pass 
+      (org-mpw-cache-pass org-mpw-cached-pass)
+    (org-mpw-cache-pass (read-passwd (format "[%s] Master pass:" name)))))
 
 (defun org-mpw-make-password (name site type count)
   "Call mpw"
   (shell-command-to-string
    (concat
-    "echo " (shell-quote-argument (org-mpw-get-master))
+    "echo " (shell-quote-argument (org-mpw-get-master name))
     "|"
     org-mpw-command
     " -u " (shell-quote-argument name)
