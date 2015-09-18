@@ -18,6 +18,11 @@
   :type 'string
   :group 'org-mpw)
 
+(defcustom org-mpw-command "mpw"
+  "Command to execute"
+  :type 'string
+  :group 'org-mpw)
+
 (defcustom org-mpw-name nil
   "Name to be used"
   :type 'string
@@ -82,6 +87,10 @@
 	((value (cond ((equal tag org-mpw-tag-max) "max")
 		      ((equal tag org-mpw-tag-long) "long")
 		      ((equal tag org-mpw-tag-med) "med")
+		      ((equal tag org-mpw-tag-basic) "basic")
+		      ((equal tag org-mpw-tag-short) "short")
+		      ((equal tag org-mpw-tag-phrase) "phrase")
+		      ((equal tag org-mpw-tag-name) "name")
 		      ((equal tag org-mpw-tag-pin) "pin"))))
       (if value (return value) nil))))
 
@@ -93,15 +102,37 @@
 	(org-entry-get nil org-mpw-type-property t)
         org-mpw-type-default)))
 
+(defun org-mpw-get-master ()
+  "Read master pass or return cached TODO"
+  (read-passwd "Master pass:"))
+
 (defun org-mpw-make-password (name site type count)
   "Call mpw"
-  (print (format "Password: %s %s %s %s" name site type count) t))
+  (shell-command-to-string
+   (concat
+    "echo " (shell-quote-argument (org-mpw-get-master))
+    "|"
+    org-mpw-command
+    " -u " (shell-quote-argument name)
+    " -c " count
+    " -t " type
+    " -s "
+    (shell-quote-argument site))))
 
-(defun org-mpw-password (&optional var)
-  "Print password"
+(defun org-mpw-password (&optional printout)
+  "Copy password to kill-ring or print it out"
   (interactive "P")
-  (let ((name (org-mpw-get-name)))
-    (if name 
-	(org-mpw-make-password name (org-get-heading t t) (org-mpw-get-type) "0"))))
+  (let ((name (org-mpw-get-name)) (site (org-get-heading t t)))
+    (if name
+	(let ((password (org-mpw-make-password
+			 name
+			 site
+			 (org-mpw-get-type)
+			 "1")))
+	  (when (string-match "\n+$" password)
+	    (let ((trimmed (replace-match "" nil nil password)))
+	      (if printout
+		  (message "[%s]: %s" site trimmed)
+		(kill-new trimmed))))))))
 
 (provide 'org-mpw)

@@ -122,6 +122,10 @@
 (add-hook 'org-mode-hook
   '(lambda ()
 	 (org-defkey org-mode-map "\M-p" 'org-mpw-password)
+	 (org-defkey org-mode-map "\M-o" 
+		     (lambda()
+		       (interactive)
+		       (org-mpw-password t)))
 	 (org-defkey org-mode-map "\M-;" 'org-timer-start)
 	 (org-defkey org-mode-map "\M--" 'org-timer-item)
 	 (org-defkey org-mode-map "\M-:" 
