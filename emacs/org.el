@@ -1,4 +1,4 @@
-(setq mark-diary-entries-in-calendar t)
+(setq mark-diary-entries-in-calendar nil)
 (setq org-agenda-files (directory-files org-directory t "^[a-z].*\.org$"))
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
@@ -92,7 +92,7 @@
 	'(
 	  ("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
 	  ("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
-	  ("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^T")
+	  ("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^t")
 	  )
 	)
 
