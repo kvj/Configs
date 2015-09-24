@@ -123,6 +123,14 @@
 		 (lambda()
 		   (interactive)
 		   (org-mpw-password t)))
+     (org-defkey org-mode-map "\M-i" 
+		 (lambda()
+		   (interactive)
+		   (org-mpw-encrypt t)))
+     (org-defkey org-mode-map "\M-k" 
+		 (lambda()
+		   (interactive)
+		   (org-mpw-decrypt t)))
      (org-defkey org-mode-map "\M-;" 'org-timer-start)
      (org-defkey org-mode-map "\M--" 'org-timer-item)
      (org-defkey org-mode-map "\M-:" 

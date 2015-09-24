@@ -78,6 +78,16 @@
   :type 'integer
   :group 'org-mpw)
 
+(defcustom org-mpw-openssl "openssl"
+  "Path to openssl executable"
+  :type 'string
+  :group 'org-mpw)
+
+(defcustom org-mpw-openssl-cipher "aes256"
+  "Symmetric encryption cipher"
+  :type 'string
+  :group 'org-mpw)
+
 (defvar org-mpw-cached-pass nil)
 (defvar org-mpw-cache-timer nil)
 
@@ -133,6 +143,12 @@
       (org-mpw-cache-pass org-mpw-cached-pass)
     (org-mpw-cache-pass (read-passwd (format "[%s] Master pass:" name)))))
 
+(defun org-mpw-trim (text)
+  "Trim input string"
+  (if (string-match "\n+$" text)
+      (replace-match "" nil nil text)
+    text))
+
 (defun org-mpw-make-password (name site type count)
   "Call mpw"
   (shell-command-to-string
@@ -146,9 +162,33 @@
     " -s "
     (shell-quote-argument site))))
 
-(defun org-mpw-password (&optional printout)
-  "Copy password to kill-ring or print it out"
-  (interactive "P")
+(defun org-mpw-openssl-encrypt (password text)
+  "Encrypt with openssl"
+  (shell-command-to-string
+   (concat
+    "echo " (shell-quote-argument text)
+    "|"
+    org-mpw-openssl
+    " enc"
+    (concat " -" org-mpw-openssl-cipher)
+    " -base64 -A"
+    " -pass " (shell-quote-argument (concat "pass:" password)))))
+
+(defun org-mpw-openssl-decrypt (password text)
+  "Decrypt with openssl"
+  (org-mpw-trim (shell-command-to-string
+   (concat
+    "echo " (shell-quote-argument text)
+    "|"
+    org-mpw-openssl
+    " enc"
+    (concat " -" org-mpw-openssl-cipher)
+    " -base64 -A"
+    " -d"
+    " -pass " (shell-quote-argument (concat "pass:" password))))))
+
+(defun org-mpw-current-password ()
+  "Return password for current heading"
   (let ((name (org-mpw-get-name)) (site (org-get-heading t t)))
     (if name
 	(let ((password (org-mpw-make-password
@@ -156,10 +196,43 @@
 			 site
 			 (org-mpw-get-type)
 			 "1")))
-	  (when (string-match "\n+$" password)
-	    (let ((trimmed (replace-match "" nil nil password)))
+	  (org-mpw-trim password))
+      nil)))
+
+(defun org-mpw-password (&optional printout)
+  "Copy password to kill-ring or print it out"
+  (interactive "P")
+  (let ((password (org-mpw-current-password)))
+    (if password
+	(if printout
+	    (message "[%s]: %s" (org-get-heading t t) password)
+	  (kill-new password))
+      (message "No password available!"))))
+
+(defun org-mpw-encrypt (&optional printout)
+  "Copy encrypted input to kill-ring or insert it to current buffer"
+  (interactive "P")
+  (let ((password (org-mpw-current-password)) (input (read-string "Enter text:")))
+    (if (and password input)
+	(let ((encrypted (org-mpw-openssl-encrypt password input)))
+	  (if encrypted
 	      (if printout
-		  (message "[%s]: %s" site trimmed)
-		(kill-new trimmed))))))))
+		  (insert encrypted)
+		(kill-new encrypted))
+	    nil))
+      (message "No password available!"))))
+
+(defun org-mpw-decrypt (&optional printout)
+  "Copy decrypted current word to kill-ring or print it out"
+  (interactive "P")
+  (let ((password (org-mpw-current-password)) (input (current-word)))
+    (if (and password input)
+	(let ((decrypted (org-mpw-openssl-decrypt password input)))
+	  (if decrypted
+	      (if printout
+		  (message "Decrypted: %s" decrypted)
+		(kill-new decrypted))
+	    nil))
+      (message "No password available!"))))
 
 (provide 'org-mpw)
