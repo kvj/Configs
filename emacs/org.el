@@ -26,7 +26,8 @@
 (setq org-habit-done-word "M")
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-modules (quote (org-info org-habit org-timer)))
-(defvar k-org-capture-inbox "main.org")
+(defvar k-org-capture-inbox "m_.org")
+(defvar k-org-capture-inbox-main "main.org")
 (setq org-todo-keywords
            '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
 	         (sequence "H(h)" "|" "M(m)")
@@ -79,22 +80,18 @@
 	  (alltodo "Tasks" (
 			    (org-agenda-overriding-header "Tasks")
 			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
-			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-	  (todo "N" (
-		     (org-agenda-overriding-header "Next tasks")
-		     (org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
-		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))) 
+			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))))
 
 (setq org-agenda-todo-ignore-scheduled t)
-(defvar k-org-capture-inbox "main.org")
 (setq org-capture-templates
-	'(
-	  ("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
-	  ("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
-	  ("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  SCHEDULED: %^t")
-	  )
+      '(
+	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
+	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
+	("P" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
+	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")
 	)
+      )
 
 (setq org-hide-block-startup t)
 (setq org-clock-persist t)
@@ -146,10 +143,21 @@
 		   (org-agenda-exit)
 		   (save-buffers-kill-terminal)))
      (org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
+     (org-defkey org-agenda-mode-map "g" 
+		 (lambda () 
+		   (interactive)
+		   (let (
+			 (marker (org-id-find "Main_Journal")))
+		     (let ((point (list "Journal in main.org" "main.org" "main org" marker)))
+		       (org-agenda-refile :rfloc point)))))
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
 		   (org-capture nil "p")))
+     (org-defkey org-agenda-mode-map "P" 
+		 (lambda () 
+		   (interactive) 
+		   (org-capture nil "P")))
      (org-defkey org-agenda-mode-map "n" 
 		 (lambda () 
 		   (interactive) 
