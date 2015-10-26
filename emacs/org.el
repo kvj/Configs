@@ -28,6 +28,8 @@
 (setq org-modules (quote (org-info org-habit org-timer)))
 (defvar k-org-capture-inbox "m_.org")
 (defvar k-org-capture-inbox-main "main.org")
+(defvar k-org-agenda-refile-id nil)
+(setq k-org-agenda-refile-id "Main_Journal")
 (setq org-todo-keywords
            '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
 	         (sequence "H(h)" "|" "M(m)")
@@ -112,6 +114,12 @@
 ;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
 (setq org-babel-results-keyword "results")
 
+(defun k-org-id-to-rfloc (id)
+  (when id
+    (let ((marker (org-id-find id)))
+      (when marker
+	(list id (car marker) id (cdr marker))))))
+
 (add-hook 'org-mode-hook
   '(lambda ()
      
@@ -140,16 +148,22 @@
      (org-defkey org-agenda-mode-map "x" 
 		 (lambda () 
 		   (interactive) 
+		   (org-save-all-org-buffers)
 		   (org-agenda-exit)
 		   (save-buffers-kill-terminal)))
      (org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
      (org-defkey org-agenda-mode-map "g" 
 		 (lambda () 
 		   (interactive)
-		   (let (
-			 (marker (org-id-find "Main_Journal")))
-		     (let ((point (list "Journal in main.org" "main.org" "main org" marker)))
-		       (org-agenda-refile :rfloc point)))))
+		   (let ((rfloc (k-org-id-to-rfloc k-org-agenda-refile-id)))
+		     (if rfloc
+			 (org-agenda-refile nil rfloc)
+		       (message "k-org-agenda-refile-id is invalid ID")))))
+     (org-defkey org-agenda-mode-map "r"
+		 (lambda () 
+		   (interactive)
+		   (org-save-all-org-buffers)
+		   (org-agenda-redo)))
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
