@@ -145,22 +145,23 @@
 
 (defun org-mpw-trim (text)
   "Trim input string"
-  (if (string-match "\n+$" text)
+  (if (string-match "[\r\n\t ]+$" text)
       (replace-match "" nil nil text)
     text))
 
 (defun org-mpw-make-password (name site type count)
   "Call mpw"
-  (shell-command-to-string
-   (concat
-    "echo " (shell-quote-argument (org-mpw-get-master name))
-    "|"
-    org-mpw-command
-    " -u " (shell-quote-argument name)
-    " -c " count
-    " -t " type
-    " -s "
-    (shell-quote-argument site))))
+  (org-mpw-trim 
+   (shell-command-to-string
+    (concat
+     "echo " (shell-quote-argument (org-mpw-get-master name))
+     "|"
+     org-mpw-command
+     " -u " (shell-quote-argument name)
+     " -c " count
+     " -t " type
+     " -s "
+     (shell-quote-argument site)))))
 
 (defun org-mpw-openssl-encrypt (password text)
   "Encrypt with openssl"
@@ -191,12 +192,7 @@
   "Return password for current heading"
   (let ((name (org-mpw-get-name)) (site (org-get-heading t t)))
     (if name
-	(let ((password (org-mpw-make-password
-			 name
-			 site
-			 (org-mpw-get-type)
-			 "1")))
-	  (org-mpw-trim password))
+	(org-mpw-make-password name site (org-mpw-get-type) "1")
       nil)))
 
 (defun org-mpw-password (&optional printout)
@@ -215,6 +211,7 @@
   (let ((password (org-mpw-current-password)) (input (read-string "Enter text:")))
     (if (and password input)
 	(let ((encrypted (org-mpw-openssl-encrypt password input)))
+	  ;(message "Encrypt %s with %s" input password)
 	  (if encrypted
 	      (if printout
 		  (insert encrypted)
@@ -228,11 +225,64 @@
   (let ((password (org-mpw-current-password)) (input (current-word)))
     (if (and password input)
 	(let ((decrypted (org-mpw-openssl-decrypt password input)))
+	  ;(message "Decrypt %s with %s" input password)
 	  (if decrypted
 	      (if printout
 		  (message "Decrypted: %s" decrypted)
 		(kill-new decrypted))
 	    nil))
       (message "No password available!"))))
+
+(defun org-mpw-encrypt-replace-region (&optional arg)
+  (interactive "P")
+  (if (and transient-mark-mode mark-active
+           (not (eq (region-beginning) (region-end))))
+      (let (
+	    (input (filter-buffer-substring (region-beginning) (region-end) t))
+	    (password (org-mpw-current-password)))
+	(when (and input password)
+	  (insert (org-mpw-openssl-encrypt password input))))))
+
+(defun org-mpw-keepass-csv-to-org (&optional arg)
+  (interactive "P")
+  (let (
+       (lines (split-string (car kill-ring) "\n"))
+       (items (list ()))
+       (index 0)
+       (name (org-mpw-get-name)))
+    (while (< index (length lines))
+      (setq data (org-mpw-trim (nth index lines)))
+      (when (> (length data) 0)
+	;(message "Step: %d %s %s" index data(substring data -1))
+	(while (not (equal "\"" (substring data -1)))
+	  (setq index (1+ index))
+	  (setq data (concat data "\n" (org-mpw-trim (nth index lines)))))
+	;(message "Line: %s" data)
+	(let (
+	      (parts (split-string (substring data 1 -1) "\",\""))
+	      (item "* "))
+	  (let (
+		(title (nth 0 parts))
+		(user (nth 1 parts))
+		(pass (org-mpw-trim (nth 2 parts)))
+		(url (nth 3 parts))
+		(memo (nth 4 parts))
+		(password (org-mpw-make-password name (nth 0 parts) org-mpw-type-default "1")))
+	    (setq item (concat item title "\n "))
+	    (when (not (= 0 (length user)))
+	      (setq item (concat item " Username: " user)))
+	    (when (not (= 0 (length pass)))
+	      (let ((encrypted (org-mpw-openssl-encrypt password pass)))
+		;(message "Pass: [%s %s %s]" encrypted pass password)
+		(setq item (concat item " Password: " encrypted))))
+	    (setq item (concat item "\n"))
+	    (when (not (or (= 0 (length url)) (equal url "http://")))
+	      (setq item (concat item "  [[" url "]]\n")))
+	    (when (not (= 0 (length memo)))
+	      (setq item (concat item (mapconcat 
+				       (function (lambda (x) (concat "  " x "\n")))
+				       (split-string memo "\n") ""))))
+	    (insert item))))
+      (setq index (1+ index)))))
 
 (provide 'org-mpw)

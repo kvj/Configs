@@ -122,8 +122,6 @@
 
 (add-hook 'org-mode-hook
   '(lambda ()
-     
-     (org-defkey org-mode-map "\M-p" 'org-mpw-password)
      (org-defkey org-mode-map "\M-o" 
 		 (lambda()
 		   (interactive)
@@ -136,6 +134,7 @@
 		 (lambda()
 		   (interactive)
 		   (org-mpw-decrypt t)))
+     (org-defkey org-mode-map "\M-p" 'org-mpw-encrypt-replace-region)
      (org-defkey org-mode-map "\M-;" 'org-timer-start)
      (org-defkey org-mode-map "\M--" 'org-timer-item)
      (org-defkey org-mode-map "\M-:" 
@@ -188,16 +187,16 @@
 (defvar k-org-goto-zero nil)
 (add-hook 'emacs-startup-hook
 	  '(lambda ()
-	     (if k-org-auto-open-agenda-key
-		 (org-agenda nil k-org-auto-open-agenda-key))))
+	     (when k-org-auto-open-agenda-key
+	       (org-agenda nil k-org-auto-open-agenda-key))))
 (add-hook 'org-agenda-mode-hook
 	  (lambda ()
 	    (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
 	    (auto-save-mode)))
 (add-hook 'org-agenda-after-show-hook
 	  (lambda ()
-	    (if k-org-goto-zero
-		(goto-char (point-at-bol)))))
+	    (when k-org-goto-zero
+	      (goto-char (point-at-bol)))))
 
 (setq org-mpw-name "Konstantin")
 
