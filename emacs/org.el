@@ -32,13 +32,13 @@
 (setq k-org-agenda-refile-id "Main_Journal")
 (setq org-todo-keywords
            '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
-	         (sequence "H(h)" "|" "M(m)")
+	         (sequence "H(h)" "|" "M(m@)")
 	        )
 )
 (setq org-refile-use-outline-path file)
 (setq org-outline-path-complete-in-steps t)
 (setq org-refile-targets (quote (
-	(nil :maxlevel . 9)
+	(nil :maxlevel . 2)
 	(org-agenda-files :level . 1)
 )))
 (setq org-refile-allow-creating-parent-nodes "confirm")
@@ -91,9 +91,7 @@
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
 	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
 	("P" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  %T")
-	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")
-	)
-      )
+	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")))
 
 (setq org-hide-block-startup t)
 (setq org-clock-persist t)
@@ -107,9 +105,7 @@
          (dot . t)
          (ditaa . t)
          (org . t)
-         (plantuml . t))
- )
-)
+         (plantuml . t))))
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 ;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
 (setq org-babel-results-keyword "results")
@@ -120,21 +116,21 @@
       (when marker
 	(list id (car marker) id (cdr marker))))))
 
+;;     (org-defkey org-mode-map "\M-o" 
+;;		 (lambda()
+;;		   (interactive)
+;;		   (org-mpw-password t)))
+;;     (org-defkey org-mode-map "\M-i" 
+;;		 (lambda()
+;;		   (interactive)
+;;		   (org-mpw-encrypt t)))
+;;     (org-defkey org-mode-map "\M-k" 
+;;		 (lambda()
+;;		   (interactive)
+;;		   (org-mpw-decrypt t)))
+;;     (org-defkey org-mode-map "\M-p" 'org-mpw-encrypt-replace-region)
 (add-hook 'org-mode-hook
   '(lambda ()
-     (org-defkey org-mode-map "\M-o" 
-		 (lambda()
-		   (interactive)
-		   (org-mpw-password t)))
-     (org-defkey org-mode-map "\M-i" 
-		 (lambda()
-		   (interactive)
-		   (org-mpw-encrypt t)))
-     (org-defkey org-mode-map "\M-k" 
-		 (lambda()
-		   (interactive)
-		   (org-mpw-decrypt t)))
-     (org-defkey org-mode-map "\M-p" 'org-mpw-encrypt-replace-region)
      (org-defkey org-mode-map "\M-;" 'org-timer-start)
      (org-defkey org-mode-map "\M--" 'org-timer-item)
      (org-defkey org-mode-map "\M-:" 
@@ -198,6 +194,6 @@
 	    (when k-org-goto-zero
 	      (goto-char (point-at-bol)))))
 
-(setq org-mpw-name "Konstantin")
-
-(require 'org-mpw)
+;(setq org-mpw-name "Konstantin")
+;
+;(require 'org-mpw)

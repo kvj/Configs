@@ -42,6 +42,8 @@
 ;(require 'image)
 (global-visual-line-mode t)
 (global-set-key (kbd "C-q") 'other-window)
+(global-set-key (kbd "C-d") 'switch-to-buffer)
+(global-set-key (kbd "C-f") 'delete-window)
 (setq inhibit-splash-screen t)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
@@ -62,3 +64,14 @@
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d C" x)) (kbd (format "%s<right>" tkey)))
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d D" x)) (kbd (format "%s<left>" tkey)))
 			 (setq x (+ x 1))))))
+
+(require 'move-text)
+(move-text-default-bindings)
+(defun save-buffer-if-visiting-file (&optional args)
+  "Save buffer on auto-save"
+  (interactive)
+  (if (and (buffer-file-name) (buffer-modified-p))
+      (save-buffer args)))
+(add-hook 'auto-save-hook 'save-buffer-if-visiting-file)
+
+(setq auto-save-interval 100)
