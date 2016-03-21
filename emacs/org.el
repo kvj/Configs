@@ -26,15 +26,17 @@
 (setq org-habit-done-word "M")
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-modules (quote (org-info org-habit org-timer)))
+(setq org-habit-show-habits-only-for-today nil)
+(setq org-habit-preceding-days 7)
+(setq org-habit-following-days 2)
+(setq org-habit-graph-column 43)
 (defvar k-org-capture-inbox "m_.org")
 (defvar k-org-capture-inbox-main "main.org")
 (defvar k-org-agenda-refile-id nil)
 (setq k-org-agenda-refile-id "Main_Journal")
 (setq org-todo-keywords
-           '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
-	         (sequence "H(h)" "|" "M(m@)")
-	        )
-)
+      '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
+	(sequence "H(h)" "|" "M(m@)")))
 (setq org-refile-use-outline-path file)
 (setq org-outline-path-complete-in-steps t)
 (setq org-refile-targets (quote (
@@ -78,7 +80,7 @@
 			   (org-agenda-overriding-header "Today")
 			   (org-agenda-ndays 1)
 			   (org-agenda-sorting-strategy 
-			    '(habit-down time-up todo-state-up priority-down))))
+			    '(time-up todo-state-up priority-down))))
 	  (alltodo "Tasks" (
 			    (org-agenda-overriding-header "Tasks")
 			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
@@ -90,8 +92,9 @@
       '(
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
 	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
-	("P" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  %T")
-	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")))
+	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  %T")
+	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")
+	("e" "Event" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* A %? %^t")))
 
 (setq org-hide-block-startup t)
 (setq org-clock-persist t)
@@ -115,7 +118,11 @@
     (let ((marker (org-id-find id)))
       (when marker
 	(list id (car marker) id (cdr marker))))))
-
+(defun k-org-copy-refile (refile-keep)
+  (let ((rfloc (k-org-id-to-rfloc k-org-agenda-refile-id)) (org-refile-keep refile-keep))
+    (if rfloc
+	(org-agenda-refile nil rfloc)
+      (message "k-org-agenda-refile-id is invalid ID"))))
 ;;     (org-defkey org-mode-map "\M-o" 
 ;;		 (lambda()
 ;;		   (interactive)
@@ -150,10 +157,11 @@
      (org-defkey org-agenda-mode-map "g" 
 		 (lambda () 
 		   (interactive)
-		   (let ((rfloc (k-org-id-to-rfloc k-org-agenda-refile-id)))
-		     (if rfloc
-			 (org-agenda-refile nil rfloc)
-		       (message "k-org-agenda-refile-id is invalid ID")))))
+		   (k-org-copy-refile t)))
+     (org-defkey org-agenda-mode-map "G"
+		 (lambda () 
+		   (interactive)
+		   (k-org-copy-refile nil)))
      (org-defkey org-agenda-mode-map "r"
 		 (lambda () 
 		   (interactive)
@@ -163,10 +171,10 @@
 		 (lambda () 
 		   (interactive) 
 		   (org-capture nil "p")))
-     (org-defkey org-agenda-mode-map "P" 
+     (org-defkey org-agenda-mode-map "i" 
 		 (lambda () 
 		   (interactive) 
-		   (org-capture nil "P")))
+		   (org-capture nil "i")))
      (org-defkey org-agenda-mode-map "n" 
 		 (lambda () 
 		   (interactive) 
