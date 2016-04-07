@@ -75,3 +75,9 @@
 (add-hook 'auto-save-hook 'save-buffer-if-visiting-file)
 
 (setq auto-save-interval 100)
+(setq neo-theme 'ascii)
+(setq neo-keymap-style 'concise)
+(setq neo-window-width 35)
+(setq neo-smart-open t)
+(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
+
