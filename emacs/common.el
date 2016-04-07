@@ -44,6 +44,7 @@
 (global-set-key (kbd "C-q") 'other-window)
 (global-set-key (kbd "C-d") 'switch-to-buffer)
 (global-set-key (kbd "C-f") 'delete-window)
+(global-set-key (kbd "C-t") 'outline-toggle-children)
 (setq inhibit-splash-screen t)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
@@ -67,6 +68,10 @@
 
 (require 'move-text)
 (move-text-default-bindings)
+
+(setq outline-regexp "\\s-*")
+(setq outline-heading-end-regexp "\\(:\\|;\\)\n")
+
 (defun save-buffer-if-visiting-file (&optional args)
   "Save buffer on auto-save"
   (interactive)
@@ -81,3 +86,5 @@
 (setq neo-smart-open t)
 (setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
 
+(add-to-list 'auto-mode-alist 
+	     '("\\.ttt\\(\\.[0-9]+\\)?$" . outline-minor-mode))
