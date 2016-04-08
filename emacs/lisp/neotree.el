@@ -172,11 +172,6 @@ buffer-local wherever it is set."
   :type 'string
   :group 'neotree)
 
-(defcustom neo-archive-tmpl "${d}${f}.archive"
-  "*The banner message of neotree window."
-  :type 'string
-  :group 'neotree)
-
 (defcustom neo-show-updir-line t
   "*If non-nil, show the updir line (..)."
   :type 'boolean
@@ -543,7 +538,6 @@ The car of the pair will store fullpath, and cdr will store line number.")
       (define-key map (kbd "C-c C-r") 'neotree-rename-node))
      ((eq neo-keymap-style 'concise)
       (define-key map (kbd "C") 'neotree-change-root)
-      (define-key map (kbd "a") 'neotree-make-archive)
       (define-key map (kbd "c") 'neotree-create-node)
       (define-key map (kbd "+") 'neotree-create-node)
       (define-key map (kbd "d") 'neotree-delete-node)
@@ -1752,34 +1746,6 @@ If the current node is the first node then the last node is selected."
         (mkdir filename)
         (neo-buffer--save-cursor-pos filename)
         (neo-buffer--refresh nil)))))
-
-(defun neotree-make-archive ()
-  "Make archive according to template"
-  (interactive)
-  (let* ((filename (neo-buffer--get-filename-current-line)))
-    (catch 'end
-      (if (null filename) (throw 'end nil))
-      (if (not (file-exists-p filename)) (throw 'end nil))
-      (if (not (yes-or-no-p (format "Do you really want to archive %S?" filename)))
-          (throw 'end nil))
-      (if (file-directory-p filename)
-	  (throw 'end nil)) ; Directory - ignore
-      (let* ((newfile 
-	      (expand-file-name 
-	       (format-time-string 
-		(replace-regexp-in-string 
-		 "${f}" 
-		 (file-name-nondirectory filename) 
-		 (replace-regexp-in-string
-		  "${d}"
-		  (file-name-directory filename) neo-archive-tmpl))))))
-	(if (not (file-exists-p (file-name-directory newfile)))
-	    (make-directory (file-name-directory newfile) t))
-	(if (file-exists-p newfile)
-	    (if (not (yes-or-no-p (format "Do you want to override %S?" newfile)))
-		(throw 'end nil)))
-	(copy-file filename newfile t)
-	(message "Archived to: %S" newfile)))))
 
 (defun neotree-delete-node ()
   "Delete current node."

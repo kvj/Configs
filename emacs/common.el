@@ -45,6 +45,7 @@
 (global-set-key (kbd "C-d") 'switch-to-buffer)
 (global-set-key (kbd "C-f") 'delete-window)
 (global-set-key (kbd "C-t") 'outline-toggle-children)
+(global-set-key (kbd "C-M-t") 'ttt-hide-marked)
 (setq inhibit-splash-screen t)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
@@ -66,18 +67,11 @@
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d D" x)) (kbd (format "%s<left>" tkey)))
 			 (setq x (+ x 1))))))
 
+(setq ttt-auto-hide-pattern "^\\S-.*;$")
+
 (require 'move-text)
+(require 'ttt)
 (move-text-default-bindings)
-
-(setq outline-regexp "\\s-*")
-(setq outline-heading-end-regexp "\\(:\\|;\\)\n")
-
-(defun save-buffer-if-visiting-file (&optional args)
-  "Save buffer on auto-save"
-  (interactive)
-  (if (and (buffer-file-name) (buffer-modified-p))
-      (save-buffer args)))
-(add-hook 'auto-save-hook 'save-buffer-if-visiting-file)
 
 (setq auto-save-interval 100)
 (setq neo-theme 'ascii)
@@ -87,4 +81,4 @@
 (setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
 
 (add-to-list 'auto-mode-alist 
-	     '("\\.ttt\\(\\.[0-9]+\\)?$" . outline-minor-mode))
+	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
