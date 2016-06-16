@@ -70,7 +70,7 @@
 (setq ttt-auto-hide-pattern "^\\S-.*;$")
 
 (require 'move-text)
-(require 'ttt)
+;(require 'ttt)
 (move-text-default-bindings)
 
 (setq auto-save-interval 100)
@@ -80,5 +80,5 @@
 (setq neo-smart-open t)
 (setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
 
-(add-to-list 'auto-mode-alist 
-	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
+;(add-to-list 'auto-mode-alist 
+;	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
