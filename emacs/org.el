@@ -76,19 +76,18 @@
       '(
 	("w" "Office"
 	 (
-	  (todo "N" (
-		     (org-agenda-overriding-header "Next")
-		     (org-agenda-files (directory-files org-directory t "^p.*\.org$"))
-		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (agenda "Today" (
 			   (org-agenda-overriding-header "Today")
 			   (org-agenda-ndays 1)
-			   (org-agenda-sorting-strategy 
-			    '(time-up todo-state-up priority-down))))
+			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
 	  (alltodo "Tasks" (
 			    (org-agenda-overriding-header "Tasks")
 			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
-			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
+			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+	  (todo "N" (
+		     (org-agenda-overriding-header "Next")
+		     (org-agenda-files (directory-files org-directory t "^p.*\.org$"))
+		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))))
 
 (setq org-agenda-todo-ignore-scheduled t)
