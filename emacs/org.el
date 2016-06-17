@@ -80,8 +80,8 @@
 			   (org-agenda-overriding-header "Today")
 			   (org-agenda-ndays 1)
 			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-	  (alltodo "Tasks" (
-			    (org-agenda-overriding-header "Tasks")
+	  (tags-todo "+Mode<>\"Scheduled\"" (
+			    (org-agenda-overriding-header "Inbox")
 			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
 			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (todo "N" (
