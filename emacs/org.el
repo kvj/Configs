@@ -88,7 +88,12 @@
 		     (org-agenda-overriding-header "Next")
 		     (org-agenda-files (directory-files org-directory t "^p.*\.org$"))
 		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
-	 ((org-agenda-compact-blocks t)))))
+	 ((org-agenda-compact-blocks t)))
+	("a" "Tasks" (
+		      (todo "" (
+				(org-agenda-overriding-header "Tasks")
+				(org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
+				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))))
 
 (setq org-agenda-todo-ignore-scheduled t)
 (setq org-capture-templates
@@ -126,19 +131,6 @@
     (if rfloc
 	(org-agenda-refile nil rfloc)
       (message "k-org-agenda-refile-id is invalid ID"))))
-;;     (org-defkey org-mode-map "\M-o" 
-;;		 (lambda()
-;;		   (interactive)
-;;		   (org-mpw-password t)))
-;;     (org-defkey org-mode-map "\M-i" 
-;;		 (lambda()
-;;		   (interactive)
-;;		   (org-mpw-encrypt t)))
-;;     (org-defkey org-mode-map "\M-k" 
-;;		 (lambda()
-;;		   (interactive)
-;;		   (org-mpw-decrypt t)))
-;;     (org-defkey org-mode-map "\M-p" 'org-mpw-encrypt-replace-region)
 (add-hook 'org-mode-hook
   '(lambda ()
      (org-defkey org-mode-map "\M-;" 'org-timer-start)
@@ -204,7 +196,3 @@
 	  (lambda ()
 	    (when k-org-goto-zero
 	      (goto-char (point-at-bol)))))
-
-;(setq org-mpw-name "Konstantin")
-;
-;(require 'org-mpw)
