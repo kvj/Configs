@@ -2,10 +2,9 @@
 (setq org-agenda-files (directory-files org-directory t "^[a-z].*\.org$"))
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
-(setq org-agenda-skip-deadline-if-done t)
 (setq org-deadline-warning-days 2)
+(setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
-;(setq org-popup-calendar-for-date-prompt nil) ; Add to mobile
 (setq org-hide-leading-stars t)
 (setq org-log-done 'time)
 (setq org-special-ctrl-a/e t)
@@ -35,7 +34,7 @@
 (defvar k-org-agenda-refile-id nil)
 (setq k-org-agenda-refile-id "Main_Journal")
 (setq org-todo-keywords
-      '((sequence "T(t)" "N(n)" "?(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
+      '((sequence "T(t)" "N(n)" "W(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
 	(sequence "H(h)" "|" "M(m@)")))
 (setq org-refile-use-outline-path file)
 (setq org-outline-path-complete-in-steps t)
@@ -46,10 +45,10 @@
 (setq org-refile-allow-creating-parent-nodes "confirm")
 (setq org-todo-keyword-faces '(
 	("N" :foreground "brightblue" :weight: bold)
-	("?" :foreground "white" :weight: bold)
+	("W" :foreground "white" :weight: bold)
 	("A" :foreground "magenta" :weight: bold)
-    ("X" :foreground "gray" :weight: bold)
-    ("H" :foreground "green")
+	("X" :foreground "gray" :weight: bold)
+	("H" :foreground "green")
 ))
 
 (setq org-capture-use-agenda-date nil)
@@ -72,6 +71,19 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 
+(setq org-speed-commands-user
+      '(
+	("s" . org-schedule)
+	("d" . org-deadline)
+	("z" . org-narrow-to-subtree)
+	("x" . widen)
+	("e" . (lambda ()
+		 (org-agenda nil "w")))
+	("." . (lambda ()
+		 (when k-org-auto-open-agenda-key
+		   (org-agenda nil k-org-auto-open-agenda-key))))
+	("k" . org-capture)))
+
 (setq org-agenda-custom-commands 
       '(
 	("w" "Office"
@@ -91,6 +103,7 @@
 	 ((org-agenda-compact-blocks t)))))
 
 (setq org-agenda-todo-ignore-scheduled t)
+
 (setq org-capture-templates
       '(
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
@@ -170,6 +183,9 @@
 		   (interactive)
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
+     (org-defkey org-agenda-mode-map "c"
+		 (lambda () 
+		   (interactive)))
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
@@ -203,6 +219,7 @@
 (add-hook 'org-agenda-after-show-hook
 	  (lambda ()
 	    (when k-org-goto-zero
+	      (org-back-to-heading t)
 	      (goto-char (point-at-bol)))))
 
 ;(setq org-mpw-name "Konstantin")
