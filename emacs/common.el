@@ -1,14 +1,9 @@
-;(set-default-font "Ubuntu Mono-10")
-;(setq default-directory "~")
-;(cd "~")
 (put 'upcase-region 'disabled nil)
 (menu-bar-mode 0)
 (windmove-default-keybindings)
-;(tool-bar-mode nil)
 (column-number-mode t)
 (global-hl-line-mode t)
 (blink-cursor-mode t)
-;(cua-mode t)
 (setq ps-paper-type 'a4)
 (setq initial-buffer-choice t)
 (setq tab-width 2)
@@ -39,13 +34,11 @@
 (set-keyboard-coding-system 'utf-8)
 (setq global-auto-revert-mode t)
 (global-auto-revert-mode t)
-;(require 'image)
 (global-visual-line-mode t)
 (global-set-key (kbd "C-q") 'other-window)
 (global-set-key (kbd "C-d") 'switch-to-buffer)
 (global-set-key (kbd "C-f") 'delete-window)
 (global-set-key (kbd "C-t") 'outline-toggle-children)
-(global-set-key (kbd "C-M-t") 'ttt-hide-marked)
 (setq inhibit-splash-screen t)
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
@@ -67,10 +60,13 @@
 			 (define-key key-translation-map (kbd (format "M-[ 1 ; %d D" x)) (kbd (format "%s<left>" tkey)))
 			 (setq x (+ x 1))))))
 
-(setq ttt-auto-hide-pattern "^\\S-.*;$")
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
+
 
 (require 'move-text)
-;(require 'ttt)
 (move-text-default-bindings)
 
 (setq auto-save-interval 100)
@@ -78,7 +74,10 @@
 (setq neo-keymap-style 'concise)
 (setq neo-window-width 35)
 (setq neo-smart-open t)
-(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
 
+;(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
+;(setq ttt-auto-hide-pattern "^\\S-.*;$")
+;(require 'ttt)
 ;(add-to-list 'auto-mode-alist 
 ;	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
+;(global-set-key (kbd "C-M-t") 'ttt-hide-marked)
