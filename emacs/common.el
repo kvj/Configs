@@ -75,6 +75,17 @@
 (setq neo-window-width 35)
 (setq neo-smart-open t)
 
+(defvar k-auto-save nil)
+
+(defun k-save-buffer-if-visiting-file (&optional args)
+  "Save buffer on auto-save"
+  (interactive)
+  (if (and (buffer-file-name) (buffer-modified-p))
+      (save-buffer args)))
+
+(when k-auto-save
+  (add-hook 'auto-save-hook 'k-save-buffer-if-visiting-file :local t))
+
 ;(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
 ;(setq ttt-auto-hide-pattern "^\\S-.*;$")
 ;(require 'ttt)
