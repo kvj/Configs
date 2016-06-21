@@ -73,8 +73,9 @@
 
 (setq org-speed-commands-user
       '(
-	("s" . org-schedule)
-	("d" . org-deadline)
+	("c" . org-schedule)
+	("y" . org-deadline)
+	("s" . org-save-all-org-buffers)
 	("z" . org-narrow-to-subtree)
 	("x" . widen)
 	("e" . (lambda ()
@@ -175,9 +176,8 @@
 		   (interactive)
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
-     (org-defkey org-agenda-mode-map "c"
-		 (lambda () 
-		   (interactive)))
+     (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
+     (org-defkey org-agenda-mode-map "y" 'org-agenda-deadline)
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
