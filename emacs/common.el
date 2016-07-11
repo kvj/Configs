@@ -86,9 +86,9 @@
 (when k-auto-save
   (add-hook 'auto-save-hook 'k-save-buffer-if-visiting-file :local t))
 
-;(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
-;(setq ttt-auto-hide-pattern "^\\S-.*;$")
-;(require 'ttt)
-;(add-to-list 'auto-mode-alist 
-;	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
-;(global-set-key (kbd "C-M-t") 'ttt-hide-marked)
+(setq neo-archive-tmpl "${d}.archive/${f}.%y%m%d")
+(setq ttt-auto-hide-pattern "^\\S-.*;$")
+(require 'ttt)
+(add-to-list 'auto-mode-alist 
+	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
+(global-set-key (kbd "C-M-t") 'ttt-hide-marked)
