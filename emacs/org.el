@@ -1,3 +1,4 @@
+
 (setq mark-diary-entries-in-calendar nil)
 (setq org-agenda-files (directory-files org-directory t "^[a-z].*\.org$"))
 (setq org-agenda-include-all-todo nil)
@@ -63,6 +64,7 @@
 (setq org-cycle-separator-lines 0)
 (setq org-catch-invisible-edits 'error)
 (setq org-agenda-current-time-string ">> - - - - - - -")
+(setq org-agenda-entry-text-maxlines 20)
 (setq org-use-speed-commands t)
 
 (require 'org)
@@ -100,6 +102,9 @@
 	  (todo "N" (
 		     (org-agenda-overriding-header "Next")
 		     (org-agenda-files (directory-files org-directory t "^p.*\.org$"))
+		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+	  (tags "+pin" (
+		     (org-agenda-overriding-header "Pin")
 		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
 	("a" "Tasks" (
@@ -112,6 +117,7 @@
 
 (setq org-capture-templates
       '(
+	("k" "Schedule smth." entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* %? %^t")
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
 	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
 	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  %T")
