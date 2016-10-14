@@ -92,3 +92,5 @@
 (add-to-list 'auto-mode-alist 
 	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
 (global-set-key (kbd "C-M-t") 'ttt-hide-marked)
+
+(set-face-background 'hl-line "navy")
