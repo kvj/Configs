@@ -96,13 +96,9 @@
 			   (org-agenda-ndays 1)
 			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
 	  (tags-todo "+Mode<>\"Scheduled\"" (
-			    (org-agenda-overriding-header "Inbox")
+			    (org-agenda-overriding-header "Tasks")
 			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
 			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-	  (todo "N" (
-		     (org-agenda-overriding-header "Next")
-		     (org-agenda-files (directory-files org-directory t "^p.*\.org$"))
-		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (tags "+pin" (
 		     (org-agenda-overriding-header "Pin")
 		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
@@ -110,7 +106,7 @@
 	("a" "Tasks" (
 		      (todo "" (
 				(org-agenda-overriding-header "Tasks")
-				(org-agenda-files (directory-files org-directory t "^p_.*\.org$"))
+				(org-agenda-files (directory-files org-directory t "^main\.org$"))
 				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))))
 
 (setq org-agenda-todo-ignore-scheduled t)
