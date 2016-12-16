@@ -1,6 +1,9 @@
-
 (setq mark-diary-entries-in-calendar nil)
-(setq org-agenda-files (directory-files org-directory t "^[a-z].*\.org$"))
+(setq org-agenda-files
+      (list org-directory
+	    (concat org-directory "calendar")
+	    (concat org-directory "inbox")))
+(setq org-agenda-file-regexp "^[a-z].*\.org$")
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
 (setq org-deadline-warning-days 2)
@@ -13,9 +16,7 @@
 (setq org-startup-folded t)
 (setq org-use-property-inheritance t)
 (setq org-agenda-skip-scheduled-if-deadline-is-shown t)
-;(setq org-agenda-span 3)
 (setq org-agenda-start-on-weekday nil)
-;(setq org-agenda-scheduled-leaders '("S:", "Sched.%2dx:"))
 (setq org-hierarchical-todo-statistics t)
 (setq org-enforce-todo-dependencies nil)
 (setq org-enforce-todo-checkbox-dependencies nil)
@@ -30,7 +31,7 @@
 (setq org-habit-preceding-days 7)
 (setq org-habit-following-days 2)
 (setq org-habit-graph-column 43)
-(defvar k-org-capture-inbox "m_.org")
+(defvar k-org-capture-inbox "inbox/m_desktop.org")
 (defvar k-org-capture-inbox-main "main.org")
 (defvar k-org-agenda-refile-id nil)
 (setq k-org-agenda-refile-id "Main_Journal")
@@ -68,6 +69,7 @@
 (setq org-use-speed-commands t)
 
 (require 'org)
+(require 'cl)
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
@@ -97,7 +99,6 @@
 			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
 	  (tags-todo "+Mode<>\"Scheduled\"" (
 			    (org-agenda-overriding-header "Tasks")
-			    (org-agenda-files (directory-files org-directory t "^m.*\.org$"))
 			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (tags "+pin" (
 		     (org-agenda-overriding-header "Pin")
@@ -106,7 +107,7 @@
 	("a" "Tasks" (
 		      (todo "" (
 				(org-agenda-overriding-header "Tasks")
-				(org-agenda-files (directory-files org-directory t "^main\.org$"))
+				(org-agenda-files (list (concat org-directory "main.org")))
 				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))))
 
 (setq org-agenda-todo-ignore-scheduled t)
@@ -121,7 +122,7 @@
 	("e" "Event" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* A %? %^t")))
 
 (setq org-hide-block-startup t)
-(setq org-clock-persist t)
+(setq org-clock-persist nil)
 (org-clock-persistence-insinuate)
 
 (setq org-agenda-window-setup 'current-window)
@@ -136,6 +137,42 @@
 (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 ;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
 (setq org-babel-results-keyword "results")
+
+(defvar k-org-git-branch "master")
+(defvar k-org-git-auto-push-min 0)
+(defun k-org-git (cmd msg)
+  "Dispatch git pull/push etc commands."
+  (when msg
+    (message msg))
+  (message (shell-command-to-string
+	    (concat
+	     "GIT_DIR=" org-directory ".git"
+	     " "
+	     "GIT_WORK_TREE=" org-directory
+	     " "
+	     cmd))))
+
+(defun k-org-git-pull ()
+  (k-org-git (concat
+	      "git pull --ff-only --no-edit origin"
+	      " " k-org-git-branch) "Pulling from git..."))
+
+(defun k-org-git-push ()
+  (org-save-all-org-buffers)
+  (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil)
+  (k-org-git (concat
+	      "git push origin"
+	      " " k-org-git-branch) "Pushing to git..."))
+
+(defun k-org-git-dispatcher ()
+  (interactive)
+  (message "Git cmd: h/j/q ")
+  (let ((a (read-char-exclusive)))
+    (case a
+	  (?h (run-with-idle-timer 20 nil 'k-org-git-push))
+	  (?j (k-org-git-pull))
+	  (?q (message "Abort"))
+	  (otherwise (error "Invalid key")))))
 
 (defun k-org-id-to-rfloc (id)
   (when id
@@ -179,6 +216,10 @@
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
      (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
+     (org-defkey org-agenda-mode-map "h"
+		 (lambda ()
+		   (interactive)
+		   (k-org-git-dispatcher)))
      (org-defkey org-agenda-mode-map "y" 'org-agenda-deadline)
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
@@ -205,7 +246,11 @@
 (add-hook 'emacs-startup-hook
 	  '(lambda ()
 	     (when k-org-auto-open-agenda-key
-	       (org-agenda nil k-org-auto-open-agenda-key))))
+	       (org-agenda nil k-org-auto-open-agenda-key))
+	     (when (> k-org-git-auto-push-min 0)
+	       (run-at-time (* k-org-git-auto-push-min 60) (* k-org-git-auto-push-min 60)
+			    (lambda ()
+			      (run-with-idle-timer 30 nil 'k-org-git-push))))))
 (add-hook 'org-agenda-mode-hook
 	  (lambda ()
 	    (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
