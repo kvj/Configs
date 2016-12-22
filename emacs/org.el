@@ -2,7 +2,8 @@
 (setq org-agenda-files
       (list org-directory
 	    (concat org-directory "calendar")
-	    (concat org-directory "inbox")))
+	    (concat org-directory "inbox")
+	    (concat org-directory "knowledge")))
 (setq org-agenda-file-regexp "^[a-z].*\.org$")
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
@@ -64,7 +65,11 @@
 (setq org-agenda-start-on-weekday 1)
 (setq org-cycle-separator-lines 0)
 (setq org-catch-invisible-edits 'error)
-(setq org-agenda-current-time-string ">> - - - - - - -")
+(setq org-agenda-current-time-string "> - - -")
+(setq org-agenda-time-grid '(
+			     (daily today)
+			     ". . . ."
+			     (1000 1200 1400 1600 1800 2000)))
 (setq org-agenda-entry-text-maxlines 20)
 (setq org-use-speed-commands t)
 
@@ -97,12 +102,14 @@
 			   (org-agenda-overriding-header "Today")
 			   (org-agenda-ndays 1)
 			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-	  (tags-todo "+Mode<>\"Scheduled\"" (
-			    (org-agenda-overriding-header "Tasks")
-			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+	  (todo "" (
+		    (org-agenda-overriding-header "Tasks")
+		    (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+		    (org-agenda-prefix-format " [ ] ")
+		    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (tags "+pin" (
-		     (org-agenda-overriding-header "Pin")
-		     (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
+			(org-agenda-overriding-header "Pin")
+			(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
 	("a" "Tasks" (
 		      (todo "" (
@@ -110,7 +117,8 @@
 				(org-agenda-files (list (concat org-directory "main.org")))
 				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))))
 
-(setq org-agenda-todo-ignore-scheduled t)
+(setq org-agenda-todo-ignore-with-date t)
+(setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 
 (setq org-capture-templates
       '(
@@ -166,10 +174,10 @@
 
 (defun k-org-git-dispatcher ()
   (interactive)
-  (message "Git cmd: h/j/q ")
+  (message "Git: ([h] push/[j] pull/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
-	  (?h (run-with-idle-timer 20 nil 'k-org-git-push))
+	  (?h (run-with-idle-timer 5 nil 'k-org-git-push))
 	  (?j (k-org-git-pull))
 	  (?q (message "Abort"))
 	  (otherwise (error "Invalid key")))))
@@ -216,10 +224,7 @@
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
      (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
-     (org-defkey org-agenda-mode-map "h"
-		 (lambda ()
-		   (interactive)
-		   (k-org-git-dispatcher)))
+     (org-defkey org-agenda-mode-map "h" 'k-org-git-dispatcher)
      (org-defkey org-agenda-mode-map "y" 'org-agenda-deadline)
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
