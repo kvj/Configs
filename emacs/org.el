@@ -148,37 +148,44 @@
 
 (defvar k-org-git-branch "master")
 (defvar k-org-git-auto-push-min 0)
-(defun k-org-git (cmd msg)
+(defun k-org-git (cmd msg dir)
   "Dispatch git pull/push etc commands."
   (when msg
     (message msg))
   (message (shell-command-to-string
 	    (concat
-	     "GIT_DIR=" org-directory ".git"
+	     "GIT_DIR=" dir ".git"
 	     " "
-	     "GIT_WORK_TREE=" org-directory
+	     "GIT_WORK_TREE=" dir
 	     " "
 	     cmd))))
 
 (defun k-org-git-pull ()
   (k-org-git (concat
 	      "git pull --ff-only --no-edit origin"
-	      " " k-org-git-branch) "Pulling from git..."))
+	      " " k-org-git-branch) "Pulling from git..." org-directory)
+  (org-agenda-redo t))
+
+(defun k-org-git-pull-config ()
+  (k-org-git (concat
+	      "git pull --ff-only --no-edit origin"
+	      " " "master") "Pulling config from git..." config-dir))
 
 (defun k-org-git-push ()
   (org-save-all-org-buffers)
-  (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil)
+  (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil org-directory)
   (k-org-git (concat
 	      "git push origin"
-	      " " k-org-git-branch) "Pushing to git..."))
+	      " " k-org-git-branch) "Pushing to git..." org-directory))
 
 (defun k-org-git-dispatcher ()
   (interactive)
-  (message "Git: ([h] push/[j] pull/[q] quit)")
+  (message "Git: ([h] push/[j] pull/[c] pull config/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
-	  (?h (run-with-idle-timer 5 nil 'k-org-git-push))
-	  (?j (k-org-git-pull))
+	  (?j (run-with-idle-timer 5 nil 'k-org-git-push))
+	  (?h (k-org-git-pull))
+	  (?c (k-org-git-pull-config))
 	  (?q (message "Abort"))
 	  (otherwise (error "Invalid key")))))
 
