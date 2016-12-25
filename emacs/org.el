@@ -115,7 +115,8 @@
 		      (todo "" (
 				(org-agenda-overriding-header "Tasks")
 				(org-agenda-files (list (concat org-directory "main.org")))
-				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))))
+				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))
+	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"")))))
 
 (setq org-agenda-todo-ignore-with-date t)
 (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
@@ -164,12 +165,13 @@
   (k-org-git (concat
 	      "git pull --ff-only --no-edit origin"
 	      " " k-org-git-branch) "Pulling from git..." org-directory)
-  (org-agenda-redo t))
+  (run-with-idle-timer 5 nil 'org-agenda-redo t))
 
 (defun k-org-git-pull-config ()
-  (k-org-git (concat
-	      "git pull --ff-only --no-edit origin"
-	      " " "master") "Pulling config from git..." config-dir))
+  (k-org-git
+   "git pull --ff-only --no-edit origin master"
+   "Pulling config from git..."
+   (concat config-dir "../")))
 
 (defun k-org-git-push ()
   (org-save-all-org-buffers)
@@ -180,7 +182,7 @@
 
 (defun k-org-git-dispatcher ()
   (interactive)
-  (message "Git: ([h] push/[j] pull/[c] pull config/[q] quit)")
+  (message "Git: ([h] pull/[j] push/[c] pull config/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
 	  (?j (run-with-idle-timer 5 nil 'k-org-git-push))
