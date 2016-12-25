@@ -105,10 +105,10 @@
 	  (todo "" (
 		    (org-agenda-overriding-header "Tasks")
 		    (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
-		    (org-agenda-prefix-format " [ ] ")
 		    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 	  (tags "+pin" (
 			(org-agenda-overriding-header "Pin")
+			(org-agenda-remove-tags t)
 			(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
 	("a" "Tasks" (
@@ -118,6 +118,12 @@
 				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))
 	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"")))))
 
+(setq org-agenda-prefix-format
+      '((agenda  . "%-10:c%?-12t% s")
+	(timeline  . "% s")
+	(todo  . "%-22:c")
+	(tags  . "%-22:c")
+	(search . "%-10:c")))
 (setq org-agenda-todo-ignore-with-date t)
 (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 
