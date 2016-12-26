@@ -87,9 +87,9 @@
 	("s" . org-save-all-org-buffers)
 	("z" . org-narrow-to-subtree)
 	("x" . widen)
-	("e" . (lambda ()
-		 (org-agenda nil "w")))
 	("." . (lambda ()
+		 (org-agenda nil "w")))
+	("e" . (lambda ()
 		 (when k-org-auto-open-agenda-key
 		   (org-agenda nil k-org-auto-open-agenda-key))))
 	("k" . org-capture)))
@@ -132,7 +132,8 @@
 	("k" "Schedule smth." entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* %? %^t")
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
 	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
-	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?\n  %T")
+	("m" "Note (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
+	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
 	("t" "Todo (Schedule)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?\n  SCHEDULED: %^t")
 	("e" "Event" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* A %? %^t")))
 
@@ -263,6 +264,7 @@
 (setq org-confirm-babel-evaluate nil)
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero nil)
+(defvar k-org-goto-narrow nil)
 (add-hook 'emacs-startup-hook
 	  '(lambda ()
 	     (when k-org-auto-open-agenda-key
@@ -279,4 +281,6 @@
 	  (lambda ()
 	    (when k-org-goto-zero
 	      (org-back-to-heading t)
-	      (goto-char (point-at-bol)))))
+	      (goto-char (point-at-bol)))
+	    (when k-org-goto-narrow
+	      (org-narrow-to-subtree))))
