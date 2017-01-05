@@ -72,6 +72,7 @@
 			     (1000 1200 1400 1600 1800 2000)))
 (setq org-agenda-entry-text-maxlines 20)
 (setq org-use-speed-commands t)
+(setq org-return-follows-link t)
 
 (require 'org)
 (require 'cl)
@@ -87,6 +88,7 @@
 	("s" . org-save-all-org-buffers)
 	("z" . org-narrow-to-subtree)
 	("x" . widen)
+	("q" . org-cycle)
 	("." . (lambda ()
 		 (org-agenda nil "w")))
 	("e" . (lambda ()
