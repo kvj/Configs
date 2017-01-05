@@ -89,6 +89,8 @@
 	("z" . org-narrow-to-subtree)
 	("x" . widen)
 	("q" . org-cycle)
+	("w" . org-global-cycle)
+	("o" . delete-other-windows)
 	("." . (lambda ()
 		 (org-agenda nil "w")))
 	("e" . (lambda ()
