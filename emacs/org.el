@@ -20,7 +20,7 @@
 (setq org-agenda-start-on-weekday nil)
 (setq org-hierarchical-todo-statistics t)
 (setq org-enforce-todo-dependencies nil)
-(setq org-enforce-todo-checkbox-dependencies nil)
+(setq org-enforce-todo-checkbox-dependencies t)
 (setq org-log-into-drawer t)
 (setq org-clock-out-remove-zero-time-clocks t)
 (setq org-clock-out-when-done t)
@@ -160,36 +160,60 @@
 
 (defvar k-org-git-branch "master")
 (defvar k-org-git-auto-push-min 0)
+(defvar k-org-git-save-push-sec 20)
+(defvar k-org-git-save-push-timer nil)
+
+(defun k-org-git-auto-save ()
+  (when k-org-git-save-push-timer
+    (cancel-timer k-org-git-save-push-timer))
+  (message "Git: Will auto-push")
+  (setq k-org-git-save-push-timer
+	(run-with-idle-timer
+	 k-org-git-save-push-sec nil (lambda()
+				       (k-org-git-push)
+				       (setq k-org-git-save-push-timer nil)))))
+
+(when (> k-org-git-save-push-sec 0)
+  (message "Git: Will auto-push on save")
+  (org-add-hook 'after-save-hook 'k-org-git-auto-save))
+
 (defun k-org-git (cmd msg dir)
   "Dispatch git pull/push etc commands."
   (when msg
     (message msg))
-  (message (shell-command-to-string
-	    (concat
-	     "GIT_DIR=" dir ".git"
-	     " "
-	     "GIT_WORK_TREE=" dir
-	     " "
-	     cmd))))
+  (= (call-process-shell-command
+      (concat
+       "GIT_DIR=" dir ".git"
+       " "
+       "GIT_WORK_TREE=" dir
+       " "
+       cmd) nil "*scratch*") 0))
 
 (defun k-org-git-pull ()
-  (k-org-git (concat
-	      "git pull --ff-only --no-edit origin"
-	      " " k-org-git-branch) "Pulling from git..." org-directory)
-  (run-with-idle-timer 5 nil 'org-agenda-redo t))
+  (if (k-org-git (concat
+		  "git pull --ff-only --no-edit origin"
+		  " " k-org-git-branch) "Git: Pulling..." org-directory)
+      (run-with-idle-timer 5 nil 'org-agenda-redo t))
+  (message "Git: No changes received"))
 
 (defun k-org-git-pull-config ()
   (k-org-git
-   "git pull --ff-only --no-edit origin master"
-   "Pulling config from git..."
+   "git pull --no-edit origin master"
+   "Git: Pulling config..."
    (concat config-dir "../")))
 
 (defun k-org-git-push ()
   (org-save-all-org-buffers)
-  (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil org-directory)
-  (k-org-git (concat
-	      "git push origin"
-	      " " k-org-git-branch) "Pushing to git..." org-directory))
+  (if (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil org-directory)
+      (let ()
+	(k-org-git (concat
+		    "git pull --no-edit origin"
+		    " " k-org-git-branch) nil org-directory)
+	(k-org-git (concat
+		    "git push origin"
+		    " " k-org-git-branch) "Git: Pushing..." org-directory)
+	(message "Git: Pushed"))
+    (message "Git: No changes to push")))
 
 (defun k-org-git-dispatcher ()
   (interactive)
