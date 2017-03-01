@@ -135,6 +135,9 @@
       '(
 	("k" "Schedule smth." entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* %? %^t")
 	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
+	("a" "Agile Results")
+	("ad" "(daily)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # Daily %t\n  1. %?\n  2. \n  3. ")
+	("aw" "(weekly)" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # Weekly\n  %^t--%^t\n  1. %?\n  2. \n  3. ")
 	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
 	("m" "Note (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
 	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")
