@@ -32,10 +32,12 @@
 (setq org-habit-preceding-days 7)
 (setq org-habit-following-days 2)
 (setq org-habit-graph-column 43)
+
 (defvar k-org-capture-inbox "inbox/m_desktop.org")
 (defvar k-org-capture-inbox-main "main.org")
 (defvar k-org-agenda-refile-id nil)
 (setq k-org-agenda-refile-id "Main_Journal")
+
 (setq org-todo-keywords
       '((sequence "T(t)" "N(n)" "W(w@/@)" "|" "A(a)" "#(d)" "X(x@)")
 	(sequence "H(h)" "|" "M(m@)")))
@@ -46,31 +48,17 @@
 	(org-agenda-files :level . 1)
 )))
 (setq org-refile-allow-creating-parent-nodes "confirm")
-(setq org-todo-keyword-faces '(
-	("N" :foreground "brightblue" :weight: bold)
-	("W" :foreground "white" :weight: bold)
-	("A" :foreground "magenta" :weight: bold)
-	("X" :foreground "gray" :weight: bold)
-	("H" :foreground "green")
-))
 
 (setq org-capture-use-agenda-date nil)
 (setq org-agenda-dim-blocked-tasks nil)
 (setq org-agenda-inhibit-startup nil)
 (setq org-agenda-use-tag-inheritance nil)
-(setq org-tags-exclude-from-inheritance '("pin"))
 (setq org-agenda-start-with-log-mode nil)
 (setq org-agenda-repeating-timestamp-show-all t)
 (setq org-agenda-show-all-dates t)
 (setq org-agenda-start-on-weekday 1)
 (setq org-cycle-separator-lines 0)
 (setq org-catch-invisible-edits 'error)
-(setq org-agenda-current-time-string "> - - -")
-(setq org-agenda-time-grid '(
-			     (daily today)
-			     ". . . ."
-			     (1000 1200 1400 1600 1800 2000)))
-(setq org-agenda-entry-text-maxlines 20)
 (setq org-use-speed-commands t)
 (setq org-return-follows-link t)
 
@@ -109,17 +97,8 @@
 	  (todo "" (
 		    (org-agenda-overriding-header "Tasks")
 		    (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
-		    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-	  (tags "+pin" (
-			(org-agenda-overriding-header "Pin")
-			(org-agenda-remove-tags t)
-			(org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
+		    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
-	("a" "Tasks" (
-		      (todo "" (
-				(org-agenda-overriding-header "Tasks")
-				(org-agenda-files (list (concat org-directory "main.org")))
-				(org-agenda-sorting-strategy '(category-up todo-state-down priority-down effort-up))))))
 	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"")))))
 
 (setq org-agenda-prefix-format
@@ -128,6 +107,13 @@
 	(todo  . "%-22:c")
 	(tags  . "%-22:c")
 	(search . "%-10:c")))
+(setq org-agenda-current-time-string "> - - -")
+(setq org-agenda-time-grid '(
+			     (daily today)
+			     ". . . ."
+			     (1000 1200 1400 1600 1800 2000)))
+(setq org-agenda-entry-text-maxlines 20)
+
 (setq org-agenda-todo-ignore-with-date t)
 (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 
@@ -150,16 +136,6 @@
 
 (setq org-agenda-window-setup 'current-window)
 (setq org-clone-delete-id t)
-(org-babel-do-load-languages
- (quote org-babel-load-languages)
- (quote ((emacs-lisp . t)
-         (dot . t)
-         (ditaa . t)
-         (org . t)
-         (plantuml . t))))
-(add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
-;(setq org-plantuml-jar-path "c:/home/download/plantuml.jar")
-(setq org-babel-results-keyword "results")
 
 (defvar k-org-git-branch "master")
 (defvar k-org-git-auto-push-min 0)
@@ -194,7 +170,7 @@
 
 (defun k-org-git-pull ()
   (if (k-org-git (concat
-		  "git pull --ff-only --no-edit origin"
+		  "git pull --no-edit origin"
 		  " " k-org-git-branch) "Git: Pulling..." org-directory)
       (run-with-idle-timer 5 nil 'org-agenda-redo t))
   (message "Git: No changes received"))
@@ -205,9 +181,17 @@
    "Git: Pulling config..."
    (concat config-dir "../")))
 
-(defun k-org-git-push ()
+(defun k-org-git-commit (msg)
   (org-save-all-org-buffers)
-  (if (k-org-git "git commit -a -m \"`date` - `hostname`\"" nil org-directory)
+  (k-org-git "git commit -a -m \"`date` - `hostname`\"" msg org-directory))
+
+(defun k-org-git-reset ()
+  (org-save-all-org-buffers)
+  (when (k-org-git "git reset --hard HEAD" "Reverting changes back" org-directory)
+    (org-agenda-redo t)))
+
+(defun k-org-git-push ()
+  (if (k-org-git-commit nil)
       (let ()
 	(k-org-git (concat
 		    "git pull --no-edit origin"
@@ -220,12 +204,14 @@
 
 (defun k-org-git-dispatcher ()
   (interactive)
-  (message "Git: ([h] pull/[j] push/[c] pull config/[q] quit)")
+  (message "Git: ([h] pull/[j] push/[c] commit/[r] reset/[s] pull config/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
 	  (?j (run-with-idle-timer 5 nil 'k-org-git-push))
 	  (?h (k-org-git-pull))
-	  (?c (k-org-git-pull-config))
+	  (?s (k-org-git-pull-config))
+	  (?c (k-org-git-commit "Saving changes..."))
+	  (?r (k-org-git-reset))
 	  (?q (message "Abort"))
 	  (otherwise (error "Invalid key")))))
 
