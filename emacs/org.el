@@ -104,8 +104,8 @@
 (setq org-agenda-prefix-format
       '((agenda  . "%-10:c%?-12t% s")
 	(timeline  . "% s")
-	(todo  . "%-22:c")
-	(tags  . "%-22:c")
+	(todo  . "%-10:c")
+	(tags  . "%-10:c")
 	(search . "%-10:c")))
 (setq org-agenda-current-time-string "> - - -")
 (setq org-agenda-time-grid '(
