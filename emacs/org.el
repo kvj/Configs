@@ -7,7 +7,7 @@
 (setq org-agenda-file-regexp "^[a-z].*\.org$")
 (setq org-agenda-include-all-todo nil)
 (setq org-agenda-include-diary nil)
-(setq org-deadline-warning-days 2)
+(setq org-deadline-warning-days 3)
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
 (setq org-hide-leading-stars t)
