@@ -15,6 +15,7 @@
 
 ; Custom org configuration
 (setq org-log-into-drawer t)
+(setq org-log-done 'time)
 
 ; Custom keywords
 (setq org-todo-keywords
