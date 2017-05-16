@@ -70,6 +70,7 @@
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
 (setq org-agenda-window-setup 'current-window)
+(setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 
 ; Compact/narrow agenda view
 (setq org-agenda-prefix-format
