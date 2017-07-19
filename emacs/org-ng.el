@@ -148,8 +148,8 @@
   (when (k-org-git "git reset --hard HEAD" "Reverting changes back" org-directory)
     (org-agenda-redo t)))
 
-(defun k-org-git-push ()
-  (if (k-org-git-commit nil)
+(defun k-org-git-push (&optional force)
+  (if (or (k-org-git-commit nil) force)
       (let ()
 	(k-org-git (concat
 		    "git pull --no-edit origin"
@@ -165,7 +165,7 @@
   (message "Git: ([h] pull/[j] push/[c] commit/[r] reset/[s] pull config/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
-	  (?j (run-with-idle-timer 5 nil 'k-org-git-push))
+	  (?j (run-with-idle-timer 5 nil 'k-org-git-push t))
 	  (?h (k-org-git-pull))
 	  (?s (k-org-git-pull-config))
 	  (?c (k-org-git-commit "Saving changes..."))
