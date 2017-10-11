@@ -14,8 +14,17 @@
 (setq org-agenda-file-regexp "^[a-z].*\.org$")
 
 ; Custom org configuration
+(setq org-modules (quote (org-info org-habit org-timer)))
 (setq org-log-into-drawer t)
 (setq org-log-done 'time)
+
+; Habits
+(setq org-habit-done-word "#")
+(setq org-habit-show-habits-only-for-today nil)
+(setq org-habit-preceding-days 7)
+(setq org-habit-following-days 2)
+(setq org-habit-graph-column 40)
+
 
 ; Custom keywords
 (setq org-todo-keywords
