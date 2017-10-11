@@ -356,14 +356,26 @@ function! GitRebaseWork()
 	let repo = 'master'
 	let remote = input('[Git rebase local]Remote? ', origin)
 	let branch = input('[Git rebase local]Branch? ', repo)
+	exe 'Git fetch '.remote
 	exe 'Git rebase -i '.remote.'/'.branch
+endfunction
+
+function! GitNewBranch()
+	let origin = 'origin'
+	let origin_repo = 'master'
+	let repo = ''
+	let branch = input('[Git new branch]Branch? ', repo)
+	let remote = input('[Git new branch]Remote? ', origin)
+	let remote_branch = input('[Git new branch]Remote branch? ', origin_repo)
+	exe 'Git fetch '.remote
+	exe 'Git checkout -b '.branch.' '.remote.'/'.remote_branch
 endfunction
 
 nnoremap <silent><LEADER>gs :Gstatus<CR>
 nnoremap <silent><LEADER>gu :call GitPullPush('Git push')<CR>
-nnoremap <silent><LEADER>gf :call GitPullPush('Git pull')<CR>
-nnoremap <silent><LEADER>gr :call GitRebaseMerge()<CR>
+nnoremap <silent><LEADER>gf :call GitPullPush('Git pull --rebase')<CR>
 nnoremap <silent><LEADER>gi :call GitRebaseWork()<CR>
+nnoremap <silent><LEADER>gb :call GitNewBranch()<CR>
 nnoremap <silent><LEADER>ga :Git rebase --
 nnoremap <silent><LEADER>gt :!tig status<CR>
 nnoremap <silent><LEADER>gl :!tig<CR>
