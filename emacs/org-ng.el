@@ -4,6 +4,7 @@
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero t)
 (defvar k-org-goto-narrow nil)
+(defvar k-org-agenda-filter nil)
 
 ; Files and folders
 (setq org-agenda-files
@@ -61,25 +62,29 @@
 	("k" . org-capture)))
 (setq org-use-speed-commands t)
 
+(setq org-agenda-tag-filter-preset (list k-org-agenda-filter))
 ; Custom agenda view
 (setq org-agenda-custom-commands 
-      '(
-	("w" "Main"
-	 (
-	  (agenda "Today" (
-			   (org-agenda-overriding-header "Today")
-			   (org-agenda-ndays 1)
-			   (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-	  (todo "" (
-		    (org-agenda-overriding-header "Tasks")
-		    (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
-		    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
+      '(("w" "Main" (
+		     (agenda "Today" ((org-agenda-overriding-header "Today")
+				      (org-agenda-span 'day)
+				      (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
+		     (todo "" ((org-agenda-overriding-header (concat "Tasks " k-org-agenda-filter))
+			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
-	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"")))))
+	("r" "All TODOs" (
+			  (todo "" ((org-agenda-tag-filter-preset nil)
+				    (org-agenda-dim-blocked-tasks t)
+				    ;(org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+				    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))))
+	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"" ((org-agenda-dim-blocked-tasks nil)))))))
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
 (setq org-agenda-window-setup 'current-window)
 (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
+(setq org-enforce-todo-dependencies t)
+(setq org-agenda-dim-blocked-tasks 'invisible)
 
 ; Compact/narrow agenda view
 (setq org-agenda-prefix-format
@@ -103,84 +108,10 @@
 	("m" "Note (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
 	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")))
 
-; Integration with Git
-(defvar k-org-git-branch "master")
-(defvar k-org-git-auto-push-min 0)
-(defvar k-org-git-save-push-sec 20)
-(defvar k-org-git-save-push-timer nil)
-
-(defun k-org-git-auto-save ()
-  (when k-org-git-save-push-timer
-    (cancel-timer k-org-git-save-push-timer))
-  (message "Git: Will auto-push")
-  (setq k-org-git-save-push-timer
-	(run-with-idle-timer
-	 k-org-git-save-push-sec nil (lambda()
-				       (k-org-git-push)
-				       (setq k-org-git-save-push-timer nil)))))
-
+; Enable git push on save
 (when (> k-org-git-save-push-sec 0)
   (message "Git: Will auto-push on save")
   (org-add-hook 'after-save-hook 'k-org-git-auto-save))
-
-(defun k-org-git (cmd msg dir)
-  "Dispatch git pull/push etc commands."
-  (when msg
-    (message msg))
-  (= (call-process-shell-command
-      (concat
-       "GIT_DIR=" dir ".git"
-       " "
-       "GIT_WORK_TREE=" dir
-       " "
-       cmd) nil "*scratch*") 0))
-
-(defun k-org-git-pull ()
-  (if (k-org-git (concat
-		  "git pull --no-edit origin"
-		  " " k-org-git-branch) "Git: Pulling..." org-directory)
-      (run-with-idle-timer 5 nil 'org-agenda-redo t))
-  (message "Git: No changes received"))
-
-(defun k-org-git-pull-config ()
-  (k-org-git
-   "git pull --no-edit origin master"
-   "Git: Pulling config..."
-   (concat config-dir "../")))
-
-(defun k-org-git-commit (msg)
-  (org-save-all-org-buffers)
-  (k-org-git "git commit -a -m \"`date` - `hostname`\"" msg org-directory))
-
-(defun k-org-git-reset ()
-  (org-save-all-org-buffers)
-  (when (k-org-git "git reset --hard HEAD" "Reverting changes back" org-directory)
-    (org-agenda-redo t)))
-
-(defun k-org-git-push (&optional force)
-  (if (or (k-org-git-commit nil) force)
-      (let ()
-	(k-org-git (concat
-		    "git pull --no-edit origin"
-		    " " k-org-git-branch) nil org-directory)
-	(k-org-git (concat
-		    "git push origin"
-		    " " k-org-git-branch) "Git: Pushing..." org-directory)
-	(message "Git: Pushed"))
-    (message "Git: No changes to push")))
-
-(defun k-org-git-dispatcher ()
-  (interactive)
-  (message "Git: ([h] pull/[j] push/[c] commit/[r] reset/[s] pull config/[q] quit)")
-  (let ((a (read-char-exclusive)))
-    (case a
-	  (?j (run-with-idle-timer 5 nil 'k-org-git-push t))
-	  (?h (k-org-git-pull))
-	  (?s (k-org-git-pull-config))
-	  (?c (k-org-git-commit "Saving changes..."))
-	  (?r (k-org-git-reset))
-	  (?q (message "Abort"))
-	  (otherwise (error "Invalid key")))))
 
 ; Translate org ID to rfloc
 (defun k-org-id-to-rfloc (id)
@@ -259,11 +190,7 @@
 (add-hook 'emacs-startup-hook
 	  '(lambda ()
 	     (when k-org-auto-open-agenda-key
-	       (org-agenda nil k-org-auto-open-agenda-key))
-	     (when (> k-org-git-auto-push-min 0)
-	       (run-at-time (* k-org-git-auto-push-min 60) (* k-org-git-auto-push-min 60)
-			    (lambda ()
-			      (run-with-idle-timer 30 nil 'k-org-git-push))))))
+	       (org-agenda nil k-org-auto-open-agenda-key))))
 
 ; Auto-save org files
 (add-hook 'org-agenda-mode-hook

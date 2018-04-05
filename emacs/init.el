@@ -1,4 +1,5 @@
 (load (concat config-dir "common.el"))
+(load (concat config-dir "git.el"))
 (when (boundp 'org-directory)
   (load (concat config-dir "org-ng.el")))
 (load (concat config-dir "abbr.el"))
