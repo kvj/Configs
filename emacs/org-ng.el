@@ -16,7 +16,7 @@
 
 ; Custom org configuration
 (setq org-modules (quote (org-info org-habit org-timer)))
-(setq org-log-into-drawer t)
+(setq org-log-into-drawer nil)
 (setq org-log-done 'time)
 
 ; Habits
@@ -84,7 +84,7 @@
 (setq org-agenda-window-setup 'current-window)
 (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 (setq org-enforce-todo-dependencies t)
-(setq org-agenda-dim-blocked-tasks 'invisible)
+(setq org-agenda-dim-blocked-tasks t)
 
 ; Compact/narrow agenda view
 (setq org-agenda-prefix-format
