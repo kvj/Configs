@@ -6,6 +6,14 @@ setlocal foldmethod=indent
 setlocal noexpandtab
 setlocal foldignore=
 
+fun! ttt#ifDefined(name, def)
+	if exists(a:name)
+		exe 'let val = '.a:name
+		return val
+	endif
+	return a:def
+endf
+
 let b:tp = ''
 let b:tdef = ''
 let b:date = 0
@@ -13,6 +21,7 @@ let b:cron = ''
 let b:amode = ''
 let b:qbar = ttt#ifDefined('b:qbar', 'def')
 let b:jump = ''
+let b:footer = '---'
 
 let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>tz tz', '<Esc>fe fe', '<Esc>fs<kOff> fs', '<Esc>tx tx', '<Esc>tt<kOn> tt', '<Esc>tu<kOn> tu', '<Esc>tn<kOn> tn']
 " let b:qbar_report = ['h', 'l', 'a', 'w', 's', '<Space> sp', '<Enter> en', 'q', 'e']
@@ -22,50 +31,13 @@ let b:qbar_def = ['<Esc>tl<kOn> tl', '<Esc>tz tz', '<Esc>fe fe', '<Esc>fs<kOff> 
 let b:lastHourUpdate = 0
 
 let s:signHour = 21000
-let s:signTask = 22000
 let s:cursorUpdateInterval = 5
 let s:dmFormat = '%m/%d'
 let s:dmyFileFormat = '%y%m%d'
-let s:hmFormat = '%H:%M'
 let s:rxTime = '\(\(\d\{2\}\):\(\d\{2\}\)\s\)'
 let s:rxDate = '\(\(\d\{2\}\)\/\(\d\{2\}\)\s\)'
 
 let s:handlers = ['gnome-open', 'kde-open', 'exo-open', 'xdg-open']
-
-function! Add_New_Line(top, content, indent)
-	if a:top == 1
-		normal! gg
-	endif
-	if a:top == 2
-		normal! G
-	endif
-	if a:content == 'time'
-		let nowDate = strftime(s:dmFormat)
-		let header = getline(1)
-		if header != nowDate
-			call append(0, nowDate)
-			call cursor(1, 0)
-		endif
-	endif
-	let ex = "o"
-	if a:indent == 1
-		let ex = ex . "\t"
-	endif
-	if a:indent == -1
-		let ex = ex . "\<esc>0Di"
-	endif
-	if a:content == 'time'
-		let ex = ex . strftime('%H:%M').' '
-	else
-		let ex = ex . a:content . ' '
-	endif
-    exec 'normal! ' . ex
-	if exists('g:android')
-		" Raise keyboard
-		call g:Android_Execute('input', {'request': 'keyboard_show'})
-	endif
-	startinsert!
-endfunction
 
 "Extracts part of date and converts to number
 function! s:DateItem(dt, item)
@@ -94,7 +66,7 @@ function! s:DateItem(dt, item)
 endfunction
 
 "Adds value to date
-function! s:AddToDate(dt, item, value)
+function! s:AddToDate(dt, item, value) " 1
 	if !a:value
 		return a:dt
 	endif
@@ -118,17 +90,7 @@ function! s:AddToDate(dt, item, value)
 	return a:dt
 endfunction
 
-"Prints date
-function! s:ToDate(dt)
-	return strftime("[%Y %b %d]", a:dt)
-endfunction
-
-"Prints date and time
-function! s:ToDateTime(dt)
-	return strftime("[%Y %b %d %T]", a:dt)
-endfunction
-
-function! s:SubstituteTemplates(lines, dt)
+function! s:SubstituteTemplates(lines, dt) " 1
 	let rexp = '{\([a-z]\)\(.\+\)[a-z]\([+\|-]\?\d\{1,2\}\)\?}'
 	let lineidx = -1
 	for line in a:lines
@@ -152,18 +114,8 @@ function! s:SubstituteTemplates(lines, dt)
 	endfor
 endfunction
 
-"Debug output for lists
-function! s:PrintList(list)
-	let idx = 0
-	echom 'PrintList: '.len(a:list)
-	for item in a:list
-		echom 'List['.idx.'] = '.item
-		let idx += 1
-	endfor
-endfunction
-
 "Loads file by relative path
-function! s:LoadFile(name)
+function! s:LoadFile(name) " 1
 	let tmplfile = expand('%:h').'/'.a:name
 	if !filereadable(tmplfile)
 		echom 'File '.tmplfile.' is not readable'
@@ -173,7 +125,7 @@ function! s:LoadFile(name)
 endfunction
 
 "Returns indent of line
-function! s:Indent(line)
+function! s:Indent(line) " 1
 	let tabs = matchstr(a:line, '^\t*')
 	return len(tabs)
 endfunction
@@ -213,106 +165,7 @@ function! s:SearchForLines(lines, rexp, children)
 	return result
 endfunction
 
-function! s:CheckCronItem(str, min, max, value)
-	"echom 'CheckCronItem '.a:str.' '.a:min.'-'.a:max.' = '.a:value
-	if '*' == a:str
-		return 1
-	endif
-	if a:str[0] == '/'
-		let inc = str2nr(a:str[1:])
-		if !inc
-			echom 'Invalid increment'
-			return 0
-		endif
-		let idx = a:min
-		"echom 'Inc: '.idx.' '.inc.' '.a:value
-		while idx<=a:value && idx<=a:max
-			if idx == a:value
-				"Match
-				return 1
-			endif
-			let idx += inc
-		endwhile
-		return 0 "No luck
-	endif
-	let values = split(a:str, ',')
-	for val in values
-		let nval = -1
-		if val == 'SUN' 
-			let nval = 0 
-		elseif val == 'MON' 
-			let nval = 1 
-		elseif val == 'TUE' 
-			let nval = 2 
-		elseif val == 'WED' 
-			let nval = 3 
-		elseif val == 'THU' 
-			let nval = 4 
-		elseif val == 'FRI' 
-			let nval = 5 
-		elseif val == 'SAT' 
-			let nval = 6
-		else 
-			let nval = str2nr(val) 
-		endif
-		"echom 'Iterate: '.val.'/'.nval.' = '.a:value
-		if nval>a:value "Too big
-			return 0
-		endif
-		if nval == a:value
-			return 1 "Match
-		endif
-	endfor
-	return 0
-endfunction
-
-"Looks for CRON element and checks whether provided date falls into it.
-"Returns task text
-function! s:CheckCronStatement(line, date)
-	let rexp = '^\(.*\)\s\[\([A-Z0-9 ,\*\/]\+\)\]\(\s\/\)\?$'
-	let parts = matchlist(a:line, rexp) "Parts: 1 - task, 2 - cron
-	if empty(parts) || empty(parts[2])
-		"No cron
-		call s:PrintList(parts)
-		echom 'No cron found: '.a:line
-		return ''
-	endif
-	let cron = split(parts[2], ' ')
-	"call s:PrintList(cron)
-	if len(cron)<3
-		echom 'Invalid cron: '.parts[2]
-		return ''
-	endif
-	let task = parts[1].parts[3]
-	let dt = a:date
-	if len(cron)>3
-		"Latest item is date of last exec
-		"echom 'Parse: ['.cron[3].']'
-		let dtParsed = matchlist(cron[3], '\(\d\{2\}\)\/\(\d\{2\}\)')
-		if len(dtParsed)>0
-			if s:DateItem(dt, 'm') == str2nr(dtParsed[1]) && s:DateItem(dt, 'd') == str2nr(dtParsed[2])
-				"Exact
-				return task. ' #next'
-			else
-				return ''
-			endif
-		endif
-		echom 'Invalid date in cron'
-		return ''
-	endif
-	if !s:CheckCronItem(cron[0], 1, 31, s:DateItem(dt, 'd'))
-		return ''
-	endif
-	if !s:CheckCronItem(cron[1], 1, 12, s:DateItem(dt, 'm'))
-		return ''
-	endif
-	if !s:CheckCronItem(cron[2], 0, 6, s:DateItem(dt, 'wd'))
-		return ''
-	endif
-	return task
-endfunction
-
-function! Insert_Template(clear)
+function! Insert_Template(clear) " 1
 	let tmpl = input('Enter template: ', b:tdef)
 	if empty(tmpl)
 		return
@@ -333,11 +186,6 @@ function! Insert_Template(clear)
 	endif
 	let @x = ''
 	call s:SubstituteTemplates(lines, dt)
-	if b:amode == '01'
-		call s:Mode01(lines, dt)
-	elseif b:amode == '07'
-		call s:Mode07(lines, dt)
-	endif
 	for line in lines
 		let @x .= line."\n"
 	endfor
@@ -369,59 +217,6 @@ function! s:Enable_Markers()
 	autocmd FileChangedShellPost,BufWritePost <buffer> call ttt#CursorTask()
 endfunction
 
-function! s:ProcessTab(tab, path)
-	let tabnum = tabpagewinnr(a:tab, '$')
-	let idx = 1
-	let bufs = tabpagebuflist(a:tab)
-	for bufno in bufs
-		"echom 'Tab '.a:tab.', buf: '.bufno.', name: '.fnamemodify(bufname(bufno), ':p').' '.bufname(bufno)
-		if fnamemodify(bufname(bufno), ':p') ==? a:path
-			"Found buffer
-			exe 'tabnext '.a:tab
-			let winno = bufwinnr(bufname(bufno))
-			"echom 'Will focus on: '.winno
-			exe winno.'wincmd w'
-			doau FileChangedShellPost
-			return 1
-		endif
-	endfor
-	return 0
-endfunction
-
-if !exists('*Jump_Window')
-	function! Jump_Window(path)
-		let tab = tabpagenr()
-		let tabs = tabpagenr('$')
-		" echom 'Locating: '.a:path.' '.tab.' of '.tabs
-		if s:ProcessTab(tab, a:path) == 1
-			"Switched in current tab
-			return 1
-		endif
-		let idx = 1
-		while idx <= tabs
-			if s:ProcessTab(idx, a:path) == 1
-				"Found in other tab
-				return 1
-			endif
-			let idx += 1
-		endwhile
-		"Edit in current
-		exe 'e '.a:path
-		doau FileChangedShellPost
-		return 0
-	endfunction
-endif
-
-function! s:Enable_Hotkeys()
-	if !exists('g:tttHotKeys')
-		return
-	endif
-	for [filePath, key] in items(g:tttHotKeys)
-		let path = ttt#findFile(filePath)
-		exe 'nn <buffer> <silent><localleader>'.key.' :call Jump_Window("'.substitute(path, '\\', '\\\\', 'g').'")<CR>'
-	endfor
-endfunction
-
 function! s:BufferSearchForLines(rexp, children, ...)
 	let idx = 1
 	let end = line('$')
@@ -446,7 +241,7 @@ function! s:BufferSearchForLines(rexp, children, ...)
 	return result
 endfunction
 
-function! s:BufferSearchForLastChild(idx)
+function! s:BufferSearchForLastChild(idx) " 1
 	let i = a:idx+1
 	let lineindent = s:Indent(getline(a:idx))
 	while i<=line('$')
@@ -459,127 +254,7 @@ function! s:BufferSearchForLastChild(idx)
 	return i-1
 endfunction
 
-"Searches closest line with #begin from index
-function! s:FindBegin(index)
-	let idx = a:index
-	while match(getline(idx), '\s*#begin ') == -1
-		let idx -= 1
-		if idx == -1
-			return -1
-		endif
-	endwhile
-	return idx
-endfunction
-
-"Selects block (without header)
-function! BeginSelectAll()
-	let beginIdx = s:FindBegin(line('.'))
-	if beginIdx == -1
-		echo 'Head of block not found'
-		return
-	endif
-	let idx = beginIdx+1
-	call cursor(idx, 0)
-	let lastline = s:BufferSearchForLastChild(beginIdx)
-	normal! V
-	if lastline>idx
-		exe 'normal! '.(lastline-idx).'j'
-	endif
-endfunction
-
-"Parses header
-function! s:BeginParseHeader(index)
-	let m = matchlist(getline(a:index), '^\s*#begin\s\([a-z0-9]\+\)\s\(.\{-}\)\(\s/\)\?$')
-	"call s:PrintList(m)
-	return [m[1], s:ParseAttrs(m[2], 0)]
-endfunction
-
-function! s:OpenFile(location, ...)
-	if has("win32")
-		let command = '!start /min CMD /C START "" %s'
-		silent execute printf(command, shellescape(a:location))
-	else
-		let s:uname = system("uname")
-		if s:uname == "Darwin"
-			"Max OSX
-			let cmd = 'open ' . shellescape(a:location) . ' 2>&1'
-			call system(cmd)
-		else
-			"Linux
-			for handler in s:handlers + a:000
-				if executable(handler)
-					let cmd = shellescape(handler) . ' ' . shellescape(a:location) . ' 2>&1'
-					call system(cmd)
-					return
-				endif
-			endfor
-		endif
-	endif
-endfunction
-
-"Opens file from block
-function! BeginOpen()
-	let beginIdx = s:FindBegin(line('.'))
-	if beginIdx == -1
-		echo 'Head of block not found'
-		return
-	endif
-	let [type, params] = s:BeginParseHeader(beginIdx)
-	if !empty(get(params, 'file', ''))
-		let fileName = fnamemodify(expand('%:p:h').'/'.params.file, ':p')
-		call s:OpenFile(fileName)
-	else
-		echo 'File not found'
-	endif
-endfunction
-
-"Compiles block starting from #begin
-function! BeginCompile()
-	let beginIdx = s:FindBegin(line('.'))
-	if beginIdx == -1
-		echo 'Head of block not found'
-		return
-	endif
-	let [type, params] = s:BeginParseHeader(beginIdx)
-	"echo 'Type: '.type.', file: '.params.file
-	if get(g:kvjExtBlockConfig, type, {}) == {}
-		"Not found
-		echo 'Config ['.type.'] not found'
-		return
-	endif
-	let lastline = s:BufferSearchForLastChild(beginIdx)
-	let conf = g:kvjExtBlockConfig[type]
-	let indent = s:Indent(getline(beginIdx+1))
-	let inputFile = tempname()
-	let cmd = conf.cmd
-	let inputFile = ''
-	if conf.input == 'lines'
-		let inputFile = tempname()
-		let idx = beginIdx+1
-		let inp = []
-		while idx<=lastline
-			call add(inp, strpart(getline(idx), indent))
-			let idx += 1
-		endwhile
-		call writefile(inp, inputFile)
-		let cmd .= ' <'.fnameescape(inputFile)
-	endif
-	let fileName = ''
-	if conf.output == 'file'
-		let fileName = fnamemodify(expand('%:p:h').'/'.params.file, ':p')
-		let cmd .= ' >'.fnameescape(fileName)
-	endif
-	"echo 'Exec: '.cmd.' Input: '.len(inp)
-	exec 'silent !'.cmd
-	if !empty(inputFile)
-		call delete(inputFile)
-	endif
-	if !empty(fileName)
-		call s:OpenFile(fileName)
-	endif
-endfunction
-
-function! Select_Tree()
+function! Select_Tree() " 1
 	let idx = line('.')
 	let lastline = s:BufferSearchForLastChild(idx)
 	normal! V
@@ -647,7 +322,7 @@ function! s:Load()
 	endif
 endfunction
 
-function! Make_Archive(addDate)
+function! Make_Archive(addDate) " 1
 	let file = expand('%:h').'/.archive/'.expand('%:t')
 	if a:addDate
 		let file .= '.'.strftime(s:dmyFileFormat)
@@ -660,7 +335,7 @@ let s:refillRexp = '^\(\t*\)\(.\s\)\?'.s:rxTime.'\?\(.\{-}\)\(\s#[a-z0-9]\+\)\?\
 " 0 = full, 1 = indent, 2 = start sign, 3 = time, 6 = text, 7 = tag, 8 = fold sign
 
 "Returns str of tabs num long
-function! s:MakeIndent(num)
+function! s:MakeIndent(num) " 1
 	let str = ''
 	let i = 0
 	while i<a:num
@@ -670,7 +345,7 @@ function! s:MakeIndent(num)
 	return str
 endfunction
 
-function! Copy_Tree(indent)
+function! Copy_Tree(indent) " 1
 	let idx = line('.')
 	let line = getline(idx)
 	let m = matchlist(line, s:refillRexp)
@@ -704,7 +379,47 @@ function! Copy_Tree(indent)
 	" echo "Copied to register"
 endfunction
 
-function! s:Fold_Text()
+let s:signTask = 22000
+
+fun! EndOfIndentBuffer(from, to)
+	let indent = s:Indent(getline(a:from))
+	let i = a:from + 1
+	while i <= a:to
+		let ind = s:Indent(getline(i))
+		if (ind <= indent) && (ind != -1)
+			return i - 1
+		endif
+		let i += 1
+	endwhile
+	return a:to
+endf
+
+fun! Pad(num)
+	if a:num<10
+		return '0'.a:num
+	endif
+	return ''.a:num
+endf
+
+let s:rxLine = '^\(\t*\)\([#=\-?~/]\)\(!\{1,5}\)\?\s\(.*\)$'
+
+fun!ParseLine(text)
+	let m = matchlist(a:text, s:rxLine)
+	if len(m)>0
+		return 
+			\{
+				\'type': m[2],
+				\'priority': len(m[3])
+			\}
+	endif
+	return 
+		\{
+			\'type': '',
+			\'priority': 0
+		\}
+endf
+
+function! s:Fold_Text() " 1
 	let nl = v:foldend - v:foldstart + 1
 	let indent = s:Indent(getline(v:foldstart-1))
 	let res = s:MakeIndent(indent+2)
@@ -717,25 +432,21 @@ setlocal fillchars=fold:\
 
 let maplocalleader = "t"
 
-nnoremap <buffer> <silent><localleader>u :call Add_New_Line(0, '-', 1)<CR>
-nnoremap <buffer> <silent><localleader>n :call Add_New_Line(0, '-', 0)<CR>
-nnoremap <buffer> <silent><localleader>t :call Add_New_Line(2, "\t-", -1)<CR>
-nnoremap <buffer> <silent><localleader>l :call ttt#appendLog()<CR>
-"nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
-"nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
+nnoremap <buffer> <silent><localleader>u :call ttt#Add_New_Line(0, '-', 1)<CR>
+nnoremap <buffer> <silent><localleader>n :call ttt#Add_New_Line(0, '-', 0)<CR>
+nnoremap <buffer> <silent><localleader>t :call ttt#Add_New_Line(2, "\t-", -1)<CR>
+nnoremap <buffer> <silent><localleader>l :call ttt#Append_Log()<CR>
+nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
+nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
 nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
 nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
 nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
-nnoremap <buffer> <silent><localleader>bv :call BeginSelectAll()<CR>
-nnoremap <buffer> <silent><localleader>bb :call BeginCompile()<CR>
-nnoremap <buffer> <silent><localleader>bn :call BeginOpen()<CR>
+
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
 nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('~')<CR>
 nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('?')<CR>
-vnoremap <buffer> <silent> w <ESC>:call ttt#sendSelection('pebble', 'widget')<CR>
 
 call s:Load()
 call s:Enable_Markers()
-call s:Enable_Hotkeys()

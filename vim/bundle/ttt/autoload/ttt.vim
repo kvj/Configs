@@ -1,15 +1,17 @@
-let s:signTask = 22000
-let s:dmFormat = '%m/%d'
-let s:dmyFileFormat = '%y%m%d'
 let s:hmFormat = '%H:%M'
-let s:rxDateSymbols = '\([0-9\/]\+\)'
-let s:rxTimeSymbols = '\([0-9:]\+\)'
-let s:rxTime = '\(\d\{1,2\}\):\(\d\{2\}\)' "H:mm
-let s:rxDate = '\(\(\d\{2\}\)/\)\?\(\d\{1,2\}\)/\(\d\{1,2\}\)' "yy/m/d
 
-let s:reportPrefix = 'Report'
+"Debug output for lists
+fun! s:PrintList(list)
+	let buf = 'List{'.len(a:list).'}['
+	let idx = 0
+	for item in a:list
+		let buf .= ' ['.idx.']='.item
+		let idx += 1
+	endfor
+	return buf.' ]'
+endf
 
-fun! Log(...)
+fun! s:Log(...)
 	let buf = ''
 	let idx = 0
 	for item in a:000
@@ -22,138 +24,20 @@ fun! Log(...)
 	echom buf
 endf
 
-fun! ttt#sendSelection(dest, name)
-	let start = line("'<")
-	let finish = line("'>")
-	if start>finish
-		let start = finish
-		let finish = line("'<")
+fun! s:AppendLineHere(append_mode, content, cursor)
+	let ex = a:append_mode."\<esc>0Di"
+	let ex = ex . a:content
+    exec 'normal! ' . ex
+	if exists('g:android')
+		" Raise keyboard
+		call g:Android_Execute('input', {'request': 'keyboard_show'})
 	endif
-	let lines = []
-	let ind = Indent(getline(start))
-	let idx = start
-	while idx <= finish
-		let line = strpart(getline(idx), ind)
-		let line = substitute(line, '\t', '  ', 'g')
-		call add(lines, line)
-		let idx += 1
-	endwhile
-	if !exists('g:android')
-		return 0
-	endif
-	call g:Android_Execute('widget', 
-				\ {'lines': lines,
-				\  'dest':  a:dest,
-				\  'name':  a:name
-				\ })
-	return 1
-endf
-
-function! BufferSearchForLines(rexp)
-	let idx = 1
-	let end = line('$')
-	let result = []
-	while idx<=end
-		let line = getline(idx)
-		if match(line, a:rexp) != -1
-			"Found
-			let item = [idx, line]
-			call add(result, item)
-		endif
-		let idx += 1
-	endwhile
-	return result
-endfunction
-
-fun! ttt#CursorTask()
-	if !exists('b:taskSigns')
-		let b:taskSigns = 0
-	endif
-	let signNo = 0
-	let tasklines = BufferSearchForLines('\t\+=!\{,5}\s.*$')
-	for task in tasklines
-		let signType = 'tttTask'
-		" Put mark
-		exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
-		exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name='.signType.' buffer='.bufnr('%')
-		let signNo += 1
-	endfor
-	if signNo<b:taskSigns
-		for i in range(signNo, b:taskSigns-1)
-			" echom 'Remove sign' i
-			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
-		endfor
-	endif
-	let b:taskSigns = signNo
-endf
-
-fun! FindBuffer(name, mode)
-	"Searches for a named buffer
-	let windows = winnr('$')
-	let idx = 1
-	while idx <= windows
-		let bufno = winbufnr(idx)
-		let bname = bufname(bufno)
-		let found = 0
-		if (a:mode == 'f') && (fnamemodify(bname, ':p') ==? a:name)
-			let found = 1
-		endif
-		if  (a:mode == 't') && (bname ==? a:name)
-			let found = 1
-		endif
-		if found
-			"Found buffer
-			"echom 'Will focus on: '.idx.' - '.bufname(bufno)
-			exe ''.idx.'wincmd w'
-			doau FileChangedShellPost
-			return 1
-		endif
-		let idx += 1
-	endwhile
-	return 0
-endfunction
-
-fun! ttt#findFile(file)
-	return FindFiles(a:file)[0]
-endf
-
-"Expand file list definition into array of paths
-fun! FindFiles(file)
-	let fname = a:file
-	if 0 == stridx(fname, 'ttt:') && exists('g:tttRoot')
-		"ttt files
-		let fname = g:tttRoot.'/'.strpart(fname, 4)
-	endif
-	let resolved = glob(fname)
-	if len(resolved)>0
-		let fname = resolved
-	endif
-	return split(fname, '\n')
-endf
-
-"Read file into list of lines
-fun! ReadOneFile(path)
-	return readfile(a:path)
-endf
-
-"Return indent of line
-fun! Indent(line)
-	let tabs = matchstr(a:line, '^\t*')
-	return len(tabs)
-endf
-
-fun! FillChars(num, char)
-	let res = ''
-	let idx = 0
-	while idx < a:num
-		let idx += 1
-		let res .= a:char
-	endwhile
-	return res
+	startinsert!
+	call cursor(line('.'), a:cursor)
 endf
 
 "Extract part of date and converts to number
-fun! DateItemPart(dt, item)
+fun! s:DateItemPart(dt, item)
 	if a:item == 'd'
 		return str2nr(strftime("%d", a:dt))
 	endif
@@ -178,266 +62,162 @@ fun! DateItemPart(dt, item)
 	return 0
 endf
 
-"Parse date and returns array of 3 [y, m, d]
-fun! ParseDate(text)
-	let m = matchlist(a:text, s:rxDate)
-	if len(m)>0
-		let y = 0
-		if len(m[1])>0
-			let y = str2nr(m[2])
-		else
-			let y = DateItemPart(localtime(), 'y')
-		endif
-		return [y, str2nr(m[3]), str2nr(m[4])]
-	endif
-	return []
-endf
-
-"Parse time and returns array of 3 [h, m, 0]
-fun! ParseTime(text)
-	let m = matchlist(a:text, s:rxTime)
-	if len(m)>0
-		return [str2nr(m[1]), str2nr(m[2]), 0]
-	endif
-	return []
-endf
-
-fun! EndOfIndent(lines, from, to)
-	let indent = Indent(a:lines[a:from])
-	let i = a:from + 1
-	while i < a:to
-		let ind = Indent(a:lines[i])
-		if (ind <= indent) && (ind != -1)
-			return i - 1
-		endif
-		let i += 1
-	endwhile
-	return a:to - 1
-endf
-
-fun! EndOfIndentBuffer(from, to)
-	let indent = Indent(getline(a:from))
-	let i = a:from + 1
-	while i <= a:to
-		let ind = Indent(getline(i))
-		if (ind <= indent) && (ind != -1)
-			return i - 1
-		endif
-		let i += 1
-	endwhile
-	return a:to
-endf
-
-fun! Pad(num)
-	if a:num<10
-		return '0'.a:num
-	endif
-	return ''.a:num
-endf
-
-fun! RenderDate(arr)
+fun! s:RenderDate(arr)
 	return Pad(a:arr[0]).'/'.Pad(a:arr[1]).'/'.Pad(a:arr[2])
 endf
 
-fun! RenderTime(arr)
+fun! s:RenderTime(arr)
 	return Pad(a:arr[0]).':'.Pad(a:arr[1])
 endf
 
-fun! MakeJump2Split()
-	let curr = winnr()
-	let foundWin = -1
-	let size = -1
-	let idx = 1
-	while idx <= winnr('$')
-		if idx != curr
-			let s = winwidth(idx)*winheight(idx)
-			if s > size
-				let foundWin = idx
-				let size = s
-			endif
-		endif
+"Append log entry to file"
+fun! ttt#Append_Log()
+	let client = ''
+	if exists('g:tttClient')
+		let client = ' '.g:tttClient
+	endif
+	let tm = localtime()
+	let dateArr = [s:DateItemPart(tm, 'y'), s:DateItemPart(tm, 'm'), s:DateItemPart(tm, 'd')]
+	let timeArr = [s:DateItemPart(tm, 'h'), s:DateItemPart(tm, 'i'), 0]
+	let date_line = s:BufferSearchForLines('^'.substitute(s:RenderDate(dateArr), '/', '\/', "").'.*:', 1)
+	if len(date_line)
+		" Already there - append after last child
+		call cursor(date_line[0][2], 0)
+		let content = "\t".s:RenderTime(timeArr).client.":\n\t"
+		return s:AppendLineHere('o', content, 4)
+	endif
+	let content = ''.s:RenderDate(dateArr).":\n\t".s:RenderTime(timeArr).client.":\n\t"
+	let footer_line = []
+	if b:footer != ''
+		let footer_line = s:BufferSearchForLines('^'.b:footer.'$', 0)
+	endif
+	let append_mode = 'o'
+	if len(footer_line) > 0
+		call cursor(footer_line[len(footer_line)-1][0], 0)
+		let append_mode = 'O'
+	else
+		normal! G
+	endif
+	return s:AppendLineHere(append_mode, content, 4)
+endf
+
+"Returns indent of line
+function! s:Indent(line) " 1
+	let tabs = matchstr(a:line, '^\t*')
+	return len(tabs)
+endfunction
+
+fun! s:FillChars(num, char)
+	let res = ''
+	let idx = 0
+	while idx < a:num
 		let idx += 1
+		let res .= a:char
 	endwhile
-	if foundWin != -1 "Found big enough win
-		exe ''.foundWin.'wincmd w'
-		return foundWin
-	endif
-	" Have to split
-	let cmd = ''.ttt#ifDefined('g:tttSplitSize', '').'sp'
-	"if winwidth(0) > winheight(0)
-	"	let cmd = 'vs'
-	"endif
-	exe cmd
-	return winnr()
+	return res
 endf
 
-let s:rxLine = '^\(\t*\)\([#=\-?~/]\)\(!\{1,5}\)\?\s\(.*\)$'
-
-fun!ParseLine(text)
-	let m = matchlist(a:text, s:rxLine)
-	if len(m)>0
-		return 
-			\{
-				\'type': m[2],
-				\'priority': len(m[3])
-			\}
-	endif
-	return 
-		\{
-			\'type': '',
-			\'priority': 0
-		\}
-endf
-
-fun! ChangeSignHere(sign)
+fun! s:ChangeSignHere(sign)
 	let line = getline('.')
 	let parsed = ParseLine(line)
 	if parsed['type'] == ''
 		return 0
 	endif
-	let ind = Indent(line)
-	let text = FillChars(ind, "\t") . a:sign . strpart(line, ind + 1)
+	let ind = s:Indent(line)
+	let text = s:FillChars(ind, "\t") . a:sign . strpart(line, ind + 1)
 	call setline('.', text)
 	return 1
 endf
 
-fun! SelectHere()
-	let idx = line('.')
-	let lastline = EndOfIndentBuffer(idx, line('$'))
-	normal! V
-	if lastline>idx
-		exe 'normal! '.(lastline-idx).'j'
-	endif
-endf
-
-fun! SelectBlock()
-	call Jump2Task(1)
-	call SelectHere()
-endf
-
-fun! CopyBlock()
-	let curr = winnr()
-	call Jump2Task(1)
-	call SelectHere()
-	normal! y
-	exe ''.curr.'wincmd w'
-endf
-
-fun! ChangeSign(sign)
-	let curr = winnr()
-	call Jump2Task(1)
-	call ChangeSignHere(a:sign)
-	exe ''.curr.'wincmd w'
-endf
-
 fun! ttt#changeSign(sign)
-	return ChangeSignHere(a:sign)
+	return s:ChangeSignHere(a:sign)
 endf
 
-fun! ttt#ifDefined(name, def)
-	if exists(a:name)
-		exe 'let val = '.a:name
-		return val
+let s:signTask = 22000
+
+function! s:BufferSearchForLines(rexp, children, ...)
+	let idx = 1
+	let end = line('$')
+	if len(a:000) == 2
+		let idx = a:1
+		let end = a:2
 	endif
-	return a:def
+	let result = []
+	while idx<=end
+		let line = getline(idx)
+		if match(line, a:rexp) != -1
+			"Found
+			let item = [idx, line]
+			call add(result, item)
+			let lineindent = s:Indent(line)
+			if a:children
+				call add(item, s:BufferSearchForLastChild(idx))
+			endif
+		endif
+		let idx += 1
+	endwhile
+	return result
+endfunction
+
+function! s:BufferSearchForLastChild(idx)
+	let i = a:idx+1
+	let lineindent = s:Indent(getline(a:idx))
+	while i<=line('$')
+		let line = getline(i)
+		if s:Indent(line)<=lineindent && !empty(line)
+			break
+		endif
+		let i += 1
+	endwhile
+	return i-1
+endfunction
+
+fun! ttt#CursorTask()
+	if !exists('b:taskSigns')
+		let b:taskSigns = 0
+	endif
+	let signNo = 0
+	let tasklines = s:BufferSearchForLines('\t\+=!\{,5}\s.*$', 0)
+	for task in tasklines
+		let signType = 'tttTask'
+		" Put mark
+		exec 'sign unplace '.(s:signTask+signNo).' buffer='.bufnr('%')
+		exec 'sign place '.(s:signTask+signNo).' line='.task[0].' name='.signType.' buffer='.bufnr('%')
+		let signNo += 1
+	endfor
+	if signNo<b:taskSigns
+		for i in range(signNo, b:taskSigns-1)
+			" echom 'Remove sign' i
+			exec 'sign unplace '.(s:signTask+i).' buffer='.bufnr('%')
+		endfor
+	endif
+	let b:taskSigns = signNo
 endf
 
-fun! AppendLineHere(content, cursor)
-	edit
-	normal! G
-	let ex = "o\<esc>0Di"
-	let ex = ex . a:content
+fun! ttt#Add_New_Line(top, content, indent)
+	if a:top == 1
+		normal! gg
+	endif
+	if a:top == 2
+		normal! G
+	endif
+	let ex = "o"
+	if a:indent == 1
+		let ex = ex . "\t"
+	endif
+	if a:indent == -1
+		let ex = ex . "\<esc>0Di"
+	endif
+	if a:content == 'time'
+		let ex = ex . strftime(s:hmFormat).' '
+	else
+		let ex = ex . a:content . ' '
+	endif
     exec 'normal! ' . ex
 	if exists('g:android')
 		" Raise keyboard
 		call g:Android_Execute('input', {'request': 'keyboard_show'})
 	endif
 	startinsert!
-	call cursor(line('.'), a:cursor)
 endf
 
-fun! AppendLine(file, content)
-	if a:file == ''
-		call Log('Target not defined')
-		return 0
-	endif
-	let paths = FindFiles(a:file)
-	if FindBuffer(paths[0], 'f')
-		"call Log('Jumped', task['file'])
-	else
-		call MakeJump2Split()
-		exe 'e '.paths[0]
-	endif
-	return AppendLineHere(a:content, 99)
-endf
-
-"Append log entry to file"
-fun! ttt#appendLog()
-	let client = ''
-	if exists('g:tttClient')
-		let client = ' '.g:tttClient
-	endif
-	let tm = localtime()
-	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
-	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content = ''.RenderDate(dateArr).' '.RenderTime(timeArr).client.":\n\t"
-	return AppendLineHere(content, 2)
-endf
-
-fun! AppendLog(file, content)
-	if a:file == ''
-		call Log('Target not defined')
-		return 0
-	endif
-	let paths = FindFiles(a:file)
-	if !FindBuffer(paths[0], 'f')
-		call MakeJump2Split()
-		exe 'e '.paths[0]
-	endif
-	let content = a:content
-	let tm = localtime()
-	let dateArr = [DateItemPart(tm, 'y'), DateItemPart(tm, 'm'), DateItemPart(tm, 'd')]
-	let timeArr = [DateItemPart(tm, 'h'), DateItemPart(tm, 'i'), 0]
-	let content .= ' ['.RenderDate(dateArr).' '.RenderTime(timeArr).']'
-	return AppendLineHere(content, 4)
-endf
-
-"Add value to date
-function! AddToDate(dt, item, value)
-	if !a:value
-		return a:dt
-	endif
-	if a:item == 'd'
-		return a:dt+a:value*60*60*24
-	endif
-	if a:item == 'm'
-		"TODO: Implement
-		return a:dt
-	endif
-	if a:item == 'y'
-		"TODO: Implement
-		return a:dt
-	endif
-	if a:item == 'h'
-		return a:dt+a:value*60*24
-	endif
-	if a:item == 'i'
-		return a:dt+a:value*60
-	endif
-	return a:dt
-endfunction
-
-fun! CollapseExpand()
-	let size = 10
-	if exists('g:tttExpandSize')
-		let size = g:tttExpandSize
-	endif
-	if b:expanded
-		exe 'resize '.b:collapseSize
-		let b:expanded = 0
-	else
-		let b:expanded = 1
-		let b:collapseSize = winheight('.')
-		exe 'resize '.(b:collapseSize+size)
-	endif
-endf

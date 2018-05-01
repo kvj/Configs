@@ -1,18 +1,16 @@
 let s:extBlockBegin = '#begin'
 let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
 
-syn match tTime '\d\{1,2}:\d\{2}'
-syn match tLocation '\s\[.\{-}\]'hs=s+1
-syn match tComment '^\s*\/\{2}\s.*$'
-syn match tDate '\(\d\{2}\/\)\?\d\{1,2}\/\d\{1,2}'
-syn match tTag '#[a-z0-9]\+'
-syn match tPriority '\s[#=-?]!\{1,5}\s'he=e-1,hs=s+2
-syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1
+syn match tTime '\d\{1,2}:\d\{2}' "_12:34
+syn match tLocation '\s\[.\{-}\]'hs=s+1 "_
+syn match tComment '^\s*\/\{2}\s.*$' "//_...
+syn match tDate '\(\d\{2}\/\)\?\d\{1,2}\/\d\{1,2}' "18/12/5
+syn match tTag '#[a-z0-9]\+' "#test
+syn match tPriority '\s[#=-?]!\{1,5}\s'he=e-1,hs=s+2 "_?2_
+syn match tContact '@[A-Z][a-zA-Z0-9-_]*'hs=s+1 "@Marco
 " exe 'syn match tOkTag ''#\('.join(s:okTags, '\|').'\)\(\s\|$\)'''
 syn cluster BlockHL contains=tTag,tContact,tTime,tDate,tPriority,tLocation
-syn match tTitle '^\s*[A-Z0-9].*:\( /\)\?$'he=e-1 contains=@BlockHL
-"exe 'syn region tOkLine start=''^\z(\s*\).*\s#\('.join(s:okTags, '\|').'\)\($\| \?/\?\)'''.markIndentBlock.' contains=@BlockHL'
-"exe 'syn region tDoneLine start=''^\z(\s*\)#^\s.\+'''.markIndentBlock.' contains=@BlockHL'
+syn match tTitle '^\s*[A-Z0-9].*:\( /\)\?$'he=e-1 contains=@BlockHL "TITLE: /
 
 exe 'syn region tExtBlock start=''^\z(\s*\)'.s:extBlockBegin.' '''.s:markIndentBlock.' keepend contains=@ExtBlockSyntax'
 
@@ -28,23 +26,6 @@ call EnableLineSyntaxt('Cancel', '/')
 call EnableLineSyntaxt('Calendar', '\*')
 call EnableLineSyntaxt('Triage', '?')
 
-function! s:enableExtBlockSyntax(code, name)
-	if !filereadable('syntax/'.a:name.'.vim')
-		return 0
-	endif
-	let ft=toupper(a:code)
-	let group='ExtSyntax'.ft
-	execute 'syntax include @'.group.' syntax/'.a:name.'.vim'
-	execute 'syntax region tExtGroup'.ft.' matchgroup=tExtGroupMark start=''^\s*'.s:extBlockBegin.'\(\s\|\n\)'.a:code.'\s.*\n''rs=e skip=''\n'' end=''$'' contained contains=@'.group
-	execute 'syn cluster ExtBlockSyntax add=tExtGroup'.ft
-	return 1
-endfunction
-
-call s:enableExtBlockSyntax('puml', 'plantuml')
-call s:enableExtBlockSyntax('js', 'javascript')
-
-exec 'syn match tBegin ''\s*'.s:extBlockBegin.'\s''he=e-1 contained containedin=tExtGroupMark'
-"syn cluster ExtBlockSyntax add=tBegin
 hi link tTitle Title
 hi link tDate Keyword
 hi link tTime Keyword
