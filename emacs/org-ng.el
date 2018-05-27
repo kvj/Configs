@@ -10,7 +10,8 @@
 (setq org-agenda-files
       (list org-directory
 	    (concat org-directory "calendar")
-	    (concat org-directory "inbox")))
+	    (concat org-directory "inbox")
+	    (concat org-directory "projects")))
 
 (setq org-agenda-file-regexp "^[a-z].*\.org$")
 
@@ -29,12 +30,12 @@
 
 ; Custom keywords
 (setq org-todo-keywords
-      '((sequence "T(t)" "|" "A(a)" "#(d)")))
+      '((sequence "T(t)" "N(n)" "|" "A(a)" "#(d)")))
 
 ; Refile targets - two levels in current file + first level in others
 (setq org-refile-targets (quote (
-	(nil :maxlevel . 2)
-	(org-agenda-files :level . 1)
+	(nil :maxlevel . 3)
+	(org-agenda-files :maxlevel . 2)
 )))
 
 (require 'org)
@@ -69,7 +70,10 @@
 		     (agenda "Today" ((org-agenda-overriding-header "Today")
 				      (org-agenda-span 'day)
 				      (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-		     (todo "" ((org-agenda-overriding-header (concat "Tasks " k-org-agenda-filter))
+		     (todo "N" ((org-agenda-overriding-header (concat "Next " k-org-agenda-filter))
+			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+		     (tags-todo "+CATEGORY=\"inbox\"" ((org-agenda-overriding-header (concat "Inbox " k-org-agenda-filter))
 			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
 			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
