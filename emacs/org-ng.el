@@ -1,5 +1,6 @@
 (defvar k-org-capture-inbox "inbox/m_desktop.org")
 (defvar k-org-capture-inbox-main "main.org")
+(defvar k-org-capture-journal "journal.org")
 (defvar k-org-agenda-refile-id "Main_Journal")
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero t)
@@ -71,10 +72,9 @@
 				      (org-agenda-span 'day)
 				      (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
 		     (todo "N" ((org-agenda-overriding-header (concat "Next " k-org-agenda-filter))
-			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
 			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
 		     (tags-todo "+CATEGORY=\"inbox\"" ((org-agenda-overriding-header (concat "Inbox " k-org-agenda-filter))
-			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
 			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-compact-blocks t)))
 	("r" "All TODOs" (
@@ -107,10 +107,15 @@
 ; Custom capture templates
 (setq org-capture-templates
       '(
-	("n" "Note" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* # %? %T")
-	("p" "Todo" entry (file+headline (concat org-directory k-org-capture-inbox-main) "Journal") "* T %?")
-	("m" "Note (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* # %? %T")
-	("i" "Todo (backup inbox)" entry (file+headline (concat org-directory k-org-capture-inbox) "Journal") "* T %?")))
+	("p" "Todo" entry
+	 (file+headline (concat org-directory k-org-capture-inbox-main) "Journal")
+	 "* T %?")
+	("j" "Journal entry" entry
+	 (file+datetree (concat org-directory k-org-capture-journal))
+	 "* %U %?")
+	("n" "Todo (backup inbox)" entry
+	 (file+headline (concat org-directory k-org-capture-inbox) "Journal")
+	 "* T %?")))
 
 ; Enable git push on save
 (when (> k-org-git-save-push-sec 0)
@@ -167,14 +172,11 @@
      (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
      (org-defkey org-agenda-mode-map "h" 'k-org-git-dispatcher)
      (org-defkey org-agenda-mode-map "y" 'org-agenda-deadline)
+     (org-defkey org-agenda-mode-map "i" 'org-agenda-refile)
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
 		   (org-capture nil "p")))
-     (org-defkey org-agenda-mode-map "i" 
-		 (lambda () 
-		   (interactive) 
-		   (org-capture nil "i")))
      (org-defkey org-agenda-mode-map "n" 
 		 (lambda () 
 		   (interactive) 
