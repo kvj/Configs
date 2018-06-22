@@ -74,12 +74,7 @@ set wildchar=<Tab>
 " show line numbers
 set number
 
-" Fold using markers {{{
-" like this
-" }}}
 set foldmethod=indent
-"set foldnestmax=3
-"set foldminlines=5
 set foldcolumn=2
 set foldlevel=99
 
@@ -136,14 +131,6 @@ set bg=dark
 " Always show the menu, insert longest match
 set completeopt=menuone,preview,longest
 
-let Tlist_GainFocus_On_ToggleOpen = 1
-let Tlist_Use_Right_Window = 1
-let Tlist_Show_One_File = 1
-let Tlist_File_Fold_Auto_Close = 1
-let Tlist_Auto_Update = 1
-let Tlist_Highlight_Tag_On_BufEnter = 1
-let Tlist_Enable_Fold_Column = 0
-let Tlist_Close_On_Select = 0
 let g:proj_window_width = 25
 let g:proj_window_increment = 35
 let g:bufExplorerShowRelativePath = 1
@@ -208,17 +195,8 @@ vnoremap y ymygv<ESC>
 "Restore pos
 nnoremap bb `mzz
 
-"Complete line
-"inoremap <C-L> <C-X><C-L>
-
 "Save
 nnoremap <silent><LEADER>s :wa<CR>
-
-"TagList
-nnoremap <silent><LEADER>o :TlistToggle<CR>
-
-"Project
-"nnoremap <silent><LEADER>p :Project<CR>
 
 "Show open windows
 nnoremap <silent><LEADER>w :BufExplorer<CR>
@@ -235,15 +213,8 @@ nnoremap <silent><LEADER>f :e #<CR>
 "Toggle tree
 nnoremap <silent><LEADER>t :NERDTreeToggle<CR>
 
-"Repeat search
-"nnoremap <C-A> :/<CR>
-"inoremap <C-A> <C-O>:/<CR>
-"vnoremap <C-A> <ESC>:/<CR>
-
 "Reset switch
 nnoremap <silent><LEADER>/ :silent noh<CR>
-"inoremap <silent><LEADER>/ <C-O>:silent noh<CR>
-"vnoremap <silent><LEADER>/ <ESC>:silent noh<CR>
 
 "Top win
 nnoremap <C-I> :wincmd k<CR>

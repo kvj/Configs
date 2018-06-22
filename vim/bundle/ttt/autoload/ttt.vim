@@ -28,10 +28,6 @@ fun! s:AppendLineHere(append_mode, content, cursor)
 	let ex = a:append_mode."\<esc>0Di"
 	let ex = ex . a:content
     exec 'normal! ' . ex
-	if exists('g:android')
-		" Raise keyboard
-		call g:Android_Execute('input', {'request': 'keyboard_show'})
-	endif
 	startinsert!
 	call cursor(line('.'), a:cursor)
 endf

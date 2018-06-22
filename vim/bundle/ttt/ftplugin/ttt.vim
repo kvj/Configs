@@ -2,7 +2,7 @@
 "setlocal list listchars=tab:»·,trail:·,extends:…,nbsp:‗
 setlocal tabstop=2
 setlocal shiftwidth=2
-setlocal foldmethod=indent
+setlocal foldmethod=syntax
 setlocal noexpandtab
 setlocal foldignore=
 
@@ -217,30 +217,6 @@ function! s:Enable_Markers()
 	autocmd FileChangedShellPost,BufWritePost <buffer> call ttt#CursorTask()
 endfunction
 
-function! s:BufferSearchForLines(rexp, children, ...)
-	let idx = 1
-	let end = line('$')
-	if len(a:000) == 2
-		let idx = a:1
-		let end = a:2
-	endif
-	let result = []
-	while idx<=end
-		let line = getline(idx)
-		if match(line, a:rexp) != -1
-			"Found
-			let item = [idx, line]
-			call add(result, item)
-			let lineindent = s:Indent(line)
-			if a:children
-				call add(item, s:BufferSearchForLastChild(idx))
-			endif
-		endif
-		let idx += 1
-	endwhile
-	return result
-endfunction
-
 function! s:BufferSearchForLastChild(idx) " 1
 	let i = a:idx+1
 	let lineindent = s:Indent(getline(a:idx))
@@ -278,47 +254,37 @@ function! s:ParseAttrs(text, index)
 	return result
 endfunction
 
-function! s:Load()
+fun! Auto_Save() " 1
+	silent! wa
+endf
+
+function! s:Load() " 1
+	let rexp = '^\/\/ ttt:\(.\+\)$'
 	au! * <buffer>
 	normal mx
-	let linenr = 0
-	let foldsmade = 0
-	while linenr <= line("$")
-		let line = getline(linenr)
-		let matched = matchstr(line, '^.*\s/$')
-		if !empty(matched)
-			call cursor(linenr+1, 0)
-			normal zc
-			let foldsmade += 1
+	call cursor(0, 0)
+	let linenr = -1
+	while linenr != 0
+		let linenr = search(rexp, 'cWze')
+		if linenr > 0
+	 		let vars = s:ParseAttrs(getline(linenr), len('// ttt:'))
+	 		for [var, value] in items(vars)
+	 			exe 'let b:'.var.'='.value
+	 		endfor
 		endif
-		"Set buffer parameters
-		let matched = matchstr(line, '^// ttt:\(.\+\)$')
-		if !empty(matched)
-			let vars = s:ParseAttrs(line, len('// ttt:'))
-			for [var, value] in items(vars)
-				exe 'let b:'.var.'='.value
-			endfor
-		endif
-		let linenr += 1
 	endwhile
-	if foldsmade>0
-		normal `x
-	endif
-	if exists('g:android')
-		"Quickbar support
-		if b:qbar != '' && exists('b:qbar_'.b:qbar)
-			"echom 'Have qbar: '.b:qbar
-			let cmd = "call g:Android_Execute('quickbar', {'items': b:qbar_".b:qbar."})"
-			exe cmd
-			autocmd BufLeave <buffer> call g:Android_Execute('quickbar', {'default': 1})
-			exe "autocmd BufEnter <buffer> ".cmd
-		endif
-	endif
+	setlocal foldlevel=0
 	if exists('g:tttNoNumber') && g:tttNoNumber == 1
 		setlocal nonumber
 	endif
+	normal `x
 	if b:jump == 'b'
 		normal Gzz
+	endif
+	if exists('g:tttAutoSave') && g:tttAutoSave == 0 || exists('b:as') && b:as == 0
+		" Do nothing, no autosave
+	else
+		au CursorHold,InsertLeave * nested call Auto_Save()
 	endif
 endfunction
 
@@ -401,9 +367,9 @@ fun! Pad(num)
 	return ''.a:num
 endf
 
-let s:rxLine = '^\(\t*\)\([#=\-?~/]\)\(!\{1,5}\)\?\s\(.*\)$'
+let s:rxLine = '^\(\t*\)\(\S\)\(!\{1,5}\)\?\s\(.*\)$'
 
-fun!ParseLine(text)
+fun! ParseLine(text)
 	let m = matchlist(a:text, s:rxLine)
 	if len(m)>0
 		return 
@@ -419,15 +385,16 @@ fun!ParseLine(text)
 		\}
 endf
 
-function! s:Fold_Text() " 1
+setlocal foldtext=Fold_Text()
+
+function! Fold_Text() " 1
 	let nl = v:foldend - v:foldstart + 1
-	let indent = s:Indent(getline(v:foldstart-1))
-	let res = s:MakeIndent(indent+2)
-	let res .= '++ '.nl.' --'
+	let m = matchlist(getline(v:foldstart), '^\(.*\)\s/$')
+	let res = m[1]
+	let res .= '...{'.nl.'}'
 	return res
 endfunction
 
-setlocal foldtext=s:Fold_Text()
 setlocal fillchars=fold:\ 
 
 let maplocalleader = "t"
@@ -445,8 +412,9 @@ nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
-nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('~')<CR>
-nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('?')<CR>
+nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('/')<CR>
+nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('~')<CR>
 
 call s:Load()
 call s:Enable_Markers()
+
