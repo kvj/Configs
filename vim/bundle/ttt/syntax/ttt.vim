@@ -1,5 +1,5 @@
 let s:extBlockBegin = '#begin'
-let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-1'
+let s:markIndentBlock = ' skip=''^\z1\s'' end=''^\s*[^\s]''me=s-2'
 
 syn match tTime '\d\{1,2}:\d\{2}' "_12:34
 syn match tLocation '\s\[.\{-}\]'hs=s+1 "_[...]

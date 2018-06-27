@@ -301,11 +301,12 @@ let s:refillRexp = '^\(\t*\)\(.\s\)\?'.s:rxTime.'\?\(.\{-}\)\(\s#[a-z0-9]\+\)\?\
 " 0 = full, 1 = indent, 2 = start sign, 3 = time, 6 = text, 7 = tag, 8 = fold sign
 
 "Returns str of tabs num long
-function! s:MakeIndent(num) " 1
+function! s:MakeIndent(num, ...) " 1
 	let str = ''
 	let i = 0
+	let fill = a:0 > 0 ? a:1 : "\t" 
 	while i<a:num
-		let str .= "\t"
+		let str .= fill
 		let i += 1
 	endwhile
 	return str
@@ -389,9 +390,10 @@ setlocal foldtext=Fold_Text()
 
 function! Fold_Text() " 1
 	let nl = v:foldend - v:foldstart + 1
-	let m = matchlist(getline(v:foldstart), '^\(.*\)\s/$')
-	let res = m[1]
-	let res .= '...{'.nl.'}'
+	let line = getline(v:foldstart)
+	let m = matchlist(line, '^\s*\(.*\)\s/$')
+	let indent = s:Indent(line)
+	let res = s:MakeIndent(indent, "  ").m[1].'...{'.nl.'}'
 	return res
 endfunction
 
