@@ -59,30 +59,37 @@
 	("." . (lambda ()
 		 (org-agenda nil "w")))
 	("e" . (lambda ()
-		 (when k-org-auto-open-agenda-key
-		   (org-agenda nil k-org-auto-open-agenda-key))))
+		 (org-agenda nil "t" 'buffer)))
 	("k" . org-capture)))
 (setq org-use-speed-commands t)
 
-(setq org-agenda-tag-filter-preset (list k-org-agenda-filter))
 ; Custom agenda view
 (setq org-agenda-custom-commands 
-      '(("w" "Main" (
-		     (agenda "Today" ((org-agenda-overriding-header "Today")
-				      (org-agenda-span 'day)
-				      (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-		     (todo "N" ((org-agenda-overriding-header (concat "Next " k-org-agenda-filter))
-			       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-		     (tags-todo "+CATEGORY=\"inbox\"" ((org-agenda-overriding-header (concat "Inbox " k-org-agenda-filter))
-			       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
-	 ((org-agenda-compact-blocks t)))
-	("r" "All TODOs" (
-			  (todo "" ((org-agenda-tag-filter-preset nil)
-				    (org-agenda-dim-blocked-tasks t)
-				    ;(org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
-				    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))))
-	("c" "Closed" ((tags "+CLOSED<\"<-3d>\"" ((org-agenda-dim-blocked-tasks nil)))))))
+      '(("w" "Main" ((agenda
+		      "Today"
+		      ((org-agenda-overriding-header "Today")
+		       (org-agenda-span 'day)
+		       (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
+		     (tags-todo
+		      "-ALLTAGS=\"\""
+		      ((org-agenda-overriding-header (format "%s / %s" "Next " k-org-agenda-filter))
+		       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
+		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
+		     (tags-todo
+		      "-ALLTAGS<>\"\""
+		      ((org-agenda-overriding-header (format "%s / %s" "Inbox " k-org-agenda-filter))
+		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
+	 ((org-agenda-tag-filter-preset k-org-agenda-filter)
+	  (org-agenda-compact-blocks t)))
+	("r" "All TODOs" ((todo
+			   ""
+			   ((org-agenda-dim-blocked-tasks t)
+					;(org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
+			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))))
+	("c" "Closed" ((tags
+			"+CLOSED<\"<-3d>\""
+			((org-agenda-dim-blocked-tasks nil)))))))
+
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
 (setq org-agenda-window-setup 'current-window)
