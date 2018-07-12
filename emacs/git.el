@@ -2,6 +2,9 @@
 (defvar k-org-git-branch "master")
 (defvar k-org-git-auto-push-min 0)
 (defvar k-org-git-save-push-sec 20)
+(defvar k-org-git-refresh-sec 1)
+
+; Internal
 (defvar k-org-git-save-push-timer nil)
 
 (defun k-org-git-auto-save ()
@@ -30,7 +33,7 @@
   (if (k-org-git (concat
 		  "git pull --no-edit origin"
 		  " " k-org-git-branch) "Git: Pulling..." org-directory)
-      (run-with-idle-timer 5 nil 'org-agenda-redo t))
+      (run-with-idle-timer k-org-git-refresh-sec nil 'org-agenda-redo t))
   (message "Git: No changes received"))
 
 (defun k-org-git-pull-config ()
@@ -65,7 +68,7 @@
   (message "Git: ([h] pull/[j] push/[c] commit/[r] reset/[s] pull config/[q] quit)")
   (let ((a (read-char-exclusive)))
     (case a
-	  (?j (run-with-idle-timer 5 nil 'k-org-git-push t))
+	  (?j (run-with-idle-timer k-org-git-refresh-sec nil 'k-org-git-push t))
 	  (?h (k-org-git-pull))
 	  (?s (k-org-git-pull-config))
 	  (?c (k-org-git-commit "Saving changes..."))
