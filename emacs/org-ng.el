@@ -28,7 +28,6 @@
 (setq org-habit-following-days 2)
 (setq org-habit-graph-column 40)
 
-
 ; Custom keywords
 (setq org-todo-keywords
       '((sequence "T(t)" "N(n)" "|" "A(a)" "#(d)")))
@@ -84,7 +83,6 @@
 	("r" "All TODOs" ((todo
 			   ""
 			   ((org-agenda-dim-blocked-tasks t)
-					;(org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))
 			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))))
 	("c" "Closed" ((tags
 			"+CLOSED<\"<-3d>\""
@@ -105,10 +103,10 @@
 	(tags  . "%-10:c")
 	(search . "%-10:c")))
 (setq org-agenda-current-time-string "> - - -")
-(setq org-agenda-time-grid '(
-			     (daily today)
-			     ". . . ."
-			     (1000 1200 1400 1600 1800 2000)))
+;(setq org-agenda-time-grid '((daily today)
+;			     (1000 1200 1400 1600 1800 2000)
+;			     ". . . ."
+;			     "-------"))
 (setq org-agenda-entry-text-maxlines 20)
 
 ; Custom capture templates
