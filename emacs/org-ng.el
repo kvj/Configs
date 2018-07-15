@@ -1,7 +1,6 @@
 (defvar k-org-capture-inbox "inbox/m_desktop.org")
-(defvar k-org-capture-inbox-main "main.org")
+(defvar k-org-capture-main-id "Main_Journal")
 (defvar k-org-capture-journal "journal.org")
-(defvar k-org-agenda-refile-id "Main_Journal")
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero t)
 (defvar k-org-goto-narrow nil)
@@ -102,25 +101,33 @@
 	(todo  . "%-10:c")
 	(tags  . "%-10:c")
 	(search . "%-10:c")))
-(setq org-agenda-current-time-string "> - - -")
+(setq org-agenda-current-time-string "<-")
 ;(setq org-agenda-time-grid '((daily today)
 ;			     (1000 1200 1400 1600 1800 2000)
 ;			     ". . . ."
 ;			     "-------"))
 (setq org-agenda-entry-text-maxlines 20)
 
+; Capture to entry set by k-org-capture-main-id
+(defun k-org-capture-main ()
+  (pcase (org-id-find k-org-capture-main-id)
+    (`(,path . ,pos)
+     (set-buffer (org-capture-target-buffer path))
+     (widen)
+     (org-capture-put-target-region-and-position)
+     (goto-char pos))
+    (_ (error "Capture target id not found: '%s'" k-org-capture-main-id))))
+
 ; Custom capture templates
 (setq org-capture-templates
       '(
 	("p" "Todo" entry
-	 (file+headline (concat org-directory k-org-capture-inbox-main) "Journal")
+	 (function (lambda ()
+		     (k-org-capture-main)))
 	 "* T %?")
 	("j" "Journal entry" entry
 	 (file+datetree (concat org-directory k-org-capture-journal))
-	 "* %U %?")
-	("n" "Todo (backup inbox)" entry
-	 (file+headline (concat org-directory k-org-capture-inbox) "Journal")
-	 "* T %?")))
+	 "* %U %?")))
 
 ; Enable git push on save
 (when (> k-org-git-save-push-sec 0)
@@ -134,13 +141,6 @@
       (when marker
 	(list id (car marker) id (cdr marker))))))
 
-; Copy/move selected outline to Journal
-(defun k-org-copy-refile (refile-keep)
-  (let ((rfloc (k-org-id-to-rfloc k-org-agenda-refile-id)) (org-refile-keep refile-keep))
-    (if rfloc
-	(org-agenda-refile nil rfloc)
-      (message "k-org-agenda-refile-id is invalid ID"))))
-
 ; Custom shortcuts
 (add-hook 'org-mode-hook
   '(lambda ()
@@ -151,7 +151,9 @@
 		   (interactive)
 		   (org-timer-pause-or-continue t)))))
 
+
 ; Custom agenda shortcuts
+; Not used: g, G, n
 (add-hook 'org-agenda-mode-hook
   '(lambda ()
      (org-defkey org-agenda-mode-map "x" 
@@ -161,14 +163,6 @@
 		   (org-agenda-exit)
 		   (save-buffers-kill-terminal)))
      (org-defkey org-agenda-mode-map "D" 'org-agenda-kill)
-     (org-defkey org-agenda-mode-map "g" 
-		 (lambda () 
-		   (interactive)
-		   (k-org-copy-refile t)))
-     (org-defkey org-agenda-mode-map "G"
-		 (lambda () 
-		   (interactive)
-		   (k-org-copy-refile nil)))
      (org-defkey org-agenda-mode-map "r"
 		 (lambda () 
 		   (interactive)
@@ -181,11 +175,7 @@
      (org-defkey org-agenda-mode-map "p" 
 		 (lambda () 
 		   (interactive) 
-		   (org-capture nil "p")))
-     (org-defkey org-agenda-mode-map "n" 
-		 (lambda () 
-		   (interactive) 
-		   (org-capture nil "n")))))
+		   (org-capture nil "p")))))
 
 ; Capture window custom shortcuts
 (add-hook 'org-capture-mode-hook
