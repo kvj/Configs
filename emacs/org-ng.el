@@ -5,6 +5,7 @@
 (defvar k-org-goto-zero t)
 (defvar k-org-goto-narrow nil)
 (defvar k-org-agenda-filter nil)
+(defvar k-org-agenda-single-line t)
 
 ; Files and folders
 (setq org-agenda-files
@@ -102,10 +103,10 @@
 	(tags  . "%-10:c")
 	(search . "%-10:c")))
 (setq org-agenda-current-time-string "<-")
-;(setq org-agenda-time-grid '((daily today)
-;			     (1000 1200 1400 1600 1800 2000)
-;			     ". . . ."
-;			     "-------"))
+(setq org-agenda-time-grid '((daily today)
+			     (0800 1200 1600 2000)
+			     ". . . ."
+			     "-------"))
 (setq org-agenda-entry-text-maxlines 20)
 
 ; Capture to entry set by k-org-capture-main-id
@@ -207,5 +208,21 @@
 	      (goto-char (point-at-bol)))
 	    (when k-org-goto-narrow
 	      (org-narrow-to-subtree))))
+
+(defun k-org-agenda-make-single-line (width)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\(\\(.+?\\)\\(:[[:alnum:]_@#%:]+:\\)?\\)[ \t]*$" nil t)
+      (let ((l (- (match-end 1) (match-beginning 1))))
+	(when (> l width)
+	  (goto-char (match-end 2))
+	  (delete-region (- (match-end 2) (- l width) 3) (match-end 2))
+	  (insert "..."))))))
+
+; Make single lines in agenda buffer
+(add-hook 'org-agenda-finalize-hook
+	  (lambda ()
+	    (when (and (< org-agenda-tags-column 0) k-org-agenda-single-line)
+	      (k-org-agenda-make-single-line (- org-agenda-tags-column)))))
 
 ; End
