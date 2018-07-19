@@ -401,21 +401,21 @@ setlocal fillchars=fold:\
 
 let maplocalleader = "t"
 
-nnoremap <buffer> <silent><localleader>u :call ttt#Add_New_Line(0, '-', 1)<CR>
-nnoremap <buffer> <silent><localleader>n :call ttt#Add_New_Line(0, '-', 0)<CR>
-nnoremap <buffer> <silent><localleader>t :call ttt#Add_New_Line(2, "\t-", -1)<CR>
-nnoremap <buffer> <silent><localleader>l :call ttt#Append_Log()<CR>
-nnoremap <buffer> <silent><localleader>y :call Insert_Template(1)<CR>
-nnoremap <buffer> <silent><localleader>a :call Insert_Template(0)<CR>
-nnoremap <buffer> <silent><localleader>c :call Make_Archive(1)<CR>
+" nnoremap <buffer> <silent><localleader>u :call ttt#Add_New_Line(0, '-', 1)<CR>
+" nnoremap <buffer> <silent><localleader>n :call ttt#Add_New_Line(0, '-', 0)<CR>
+nnoremap <buffer> <silent><localleader>l :call ttt#Append_Log(1)<CR>
+nnoremap <buffer> <silent><localleader>t :call ttt#Append_Log(0)<CR>
+nnoremap <buffer> <silent><localleader>k :call Insert_Template(0)<CR>
+nnoremap <buffer> <silent><localleader>a :call Make_Archive(1)<CR>
 nnoremap <buffer> <silent><localleader>s :call Select_Tree()<CR>
-nnoremap <buffer> <silent><localleader>r :call Copy_Tree(1)<CR>
+nnoremap <buffer> <silent><localleader>y :call Copy_Tree(1)<CR>
 
 nnoremap <buffer> <silent><localleader>1 :call ttt#changeSign('-')<CR>
 nnoremap <buffer> <silent><localleader>2 :call ttt#changeSign('=')<CR>
 nnoremap <buffer> <silent><localleader>3 :call ttt#changeSign('#')<CR>
 nnoremap <buffer> <silent><localleader>4 :call ttt#changeSign('/')<CR>
 nnoremap <buffer> <silent><localleader>5 :call ttt#changeSign('~')<CR>
+nnoremap <buffer> <silent><localleader>c :call ttt#Close_Header()<CR>
 
 call s:Load()
 call s:Enable_Markers()

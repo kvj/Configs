@@ -66,8 +66,36 @@ fun! s:RenderTime(arr)
 	return Pad(a:arr[0]).':'.Pad(a:arr[1])
 endf
 
+fun! ttt#Close_Header()
+	let idx = line('.')
+	let indent = s:Indent(getline('.'))
+	while idx>=1
+		let line = getline(idx)
+		let ind = s:Indent(line)
+		if ind < indent
+			" Parent
+			let m = matchlist(line, '\(.\+:\)\( /\)\?$')
+			if !empty(m)
+				" Found
+				call cursor(idx, 0)
+				if m[2] " Already there
+					return 0
+				else
+					call setline('.', m[1].' /')
+					return 1
+				endif
+			endif
+			if ind == 0
+				return 0
+			endif
+		endif
+		let idx -= 1
+	endwhile
+	return 0
+endf
+
 "Append log entry to file"
-fun! ttt#Append_Log()
+fun! ttt#Append_Log(time)
 	let client = ''
 	if exists('g:tttClient')
 		let client = ' '.g:tttClient
@@ -79,10 +107,16 @@ fun! ttt#Append_Log()
 	if len(date_line)
 		" Already there - append after last child
 		call cursor(date_line[0][2], 0)
-		let content = "\t".s:RenderTime(timeArr).client.":\n\t"
+		let content = "\t"
+		if a:time
+			let content = "\t".s:RenderTime(timeArr).client.":\n\t"
+		endif
 		return s:AppendLineHere('o', content, 4)
 	endif
-	let content = ''.s:RenderDate(dateArr).":\n\t".s:RenderTime(timeArr).client.":\n\t"
+	let content = ''.s:RenderDate(dateArr).":\n\t"
+	if a:time
+		let content .= s:RenderTime(timeArr).client.":\n\t"
+	endif
 	let footer_line = []
 	if b:footer != ''
 		let footer_line = s:BufferSearchForLines('^'.b:footer.'$', 0)
