@@ -2,7 +2,7 @@
 (defvar k-org-git-branch "master")
 (defvar k-org-git-auto-push-min 0)
 (defvar k-org-git-save-push-sec 20)
-(defvar k-org-git-refresh-sec 1)
+(defvar k-org-git-refresh-sec 10)
 
 ; Internal
 (defvar k-org-git-save-push-timer nil)
