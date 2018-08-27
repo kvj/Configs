@@ -30,7 +30,7 @@
 
 ; Custom keywords
 (setq org-todo-keywords
-      '((sequence "T(t)" "N(n)" "|" "A(a)" "#(d)")))
+      '((sequence "N(n)" "T(t)" "H(h)" "|" "A(a)" "#(d)")))
 
 ; Refile targets - two levels in current file + first level in others
 (setq org-refile-targets (quote (
@@ -42,7 +42,7 @@
 (require 'cl)
 
 (global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cb" 'org-switchb)
 
 ; Custom speed commands
 (setq org-speed-commands-user
@@ -69,8 +69,8 @@
 		      ((org-agenda-overriding-header "Today")
 		       (org-agenda-span 'day)
 		       (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
-		     (tags-todo
-		      "-ALLTAGS=\"\""
+		     (tags
+		      "TODO=\"T\"-ALLTAGS=\"\""
 		      ((org-agenda-overriding-header (format "%s / %s" "Next " k-org-agenda-filter))
 		       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
 		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
@@ -83,7 +83,7 @@
 	("r" "All TODOs" ((todo
 			   ""
 			   ((org-agenda-dim-blocked-tasks t)
-			    (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))))
+			    (org-agenda-sorting-strategy '(tag-up todo-state-up priority-down effort-up))))))
 	("c" "Closed" ((tags
 			"+CLOSED<\"<-3d>\""
 			((org-agenda-dim-blocked-tasks nil)))))))
@@ -126,9 +126,14 @@
 	 (function (lambda ()
 		     (k-org-capture-main)))
 	 "* T %?")
+	("a" "[#A] Todo" entry
+	 (function (lambda ()
+		     (k-org-capture-main)))
+	 "* T [#A] %?")
 	("j" "Journal entry" entry
-	 (file+datetree (concat org-directory k-org-capture-journal))
-	 "* %U %?")))
+	 (file+olp+datetree (lambda ()
+			      (concat org-directory k-org-capture-journal)))
+	 "* > %T %?" :tree-type week)))
 
 ; Enable git push on save
 (when (> k-org-git-save-push-sec 0)
