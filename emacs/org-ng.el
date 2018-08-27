@@ -174,8 +174,9 @@
 		   (interactive)
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
-     (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
+     (org-defkey org-agenda-mode-map "A" 'org-agenda)
      (org-defkey org-agenda-mode-map "h" 'k-org-git-dispatcher)
+     (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
      (org-defkey org-agenda-mode-map "y" 'org-agenda-deadline)
      (org-defkey org-agenda-mode-map "i" 'org-agenda-refile)
      (org-defkey org-agenda-mode-map "p" 
