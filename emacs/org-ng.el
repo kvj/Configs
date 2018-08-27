@@ -6,6 +6,7 @@
 (defvar k-org-goto-narrow nil)
 (defvar k-org-agenda-filter nil)
 (defvar k-org-agenda-single-line t)
+(defvar k-org-compact-agenda nil)
 
 ; Files and folders
 (setq org-agenda-files
@@ -102,6 +103,14 @@
 	(todo  . "%-10:c")
 	(tags  . "%-10:c")
 	(search . "%-10:c")))
+(when k-org-compact-agenda
+  (setq org-agenda-prefix-format
+	'((agenda  . "   %?-12t% s")
+	  (timeline  . "% s")
+	  (todo  . " ")
+	  (tags  . " ")
+	  (search . " ")))
+  )
 (setq org-agenda-current-time-string "<-")
 (setq org-agenda-time-grid '((daily today)
 			     (0800 1200 1600 2000)
