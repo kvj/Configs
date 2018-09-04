@@ -1,4 +1,3 @@
-data.location=~/.task/freecinc
 taskd.server=freecinc.com:53589
 taskd.credentials=FreeCinc/freecinc_be573354/e264439a-827a-435f-ac2c-bb7b80dbe7c4
 
