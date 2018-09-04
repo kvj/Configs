@@ -1,0 +1,35 @@
+#!/bin/zsh
+
+TASK_REPORT=ready
+
+alias t=task
+alias tt='task $TASK_REPORT'
+
+_t() {
+	task $* && task $TASK_REPORT
+}
+
+alias tu='_t undo'
+alias ts='_t sync'
+alias tr='task ready'
+alias tn='task next'
+
+alias ta='_t add'
+alias tan='ta +next'
+
+alias tl='task log'
+alias tlf='tl +log +food'
+
+alias te='_t edit'
+
+tm() {
+	args=($*)
+	ids=$args[1]
+	args[1]=()
+	_t $ids modify $args
+}
+
+tmn() {
+	tm $* +next
+}
+
