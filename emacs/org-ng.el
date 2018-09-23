@@ -31,7 +31,7 @@
 
 ; Custom keywords
 (setq org-todo-keywords
-      '((sequence "N(n)" "T(t)" "H(h)" "|" "A(a)" "#(d)")))
+      '((sequence "N(n)" "T(t)" "H(h)" "X(x)" "|" "A(a)" "#(d)")))
 
 ; Refile targets - two levels in current file + first level in others
 (setq org-refile-targets (quote (
@@ -75,8 +75,8 @@
 		      ((org-agenda-overriding-header (format "%s / %s" "Next " k-org-agenda-filter))
 		       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
 		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-		     (tags-todo
-		      "-ALLTAGS<>\"\""
+		     (tags
+		      "TODO=\"T\"-ALLTAGS<>\"\""
 		      ((org-agenda-overriding-header (format "%s / %s" "Inbox " k-org-agenda-filter))
 		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
 	 ((org-agenda-tag-filter-preset k-org-agenda-filter)
