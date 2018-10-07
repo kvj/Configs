@@ -1,5 +1,14 @@
-taskd.server=freecinc.com:53589
-taskd.credentials=FreeCinc/freecinc_be573354/e264439a-827a-435f-ac2c-bb7b80dbe7c4
+taskd.trust=ignore hostname
+
+# -------- Console task
+verbose=header,footnote,label,new-id,new-uuid,affected,edit,special,unwait,recur
+
+color.tag.hold=gray10
+color.tag.today=color14
+color.project.none=color9
+color.blocking=
+
+# -------- Console task
 
 default.command=ready
 
@@ -8,21 +17,25 @@ urgency.blocking.coefficient=0.0
 urgency.age.coefficient=0.0
 urgency.uda.priority.L.coefficient=-2.0
 urgency.uda.tags.hold.coefficient=-3.0
+urgency.uda.tags.today.coefficient=30.0
 
 report.ready.filter=+READY -hold
 report.ready.sort=start-,urgency-,description
+report.ready.columns=id,depends.indicator,priority,project,tags,recur.indicator,scheduled.countdown,due.countdown,until.remaining,description,urgency
+report.ready.labels=ID,D,P,Prj,Tags,R,S,Due,Until,Description,Urg
 
-color.tag.hold=gray10
-color.project.none=underline
+report.diary.columns=uuid.short,description.truncated
+report.diary.description=Logs of what's done
+report.diary.filter=status:completed
+report.diary.labels=UUID,Description
+report.diary.sort=end+
 
 # ----------- twc2
-report.ready.filter.pre.0=status:pending pro:
+report.ready.filter.pre.0=status:pending -today pro:
 ui.pane.popup=off
 ui.pane.tags=compact
 ui.pane.sort=tree
 ui.default.tags=next,hold
 
-ui.window.position=10x10x480x1000
-ui.style.font=Fira Code
 # ----------- twc2
 

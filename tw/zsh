@@ -2,25 +2,38 @@
 
 TASK_REPORT=ready
 
-alias t=task
-alias tt='task $TASK_REPORT'
+alias t='clear; task'
 
 _t() {
-	task $* && task $TASK_REPORT
+	clear; task $* && task $TASK_REPORT
 }
+
+_tc() {
+	task $* && clear && task $TASK_REPORT
+}
+
+alias tt='_t'
 
 alias tu='_t undo'
 alias ts='_t sync'
-alias tr='task ready'
-alias tn='task next'
+alias tr='t ready'
+alias tn='t next'
 
-alias ta='_t add'
+alias ta='_tc add'
 alias tan='ta +next'
 
-alias tl='task log'
+alias tl='_tc log'
 alias tlf='tl +log +food'
+alias tlr='tl +log +run'
+alias tls='tl +log +suppl'
 
 alias te='_t edit'
+alias tst='_t start'
+alias tsp='_t stop'
+
+alias td='t diary +log'
+alias tdt='td end:today'
+alias tdy='td end:yesterday'
 
 tm() {
 	args=($*)
