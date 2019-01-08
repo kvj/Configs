@@ -1,4 +1,3 @@
-(defvar k-org-capture-inbox "inbox/m_desktop.org")
 (defvar k-org-capture-main-id "Main_Journal")
 (defvar k-org-capture-journal "journal.org")
 (defvar k-org-auto-open-agenda-key nil)
@@ -105,11 +104,11 @@
 	(search . "%-10:c")))
 (when k-org-compact-agenda
   (setq org-agenda-prefix-format
-	'((agenda  . "   %?-12t% s")
+	'((agenda  . "  %?-12t% s")
 	  (timeline  . "% s")
-	  (todo  . " ")
-	  (tags  . " ")
-	  (search . " ")))
+	  (todo  . "  ")
+	  (tags  . "  ")
+	  (search . "  ")))
   )
 (setq org-agenda-current-time-string "<-")
 (setq org-agenda-time-grid '((daily today)
