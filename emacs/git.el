@@ -3,6 +3,8 @@
 (defvar k-org-git-auto-push-min 0)
 (defvar k-org-git-save-push-sec 20)
 (defvar k-org-git-refresh-sec 10)
+(defvar k-org-schedule '())
+(defvar k-org-output-buffer "*scratch*")
 
 ; Internal
 (defvar k-org-git-save-push-timer nil)
@@ -27,7 +29,7 @@
        " "
        "GIT_WORK_TREE=" dir
        " "
-       cmd) nil "*scratch*") 0))
+       cmd) nil k-org-output-buffer) 0))
 
 (defun k-org-git-pull ()
   (if (k-org-git (concat
@@ -76,10 +78,22 @@
 	  (?q (message "Abort"))
 	  (otherwise (error "Invalid key")))))
 
+(defun k-org-schedule-cmd (cmd)
+  (interactive)
+  (= (call-process-shell-command (getf cmd :cmd) nil k-org-output-buffer) 0))
+
+(defun k-org-schedule-cmds (cmds)
+  (interactive)
+  (loop for cmd in cmds
+	do (run-at-time 5 (* (getf cmd :min) 60)
+			(lambda (cmd)
+			  (run-with-idle-timer 5 nil 'k-org-schedule-cmd cmd)) cmd)))
+
 ; Enable auto-push
 (add-hook 'emacs-startup-hook
 	  '(lambda ()
 	     (when (> k-org-git-auto-push-min 0)
 	       (run-at-time (* k-org-git-auto-push-min 60) (* k-org-git-auto-push-min 60)
 			    (lambda ()
-			      (run-with-idle-timer 30 nil 'k-org-git-push))))))
+			      (run-with-idle-timer 30 nil 'k-org-git-push))))
+	     (k-org-schedule-cmds k-org-schedule)))
