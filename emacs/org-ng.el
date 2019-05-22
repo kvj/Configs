@@ -1,9 +1,9 @@
-(defvar k-org-capture-main-id "Main_Journal")
+(defvar k-org-capture-file "main.org")
+(defvar k-org-capture-location "Journal")
 (defvar k-org-capture-journal "journal.org")
 (defvar k-org-auto-open-agenda-key nil)
 (defvar k-org-goto-zero t)
 (defvar k-org-goto-narrow nil)
-(defvar k-org-agenda-filter nil)
 (defvar k-org-agenda-single-line t)
 (defvar k-org-compact-agenda nil)
 
@@ -70,16 +70,11 @@
 		       (org-agenda-span 'day)
 		       (org-agenda-sorting-strategy '(time-up todo-state-up priority-down))))
 		     (tags
-		      "TODO=\"T\"-ALLTAGS=\"\""
-		      ((org-agenda-overriding-header (format "%s / %s" "Next " k-org-agenda-filter))
+		      "TODO=\"T\""
+		      ((org-agenda-overriding-header "Tasks")
 		       (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))))
-		     (tags
-		      "TODO=\"T\"-ALLTAGS<>\"\""
-		      ((org-agenda-overriding-header (format "%s / %s" "Inbox " k-org-agenda-filter))
 		       (org-agenda-sorting-strategy '(todo-state-up priority-down effort-up)))))
-	 ((org-agenda-tag-filter-preset k-org-agenda-filter)
-	  (org-agenda-compact-blocks t)))
+	 ((org-agenda-compact-blocks t)))
 	("r" "All TODOs" ((todo
 			   ""
 			   ((org-agenda-dim-blocked-tasks t)
@@ -115,33 +110,20 @@
 			     (0800 1200 1600 2000)
 			     ". . . ."
 			     "-------"))
-(setq org-agenda-entry-text-maxlines 20)
-
-; Capture to entry set by k-org-capture-main-id
-(defun k-org-capture-main ()
-  (pcase (org-id-find k-org-capture-main-id)
-    (`(,path . ,pos)
-     (set-buffer (org-capture-target-buffer path))
-     (widen)
-     (org-capture-put-target-region-and-position)
-     (goto-char pos))
-    (_ (error "Capture target id not found: '%s'" k-org-capture-main-id))))
+;(setq org-agenda-entry-text-maxlines 20)
 
 ; Custom capture templates
+(setq k-org-capture-loc
+      (list 'file+headline (concat org-directory k-org-capture-file) k-org-capture-location))
 (setq org-capture-templates
-      '(
-	("p" "Todo" entry
-	 (function (lambda ()
-		     (k-org-capture-main)))
-	 "* T %?")
-	("a" "[#A] Todo" entry
-	 (function (lambda ()
-		     (k-org-capture-main)))
-	 "* T [#A] %?")
-	("j" "Journal entry" entry
-	 (file+olp+datetree (lambda ()
-			      (concat org-directory k-org-capture-journal)))
-	 "* > %T %?" :tree-type week)))
+      (list
+	(list "p" "Todo" 'entry k-org-capture-loc
+	      "* T %?")
+	(list "a" "[#A] Todo" 'entry k-org-capture-loc
+	      "* T [#A] %?")
+	(list "j" "Journal entry" 'entry
+	      (list 'file+olp+datetree (concat org-directory k-org-capture-journal))
+	      "* > %T %?" ':tree-type 'week)))
 
 ; Enable git push on save
 (when (> k-org-git-save-push-sec 0)
@@ -182,6 +164,11 @@
 		   (interactive)
 		   (org-save-all-org-buffers)
 		   (org-agenda-redo)))
+     (org-defkey org-agenda-mode-map "k"
+		 (lambda ()
+		   (interactive)
+		   (org-agenda-capture 1)))
+     (org-defkey org-agenda-mode-map "K" 'org-agenda-capture)
      (org-defkey org-agenda-mode-map "A" 'org-agenda)
      (org-defkey org-agenda-mode-map "h" 'k-org-git-dispatcher)
      (org-defkey org-agenda-mode-map "c" 'org-agenda-schedule)
@@ -223,6 +210,7 @@
 	    (when k-org-goto-narrow
 	      (org-narrow-to-subtree))))
 
+; Force single line agenda
 (defun k-org-agenda-make-single-line (width)
   (save-excursion
     (goto-char (point-min))
