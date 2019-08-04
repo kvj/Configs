@@ -32,11 +32,10 @@
        cmd) nil k-org-output-buffer) 0))
 
 (defun k-org-git-pull ()
-  (if (k-org-git (concat
-		  "git pull --no-edit origin"
-		  " " k-org-git-branch) "Git: Pulling..." org-directory)
-      (run-with-idle-timer k-org-git-refresh-sec nil 'org-agenda-redo t))
-  (message "Git: No changes received"))
+  (k-org-git (concat
+	      "git pull --no-edit origin"
+	      " " k-org-git-branch) "Git: Pulling..." org-directory)
+  (run-with-idle-timer k-org-git-refresh-sec nil 'org-agenda-redo t))
 
 (defun k-org-git-pull-config ()
   (k-org-git

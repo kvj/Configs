@@ -163,7 +163,7 @@
 		 (lambda () 
 		   (interactive)
 		   (org-save-all-org-buffers)
-		   (org-agenda-redo)))
+		   (org-agenda-redo t)))
      (org-defkey org-agenda-mode-map "k"
 		 (lambda ()
 		   (interactive)
