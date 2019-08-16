@@ -3,6 +3,8 @@
 (windmove-default-keybindings)
 (column-number-mode t)
 (global-hl-line-mode t)
+(set-face-background 'hl-line "white")
+(set-face-foreground 'hl-line nil)
 (blink-cursor-mode t)
 (setq ps-paper-type 'a4)
 (setq initial-buffer-choice t)
@@ -92,5 +94,3 @@
 (add-to-list 'auto-mode-alist 
 	     '("\\.ttt\\(\\.[0-9]+\\)?$" . ttt-minor-mode))
 (global-set-key (kbd "C-M-t") 'ttt-hide-marked)
-
-(set-face-background 'hl-line "navy")
